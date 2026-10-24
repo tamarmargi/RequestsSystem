@@ -80,7 +80,7 @@ Oct 23, 2026 ·@tamar
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T7.1 | שלד ו-Services | יצירת פרויקט Angular, Models, RequestsApiService, Interceptor לשגיאות, הגדרות סביבה ו-Proxy | שכבת נתונים נפרדת מהרכיבים | T2.1 | 1 |
+| T7.1 | שלד ו-Services | יצירת פרויקט Angular, Models, RequestsApiService, Interceptor לשגיאות, הגדרות סביבה ו-Proxy | שכבת נתונים נפרדת מהרכיבים. **בוצע:** הוחל במקביל ל-Backend, מיד לאחר הגדרת חוזה ה-API (docs/api-contract.md); כולל תשתית Design Tokens לשלב העיצוב שיבוא בהמשך | T2.1 | 1 |
 | T7.2 | רשימת פניות | טבלה עם דפדוף ומיון בצד השרת | רכיב רשימה מחובר ל-API | T7.1, T2.5 | 1.5 |
 | T7.3 | חיפוש וסינון | Reactive Form, debounceTime, distinctUntilChanged, switchMap לביטול בקשות קודמות | אין בקשות מיותרות או תשובות מיושנות | T7.2 | 1.5 |
 | T7.4 | מצבי UI | Loading, Empty, Error | שלושה מצבים מטופלים | T7.2 | 0.5 |

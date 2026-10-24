@@ -1,0 +1,21 @@
+<main class="page">
+  <h1 class="page__title">ניהול פניות</h1>
+
+  @if (connection$ | async; as connection) {
+    <p class="connection" [class]="'connection--' + connection.kind" role="status" aria-live="polite">
+      @switch (connection.kind) {
+        @case ('loading') {
+          <mat-progress-spinner mode="indeterminate" diameter="16" aria-hidden="true" />
+          <span>בודק חיבור לשרת…</span>
+        }
+        @case ('available') {
+          <span>השרת זמין</span>
+        }
+        @case ('unavailable') {
+          <span>השרת אינו זמין</span>
+          <span class="connection__detail">({{ connection.message }})</span>
+        }
+      }
+    </p>
+  }
+</main>

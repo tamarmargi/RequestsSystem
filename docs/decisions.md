@@ -35,3 +35,21 @@
 - **Decision:** Generate test data in memory with a fixed random seed (42) and a fixed reference date, and insert it with `SqlBulkCopy` (from `DataTable`s, inside one transaction) via `dotnet run -- --seed`.
 - **Reason:** Fast (seconds instead of minutes with EF Core) and deterministic: every run on every machine produces exactly the same data, so performance measurements before and after adding indexes are comparable.
 - **Alternatives:** EF Core `AddRange` + `SaveChanges`, the Bogus library, a SQL script.
+
+## 7. Angular Material for behavior, custom design tokens for appearance
+
+- **Decision:** Use Angular Material components for behavior, and our own CSS custom properties (`frontend/src/styles/_tokens.scss`) for appearance. The Material theme is mapped onto these variables (primary color, typography, shape).
+- **Reason:** Ready-made, accessible table, paginator, sort and dialogs that work with server-side paging and sorting, while the visual design stays under our control through our own CSS variables (to be defined in a dedicated design step).
+- **Alternatives:** PrimeNG, Angular CDK with fully custom components.
+
+## 8. API contract defined before implementation
+
+- **Decision:** Write [api-contract.md](api-contract.md) (endpoints, parameters, response shapes, status codes) before implementing the endpoints; the TypeScript models mirror it exactly.
+- **Reason:** Lets the frontend be built in parallel with the backend and avoids mismatches between them.
+- **Alternatives:** Generating the client from Swagger after the backend is done.
+
+## 9. Dev proxy instead of CORS
+
+- **Decision:** In development the Angular dev server proxies `/api` to `http://localhost:5000` (`frontend/proxy.conf.json`); the app only calls relative URLs.
+- **Reason:** The browser calls the same origin, so no CORS configuration is needed in development.
+- **Note:** In production the frontend would be served behind the same host as the API, or CORS would be configured explicitly.

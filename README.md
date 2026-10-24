@@ -2,10 +2,14 @@
 
 A system for managing requests from organizations.
 
+- Work plan: [docs/work-plan.md](docs/work-plan.md)
+- API contract: [docs/api-contract.md](docs/api-contract.md)
+
 ## Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (or newer SDK with the .NET 8 runtime)
 - [Docker](https://www.docker.com/) (Docker Desktop on Windows/macOS)
+- [Node.js](https://nodejs.org/) LTS – developed with Node 24.12.0 and npm 11.6.2 (Angular 21 requires Node `^20.19`, `^22.12` or `>=24`)
 
 ## Project structure
 
@@ -19,7 +23,15 @@ RequestsSystem/
 │   │   └── Requests.DAL/      # Data access with EF Core: DbContext, entities, migrations
 │   └── tests/
 │       └── Requests.Tests/    # xUnit unit and integration tests
-├── frontend/                  # Angular client (to be added)
+├── frontend/                  # Angular 21 client (see frontend/README.md)
+│   ├── proxy.conf.json        # dev proxy: /api → http://localhost:5000
+│   └── src/
+│       ├── styles/            # design tokens (_tokens.scss) used by all component styles
+│       └── app/
+│           ├── models/        # TypeScript types matching docs/api-contract.md
+│           ├── services/      # HTTP clients (RequestsApiService, HealthService)
+│           ├── core/          # cross-cutting code: ApiError, error interceptor
+│           └── features/      # UI by feature (requests/requests-page)
 ├── docs/                      # Technical decisions and work plan
 ├── .config/                   # Local .NET tools manifest (dotnet-ef)
 └── docker-compose.yml         # Local SQL Server 2022
@@ -54,11 +66,24 @@ dotnet run --project backend/src/Requests.Api
 > SQL Server from Docker is exposed on host port **1435** (not 1433) so it does not collide with a
 > locally installed SQL Server instance, which typically uses TCP 1433 and its DAC on 1434.
 
+Run the frontend (in a second terminal, while the API is running):
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+Then open http://localhost:4200. The dev server proxies `/api` to the API on port 5000; the page
+shows "השרת זמין" when the API is reachable.
+
 Run tests:
 
 ```bash
 dotnet build backend/RequestsSystem.sln
 dotnet test backend/RequestsSystem.sln
+
+cd frontend && npm test   # single headless run
 ```
 
 ## Test Data
