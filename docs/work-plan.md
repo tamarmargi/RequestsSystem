@@ -4,7 +4,7 @@ Oct 23, 2026 ·@tamar
 
 ## סקירה
 
-האפיון מפורק ל-11 אפיקים ו-47 משימות, בהיקף של כ-90 שעות נטו (כ-105 שעות כולל מרווח ביטחון של 15%). הנחות בסיס: SQL Server עם EF Core, ‏.NET 8, ‏Angular 17+, ארכיטקטורת שלוש שכבות (Api, BL, DAL), IMemoryCache, ובחירה ב-Partial Success בעדכון Bulk.
+האפיון מפורק ל-11 אפיקים ו-47 משימות, בהיקף של כ-42 שעות נטו (כ-50 שעות כולל מרווח ביטחון של 20%), בהנחה שהקוד נכתב בעזרת Claude Code. הנחות בסיס: SQL Server עם EF Core, ‏.NET 8, ‏Angular 17+, ארכיטקטורת שלוש שכבות (Api, BL, DAL), IMemoryCache, ובחירה ב-Partial Success בעדכון Bulk.
 
 **עקרונות החלוקה**
 
@@ -13,115 +13,115 @@ Oct 23, 2026 ·@tamar
 - חוזה ה-API נקבע מוקדם, כך שעבודת ה-Angular יכולה להתחיל במקביל ל-Backend.
 - משימות שאינן קוד (תכנון DB, מדידת ביצועים, תיעוד, היערכות להרצה) מופיעות כמשימות מלאות עם הערכה.
 
-**הערכת המאמץ** ניתנת בשעות עבודה נטו לכל משימה, ומסוכמת לכל אפיק בכותרתו. משימות שמסומנות "אופציונלי" אינן נכללות בסיכום.
+**הערכת המאמץ** ניתנת בשעות עבודה נטו לכל משימה, וכוללת ניסוח ההוראה ל-Claude Code, סקירת הקוד שנוצר, בדיקה ידנית ותיקונים, ומסוכמת לכל אפיק בכותרתו. משימות שמסומנות "אופציונלי" אינן נכללות בסיכום.
 
 ## משימות לפי אפיקים
 
-### E0 – תכנון והקמה (7.5 ש')
+### E0 – תכנון והקמה (3 ש')
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T0.1 | החלטות ארכיטקטורה | SQL Server, EF Core, שלוש שכבות (Api / BL / DAL), FluentValidation, תאריכים ב-UTC | docs/decisions.md | – | 2 |
-| T0.2 | תוכנית עבודה | פירוק האפיון למשימות, תלויות והערכות | docs/work-plan.md + Issues, Milestones ו-Project Board ב-GitHub | T0.1 | 2 |
-| T0.3 | שלד הפתרון | Solution עם Requests.Api (Controllers), Requests.BL (לוגיקה עסקית), Requests.DAL (EF Core), Requests.Tests | Repo שמתקמפל ורץ ריק | T0.1 | 2 |
-| T0.4 | סביבת הרצה מקומית | Docker Compose ל-SQL Server, Connection String, הגדרות סביבה | `docker compose up` מעלה DB | T0.3 | 1.5 |
+| T0.1 | החלטות ארכיטקטורה | SQL Server, EF Core, שלוש שכבות (Api / BL / DAL), FluentValidation, תאריכים ב-UTC | docs/decisions.md | – | 1 |
+| T0.2 | תוכנית עבודה | פירוק האפיון למשימות, תלויות והערכות | docs/work-plan.md + Issues, Milestones ו-Project Board ב-GitHub | T0.1 | 1 |
+| T0.3 | שלד הפתרון | Solution עם Requests.Api (Controllers), Requests.BL (לוגיקה עסקית), Requests.DAL (EF Core), Requests.Tests | Repo שמתקמפל ורץ ריק | T0.1 | 0.5 |
+| T0.4 | סביבת הרצה מקומית | Docker Compose ל-SQL Server, Connection String, הגדרות סביבה | `docker compose up` מעלה DB | T0.3 | 0.5 |
 
-### E1 – בסיס נתונים ונתוני בדיקה (9 ש')
-
-| מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
-| --- | --- | --- | --- | --- | --- |
-| T1.1 | מודל נתונים | טבלאות Requests ו-RequestStatusHistory, Enums, עמודת rowversion, אורכי שדות | תרשים מודל + ישויות ב-DAL | T0.1 | 2 |
-| T1.2 | DbContext ו-Migration | EF Core Configurations, Concurrency Token, Migration ראשונה | סכמה נוצרת אוטומטית | T1.1, T0.3 | 2 |
-| T1.3 | תכנון אינדקסים | אינדקס לכל תרחיש סינון ומיון מרכזי (למשל Status+CreatedAt, AssignedTo, OrganizationName, ואינדקס מסונן לפניות פתוחות); החלטה על חיפוש טקסט | Migration אינדקסים + נימוק כתוב | T1.2 | 2 |
-| T1.4 | Seeder ל-100,000 רשומות | יצירה ב-Bulk Insert עם Seed קבוע, הרצה חוזרת (ניקוי ויצירה מחדש), כולל היסטוריה לחלק מהפניות | פקודה/Endpoint ליצירת נתונים בפחות מדקה | T1.2 | 3 |
-
-### E2 – API שליפה (13.5 ש')
+### E1 – בסיס נתונים ונתוני בדיקה (3.5 ש')
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T2.1 | DTOs ומודל שאילתה | RequestDto, PagedResult, RequestQueryParams, Mapping מפורש | חוזה API מתועד ב-Swagger | T1.2 | 1.5 |
-| T2.2 | Validation לפרמטרים | PageSize מקסימלי (100), רשימה סגורה של שדות מיון, טווח תאריכים תקין, Enums חוקיים | 400 עם ProblemDetails לקלט שגוי | T2.1 | 2 |
-| T2.3 | שירות שאילתות | סינון משולב, חיפוש ב-Title וב-OrganizationName, מיון דינמי, Skip/Take על IQueryable, AsNoTracking, Projection ל-DTO, CancellationToken | שאילתת SQL אחת לעמוד + אחת ל-Count | T2.1, T1.3 | 4 |
-| T2.4 | Aggregations | ספירה לפי Status ולפי Priority (גלובלי, כדי לאפשר Cache), בשאילתה אחת עם COUNT מותנה בצד ה-DB | Endpoint נתונים מסכמים | T2.3 | 2.5 |
-| T2.5 | Controllers | GET /api/requests, GET /api/requests/{id}, GET /api/requests/stats | Endpoints פעילים ב-Swagger | T2.2, T2.3, T2.4 | 1.5 |
-| T2.6 | טיפול גלובלי בשגיאות ו-Logging | Exception Handler עם ProblemDetails, Logging מובנה ללא מידע רגיש | תגובות שגיאה אחידות | T0.3 | 2 |
+| T1.1 | מודל נתונים | טבלאות Requests ו-RequestStatusHistory, Enums, עמודת rowversion, אורכי שדות | תרשים מודל + ישויות ב-DAL | T0.1 | 1 |
+| T1.2 | DbContext ו-Migration | EF Core Configurations, Concurrency Token, Migration ראשונה | סכמה נוצרת אוטומטית | T1.1, T0.3 | 0.5 |
+| T1.3 | תכנון אינדקסים | אינדקס לכל תרחיש סינון ומיון מרכזי (למשל Status+CreatedAt, AssignedTo, OrganizationName, ואינדקס מסונן לפניות פתוחות); החלטה על חיפוש טקסט | Migration אינדקסים + נימוק כתוב | T1.2 | 1 |
+| T1.4 | Seeder ל-100,000 רשומות | יצירה ב-Bulk Insert עם Seed קבוע, הרצה חוזרת (ניקוי ויצירה מחדש), כולל היסטוריה לחלק מהפניות | פקודה/Endpoint ליצירת נתונים בפחות מדקה | T1.2 | 1 |
 
-### E3 – עדכון סטטוס ו-Concurrency (7.5 ש')
+### E2 – API שליפה (6 ש')
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T3.1 | מעברי סטטוס | הגדרת מעברים מותרים (למשל Completed סופי), שירות בדיקה | מחלקה ב-BL עם בדיקות יחידה | T1.1 | 1.5 |
-| T3.2 | Endpoint עדכון סטטוס | PATCH /api/requests/{id}/status עם Version בגוף או ב-If-Match; 404 לפנייה חסרה, 400/422 לסטטוס או מעבר לא חוקי | Endpoint עם קודי HTTP מתועדים | T3.1, T2.6 | 3 |
-| T3.3 | Optimistic Concurrency | rowversion כ-Concurrency Token, תפיסת DbUpdateConcurrencyException והחזרת 409 עם המצב העדכני | עדכון מתחרה נדחה ב-DB, לא רק ב-UI | T3.2, T1.2 | 2 |
-| T3.4 | עדכון UpdatedAt עקבי | SaveChanges Interceptor שמעדכן UpdatedAt בכל שינוי | אין עדכון שמדלג על UpdatedAt | T1.2 | 1 |
+| T2.1 | DTOs ומודל שאילתה | RequestDto, PagedResult, RequestQueryParams, Mapping מפורש | חוזה API מתועד ב-Swagger | T1.2 | 0.5 |
+| T2.2 | Validation לפרמטרים | PageSize מקסימלי (100), רשימה סגורה של שדות מיון, טווח תאריכים תקין, Enums חוקיים | 400 עם ProblemDetails לקלט שגוי | T2.1 | 1 |
+| T2.3 | שירות שאילתות | סינון משולב, חיפוש ב-Title וב-OrganizationName, מיון דינמי, Skip/Take על IQueryable, AsNoTracking, Projection ל-DTO, CancellationToken | שאילתת SQL אחת לעמוד + אחת ל-Count | T2.1, T1.3 | 2 |
+| T2.4 | Aggregations | ספירה לפי Status ולפי Priority (גלובלי, כדי לאפשר Cache), בשאילתה אחת עם COUNT מותנה בצד ה-DB | Endpoint נתונים מסכמים | T2.3 | 1 |
+| T2.5 | Controllers | GET /api/requests, GET /api/requests/{id}, GET /api/requests/stats | Endpoints פעילים ב-Swagger | T2.2, T2.3, T2.4 | 0.5 |
+| T2.6 | טיפול גלובלי בשגיאות ו-Logging | Exception Handler עם ProblemDetails, Logging מובנה ללא מידע רגיש | תגובות שגיאה אחידות | T0.3 | 1 |
 
-### E4 – היסטוריית שינויים (3 ש')
-
-| מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
-| --- | --- | --- | --- | --- | --- |
-| T4.1 | שמירת Audit | רשומה עם RequestId, PreviousStatus, NewStatus, ChangedAt, ChangedBy באותה טרנזקציה של העדכון | אין עדכון בלי Audit ולהפך | T3.3 | 1.5 |
-| T4.2 | Endpoint היסטוריה | GET /api/requests/{id}/history ממוין לפי זמן, אינדקס על RequestId+ChangedAt | Endpoint פעיל | T4.1 | 1.5 |
-
-### E5 – עדכון Bulk (5 ש')
+### E3 – עדכון סטטוס ו-Concurrency (3.5 ש')
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T5.1 | החלטה ונימוק | Partial Success: כשל של פנייה אחת לא חוסם את השאר; כל פריט נושא Version משלו | סעיף בתיעוד + דוגמת תגובה | T3.3 | 1 |
-| T5.2 | Endpoint Bulk | POST /api/requests/bulk-status, עד 100 מזהים ללא כפילויות, תוצאה לכל פריט (Updated, NotFound, Conflict, InvalidTransition) וסיכום | תגובה ברורה ללקוח, Audit לכל הצלחה | T5.1, T4.1 | 4 |
+| T3.1 | מעברי סטטוס | הגדרת מעברים מותרים (למשל Completed סופי), שירות בדיקה | מחלקה ב-BL עם בדיקות יחידה | T1.1 | 0.5 |
+| T3.2 | Endpoint עדכון סטטוס | PATCH /api/requests/{id}/status עם Version בגוף או ב-If-Match; 404 לפנייה חסרה, 400/422 לסטטוס או מעבר לא חוקי | Endpoint עם קודי HTTP מתועדים | T3.1, T2.6 | 1.5 |
+| T3.3 | Optimistic Concurrency | rowversion כ-Concurrency Token, תפיסת DbUpdateConcurrencyException והחזרת 409 עם המצב העדכני | עדכון מתחרה נדחה ב-DB, לא רק ב-UI | T3.2, T1.2 | 1 |
+| T3.4 | עדכון UpdatedAt עקבי | SaveChanges Interceptor שמעדכן UpdatedAt בכל שינוי | אין עדכון שמדלג על UpdatedAt | T1.2 | 0.5 |
 
-### E6 – Cache (2.5 ש')
+### E4 – היסטוריית שינויים (1 ש')
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T6.1 | Cache לנתונים המסכמים | IMemoryCache מאחורי ממשק, Absolute Expiration של 60 שניות, Invalidation בכל עדכון בודד ו-Bulk | Cache עם Invalidation מוכח בבדיקה | T2.4, T3.2, T5.2 | 2 |
+| T4.1 | שמירת Audit | רשומה עם RequestId, PreviousStatus, NewStatus, ChangedAt, ChangedBy באותה טרנזקציה של העדכון | אין עדכון בלי Audit ולהפך | T3.3 | 0.5 |
+| T4.2 | Endpoint היסטוריה | GET /api/requests/{id}/history ממוין לפי זמן, אינדקס על RequestId+ChangedAt | Endpoint פעיל | T4.1 | 0.5 |
+
+### E5 – עדכון Bulk (2 ש')
+
+| מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
+| --- | --- | --- | --- | --- | --- |
+| T5.1 | החלטה ונימוק | Partial Success: כשל של פנייה אחת לא חוסם את השאר; כל פריט נושא Version משלו | סעיף בתיעוד + דוגמת תגובה | T3.3 | 0.5 |
+| T5.2 | Endpoint Bulk | POST /api/requests/bulk-status, עד 100 מזהים ללא כפילויות, תוצאה לכל פריט (Updated, NotFound, Conflict, InvalidTransition) וסיכום | תגובה ברורה ללקוח, Audit לכל הצלחה | T5.1, T4.1 | 1.5 |
+
+### E6 – Cache (1.5 ש')
+
+| מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
+| --- | --- | --- | --- | --- | --- |
+| T6.1 | Cache לנתונים המסכמים | IMemoryCache מאחורי ממשק, Absolute Expiration של 60 שניות, Invalidation בכל עדכון בודד ו-Bulk | Cache עם Invalidation מוכח בבדיקה | T2.4, T3.2, T5.2 | 1 |
 | T6.2 | תכנון לריבוי מופעים | מעבר ל-IDistributedCache (Redis) והפצת Invalidation בין מופעים | סעיף בתיעוד | T6.1 | 0.5 |
 
-### E7 – Angular (17 ש')
+### E7 – Angular (8 ש')
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T7.1 | שלד ו-Services | יצירת פרויקט Angular, Models, RequestsApiService, Interceptor לשגיאות, הגדרות סביבה ו-Proxy | שכבת נתונים נפרדת מהרכיבים | T2.1 | 2 |
-| T7.2 | רשימת פניות | טבלה עם דפדוף ומיון בצד השרת | רכיב רשימה מחובר ל-API | T7.1, T2.5 | 4 |
-| T7.3 | חיפוש וסינון | Reactive Form, debounceTime, distinctUntilChanged, switchMap לביטול בקשות קודמות | אין בקשות מיותרות או תשובות מיושנות | T7.2 | 3 |
-| T7.4 | מצבי UI | Loading, Empty, Error | שלושה מצבים מטופלים | T7.2 | 1.5 |
-| T7.5 | רכיב Aggregations | הצגת הנתונים המסכמים | רכיב נפרד | T7.1, T2.4 | 1.5 |
-| T7.6 | עדכון סטטוס ו-409 | שליחת Version; ב-409 הצגת מי שינה, למה ומתי, ובחירה: להשאיר את השינוי של האחר או לעדכן מחדש עם הגרסה החדשה | עדכון שמתנהג נכון בהתנגשות | T7.2, T3.3 | 3 |
-| T7.7 | צפייה בהיסטוריה | דיאלוג או פאנל היסטוריה לפנייה | רכיב היסטוריה | T7.1, T4.2 | 2 |
-| T7.8 | ממשק Bulk (אופציונלי) | בחירה מרובה והצגת תוצאה לכל פריט | – | T7.2, T5.2 | 2 |
+| T7.1 | שלד ו-Services | יצירת פרויקט Angular, Models, RequestsApiService, Interceptor לשגיאות, הגדרות סביבה ו-Proxy | שכבת נתונים נפרדת מהרכיבים | T2.1 | 1 |
+| T7.2 | רשימת פניות | טבלה עם דפדוף ומיון בצד השרת | רכיב רשימה מחובר ל-API | T7.1, T2.5 | 1.5 |
+| T7.3 | חיפוש וסינון | Reactive Form, debounceTime, distinctUntilChanged, switchMap לביטול בקשות קודמות | אין בקשות מיותרות או תשובות מיושנות | T7.2 | 1.5 |
+| T7.4 | מצבי UI | Loading, Empty, Error | שלושה מצבים מטופלים | T7.2 | 0.5 |
+| T7.5 | רכיב Aggregations | הצגת הנתונים המסכמים | רכיב נפרד | T7.1, T2.4 | 0.5 |
+| T7.6 | עדכון סטטוס ו-409 | שליחת Version; ב-409 הצגת מי שינה, למה ומתי, ובחירה: להשאיר את השינוי של האחר או לעדכן מחדש עם הגרסה החדשה | עדכון שמתנהג נכון בהתנגשות | T7.2, T3.3 | 1.5 |
+| T7.7 | צפייה בהיסטוריה | דיאלוג או פאנל היסטוריה לפנייה | רכיב היסטוריה | T7.1, T4.2 | 1 |
+| T7.8 | ממשק Bulk (אופציונלי) | בחירה מרובה והצגת תוצאה לכל פריט | – | T7.2, T5.2 | 1 |
 
-### E8 – בדיקות אוטומטיות (8.5 ש')
-
-| מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
-| --- | --- | --- | --- | --- | --- |
-| T8.1 | Unit – Validation | פרמטרים שגויים נדחים (PageSize, מיון, תאריכים) | בדיקה עוברת | T2.2 | 1 |
-| T8.2 | Unit – מעברי סטטוס | מעבר מותר ומעבר אסור | בדיקה עוברת | T3.1 | 1 |
-| T8.3 | Integration – שליפה וסינון | WebApplicationFactory מול SQL Server אמיתי (Testcontainers), בדיקת סינון, מיון ודפדוף | בדיקת API+DB | T2.5, T0.4 | 3 |
-| T8.4 | Integration – Concurrency | שני עדכונים שרצים במקביל באמת (Task.WhenAll) עם אותו Version: בדיוק אחד 200 ואחד 409; בדיקת Audit יחיד | בדיקה עוברת | T3.3, T8.3 | 2 |
-| T8.5 | Integration – Bulk | חלק קיים, חלק חסר, חלק בהתנגשות | בדיקה עוברת | T5.2, T8.3 | 1.5 |
-| T8.6 | Angular (אופציונלי) | בדיקת Debounce ו-switchMap ב-Service או ברכיב | – | T7.3 | 1.5 |
-
-### E9 – ביצועים (6 ש')
+### E8 – בדיקות אוטומטיות (4.5 ש')
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T9.1 | מדידה | שתי פעולות: רשימה מסוננת וממוינת, ונתונים מסכמים; Execution Plan, STATISTICS IO/TIME על 100,000 רשומות | צילומי Plan ומספרים לפני השיפור | T1.4, T2.3, T2.4 | 3 |
-| T9.2 | כיוונון אינדקסים | התאמה לפי הממצאים ומדידה חוזרת | השוואת לפני/אחרי | T9.1 | 2 |
-| T9.3 | צוואר בקבוק והצעה | למשל OFFSET בעמודים עמוקים (הצעה: Keyset Pagination), COUNT יקר, חיפוש עם LIKE בתחילת מחרוזת (הצעה: Full-Text) | סעיף בתיעוד | T9.2 | 1 |
+| T8.1 | Unit – Validation | פרמטרים שגויים נדחים (PageSize, מיון, תאריכים) | בדיקה עוברת | T2.2 | 0.5 |
+| T8.2 | Unit – מעברי סטטוס | מעבר מותר ומעבר אסור | בדיקה עוברת | T3.1 | 0.5 |
+| T8.3 | Integration – שליפה וסינון | WebApplicationFactory מול SQL Server אמיתי (Testcontainers), בדיקת סינון, מיון ודפדוף | בדיקת API+DB | T2.5, T0.4 | 1.5 |
+| T8.4 | Integration – Concurrency | שני עדכונים שרצים במקביל באמת (Task.WhenAll) עם אותו Version: בדיוק אחד 200 ואחד 409; בדיקת Audit יחיד | בדיקה עוברת | T3.3, T8.3 | 1 |
+| T8.5 | Integration – Bulk | חלק קיים, חלק חסר, חלק בהתנגשות | בדיקה עוברת | T5.2, T8.3 | 1 |
+| T8.6 | Angular (אופציונלי) | בדיקת Debounce ו-switchMap ב-Service או ברכיב | – | T7.3 | 0.5 |
 
-### E10 – תיעוד והגשה (10 ש')
+### E9 – ביצועים (3.5 ש')
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T10.1 | README | הוראות הפעלה, טכנולוגיות וגרסאות, מבנה הפתרון | README ברור | T0.4 | 2 |
-| T10.2 | תיעוד טכני | DB ואינדקסים, Concurrency, Bulk, Cache ו-Invalidation, מניעת טעינה לזיכרון | מסמך ארכיטקטורה | E3–E6, E9 | 2 |
-| T10.3 | החלטות ושימוש ב-AI | שתי החלטות וחלופות, מגבלה ידועה, שיפור אפשרי, היכן נעזרתי ב-AI ומה בדקתי ידנית | סעיף בתיעוד | T10.2 | 1 |
-| T10.4 | היערכות להרצה | Docker Compose מלא (DB, API, UI) או סקריפט אחד, Seed אוטומטי | הרצה בפקודה אחת | T0.4, T1.4 | 2 |
-| T10.5 | הגשה ו-CI | Repo ציבורי ב-GitHub, משימות כ-Issues/Project, GitHub Actions לבנייה ובדיקות | קישור אחד לבודקים | T10.1 | 2 |
-| T10.6 | בדיקת קצה-לקצה | Clone נקי והרצה לפי ה-README בלבד | אישור שהכל רץ | T10.4, T10.5 | 1 |
+| T9.1 | מדידה | שתי פעולות: רשימה מסוננת וממוינת, ונתונים מסכמים; Execution Plan, STATISTICS IO/TIME על 100,000 רשומות | צילומי Plan ומספרים לפני השיפור | T1.4, T2.3, T2.4 | 2 |
+| T9.2 | כיוונון אינדקסים | התאמה לפי הממצאים ומדידה חוזרת | השוואת לפני/אחרי | T9.1 | 1 |
+| T9.3 | צוואר בקבוק והצעה | למשל OFFSET בעמודים עמוקים (הצעה: Keyset Pagination), COUNT יקר, חיפוש עם LIKE בתחילת מחרוזת (הצעה: Full-Text) | סעיף בתיעוד | T9.2 | 0.5 |
+
+### E10 – תיעוד והגשה (5 ש')
+
+| מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
+| --- | --- | --- | --- | --- | --- |
+| T10.1 | README | הוראות הפעלה, טכנולוגיות וגרסאות, מבנה הפתרון | README ברור | T0.4 | 1 |
+| T10.2 | תיעוד טכני | DB ואינדקסים, Concurrency, Bulk, Cache ו-Invalidation, מניעת טעינה לזיכרון | מסמך ארכיטקטורה | E3–E6, E9 | 1 |
+| T10.3 | החלטות ושימוש ב-AI | שתי החלטות וחלופות, מגבלה ידועה, שיפור אפשרי, היכן נעזרתי ב-AI ומה בדקתי ידנית | סעיף בתיעוד | T10.2 | 0.5 |
+| T10.4 | היערכות להרצה | Docker Compose מלא (DB, API, UI) או סקריפט אחד, Seed אוטומטי | הרצה בפקודה אחת | T0.4, T1.4 | 1 |
+| T10.5 | הגשה ו-CI | Repo ציבורי ב-GitHub, משימות כ-Issues/Project, GitHub Actions לבנייה ובדיקות | קישור אחד לבודקים | T10.1 | 1 |
+| T10.6 | בדיקת קצה-לקצה | Clone נקי והרצה לפי ה-README בלבד | אישור שהכל רץ | T10.4, T10.5 | 0.5 |
 
 ## סדר ביצוע ותלויות
 
-הנתיב הקריטי הוא E0 ← E1 ← E2 ← E3 ← E5 ← E8 ← E10, כ-60 שעות. ה-Angular מתחיל ברגע שחוזה ה-API (T2.1) קבוע, ולכן מתקדם במקביל ל-Backend.
+הנתיב הקריטי הוא E0 ← E1 ← E2 ← E3 ← E5 ← E8 ← E10, כ-28 שעות. ה-Angular מתחיל ברגע שחוזה ה-API (T2.1) קבוע, ולכן מתקדם במקביל ל-Backend.
 
 &#91;embedded content: סדר ביצוע ותלויות · 7 שלבים\]
 
@@ -148,7 +148,7 @@ Oct 23, 2026 ·@tamar
 
 ## סיכונים והחלטות פתוחות
 
-הסיכון העיקרי הוא בזמן: אם התקציב קצר מ-90 שעות, יש לקצץ קודם בתוספות ולא בסעיפי החובה.
+הסיכון העיקרי הוא בזמן: אם התקציב קצר מ-42 שעות, יש לקצץ קודם בתוספות ולא בסעיפי החובה.
 
 **סיכונים**
 
