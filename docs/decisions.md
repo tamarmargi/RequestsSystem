@@ -29,3 +29,9 @@
 - **Decision:** All `DateTime` values (`CreatedAt`, `UpdatedAt`, `ChangedAt`) are stored and handled in UTC.
 - **Reason:** Avoids time-zone and daylight-saving ambiguity; conversion to local time is a presentation concern.
 - **Alternatives:** Local server time, `DateTimeOffset`.
+
+## 6. Seeding with SqlBulkCopy and a fixed random seed
+
+- **Decision:** Generate test data in memory with a fixed random seed (42) and a fixed reference date, and insert it with `SqlBulkCopy` (from `DataTable`s, inside one transaction) via `dotnet run -- --seed`.
+- **Reason:** Fast (seconds instead of minutes with EF Core) and deterministic: every run on every machine produces exactly the same data, so performance measurements before and after adding indexes are comparable.
+- **Alternatives:** EF Core `AddRange` + `SaveChanges`, the Bogus library, a SQL script.

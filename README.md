@@ -40,7 +40,10 @@ docker compose up -d
 dotnet tool restore
 dotnet ef database update --project backend/src/Requests.DAL --startup-project backend/src/Requests.Api
 
-# 4. Run the API
+# 4. Generate test data (100,000 requests; see "Test Data" below)
+dotnet run --project backend/src/Requests.Api -- --seed
+
+# 5. Run the API
 dotnet run --project backend/src/Requests.Api
 ```
 
@@ -57,6 +60,47 @@ Run tests:
 dotnet build backend/RequestsSystem.sln
 dotnet test backend/RequestsSystem.sln
 ```
+
+## Test Data
+
+Generate test data (SQL Server must be running and migrations applied):
+
+```bash
+dotnet run --project backend/src/Requests.Api -- --seed               # 100,000 requests (default)
+dotnet run --project backend/src/Requests.Api -- --seed --count 5000  # any count from 1 to 1,000,000
+```
+
+The command fills the database and exits without starting the web server. It **deletes all existing
+requests and history first**, so running it again recreates exactly the same data: generation uses a
+fixed random seed (42) and a fixed reference date (2026-10-01 UTC), never the current time.
+
+What is generated (code in `backend/src/Requests.DAL/Seeding/`):
+
+- **100,000 requests** with Ids 1..100,000, Hebrew titles, 300 organizations (municipalities, regional
+  councils, hospitals, NGOs, companies; Hebrew and English) and 50 handlers.
+- **~178,000 status history rows**: every non-`New` request has a consistent path from `New` to its
+  current status, with strictly increasing `ChangedAt` between `CreatedAt` and the reference date.
+  `UpdatedAt` equals the last change.
+
+| Field | Distribution |
+|---|---|
+| `Status` | Completed 50%, InProgress 25%, New 15%, Waiting 10% |
+| `Priority` | Low 50%, Medium 35%, High 15% |
+| `OrganizationName` | Skewed: 20% of organizations (60) receive ~60% of requests |
+| `AssignedTo` | `null` for `New`; otherwise one of 50 handlers |
+| `CreatedAt` | Uniform within the 2 years before the reference date |
+| History path | InProgress: New→InProgress · Waiting: New→InProgress→Waiting · Completed: New→InProgress→Completed, or (1 in 3) New→InProgress→Waiting→InProgress→Completed |
+
+**Why skewed distributions?** Real data is never uniform. Index selectivity depends on the actual value
+distribution: filtering by `Status = Waiting` (10%) behaves differently from `Status = Completed` (50%),
+and a "big" organization returns many more rows than a small one. Realistic skew makes the index and
+performance measurements in later steps meaningful instead of optimistic.
+
+**Why SqlBulkCopy?** Inserting ~280,000 rows through EF Core (`AddRange` + `SaveChanges`) means change
+tracking and batched `INSERT` statements and takes minutes. `SqlBulkCopy` streams the rows with the
+bulk-load protocol inside one transaction. Measured on the local Docker SQL Server: generation ~0.4 s,
+insert ~2.8 s on an empty database (~7.4 s when existing data is deleted first); the whole command
+finishes in under 10 seconds.
 
 ## Architecture
 
