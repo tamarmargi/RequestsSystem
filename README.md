@@ -77,14 +77,7 @@ npm start
 Then open http://localhost:4200. The dev server proxies `/api` to the API on port 5000; the page
 shows "השרת זמין" when the API is reachable.
 
-Run tests:
-
-```bash
-dotnet build backend/RequestsSystem.sln
-dotnet test backend/RequestsSystem.sln
-
-cd frontend && npm test   # single headless run
-```
+To run the tests, see [Running tests](#running-tests).
 
 ## Test Data
 
@@ -127,6 +120,37 @@ bulk-load protocol inside one transaction. Measured on the local Docker SQL Serv
 insert ~2.8 s on an empty database (~7.4 s when existing data is deleted first); the whole command
 finishes in under 10 seconds.
 
+## API
+
+Endpoints implemented so far (full specification in [docs/api-contract.md](docs/api-contract.md)):
+
+| Endpoint | Description |
+|---|---|
+| `GET /api/requests` | Paged list with filters (`status`, `priority`, `organizationName`, `assignedTo`, `createdFrom`/`createdTo`), free-text `search` on title or organization, sorting (`sortBy`, `sortDirection`) and paging (`page`, `pageSize` ≤ 100). `400` on invalid parameters. |
+| `GET /api/requests/{id}` | A single request, or `404`. |
+| `GET /api/requests/stats` | Counts over all requests: total, per status and per priority. |
+| `GET /api/health` | Liveness check. |
+
+Enums are strings, dates are UTC ISO 8601, `version` is the Base64 `rowversion`, and every error is an
+RFC 7807 ProblemDetails (`400` responses include an `errors` object keyed by the camelCase parameter name).
+
+[backend/src/Requests.Api/Requests.http](backend/src/Requests.Api/Requests.http) contains runnable
+examples for every endpoint, including invalid input (open it in VS Code with the REST Client extension,
+or in Visual Studio / Rider).
+
+## Running tests
+
+```bash
+dotnet test backend/RequestsSystem.sln
+
+cd frontend && npm test   # Angular tests, single headless run
+```
+
+The backend tests include unit tests (no dependencies) and **integration tests that need Docker running**:
+they start a throwaway SQL Server 2022 container with Testcontainers (once for all integration tests),
+apply the migrations, seed 500 deterministic requests and call the API over HTTP through
+`WebApplicationFactory`. The first run also pulls the SQL Server image if it is not present.
+
 ## Architecture
 
 The backend solution (`backend/RequestsSystem.sln`) has three layers plus a test project:
@@ -150,6 +174,18 @@ See [docs/decisions.md](docs/decisions.md) for technical decisions.
 ## Database & Indexes
 
 TODO
+
+### Avoiding loading all data into memory
+
+- Filtering, search, sorting and paging are composed on one `IQueryable` in `RequestRepository` and
+  executed by SQL Server: one query with `ORDER BY … OFFSET … FETCH NEXT` for the page, plus one
+  `COUNT(*)` query with the same `WHERE` for `totalCount`. Nothing is materialized before paging.
+- Queries use `AsNoTracking`, so EF Core does not build change-tracking state for read-only data.
+- Only the current page (at most 100 rows, enforced by validation) leaves the database.
+- Stats are computed in SQL by a single aggregate query (`COUNT(*)` plus conditional
+  `COUNT(CASE WHEN …)` per status and priority), one pass over the table instead of one query per group.
+- The `Requests` table has no indexes besides the primary key yet; indexes will be added and measured in
+  the performance step.
 
 ## Concurrency
 

@@ -1,3 +1,7 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
+using Requests.Api.ErrorHandling;
 using Requests.BL;
 using Requests.DAL;
 using Requests.DAL.Seeding;
@@ -7,7 +11,30 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDal(builder.Configuration);
 builder.Services.AddBl();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Binding errors (e.g. status=Banana) use the same camelCase field names as the BL validation errors.
+        var defaultFactory = options.InvalidModelStateResponseFactory;
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var result = (ObjectResult)defaultFactory(context);
+            if (result.Value is ValidationProblemDetails problem)
+            {
+                var errors = problem.Errors.ToDictionary(e => JsonNamingPolicy.CamelCase.ConvertName(e.Key), e => e.Value);
+                problem.Errors.Clear();
+                foreach (var (key, messages) in errors)
+                {
+                    problem.Errors[key] = messages;
+                }
+            }
+
+            return result;
+        };
+    });
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -37,6 +64,10 @@ if (args.Contains("--seed"))
     await scope.ServiceProvider.GetRequiredService<DatabaseSeeder>().SeedAsync(seedCount, CancellationToken.None);
     return;
 }
+
+// GlobalExceptionHandler decides how each exception is logged; the middleware's own Error log for every
+// exception (including validation and cancellation) is turned off in appsettings.json.
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

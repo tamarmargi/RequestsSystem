@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Requests.DAL.Repositories;
 using Requests.DAL.Seeding;
 
 namespace Requests.DAL;
@@ -12,6 +13,7 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("Default")));
 
+        services.AddScoped<IRequestRepository, RequestRepository>();
         services.AddScoped<DatabaseSeeder>();
 
         return services;

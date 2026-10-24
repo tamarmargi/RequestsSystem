@@ -39,12 +39,12 @@ Oct 23, 2026 ·@tamar
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T2.1 | DTOs ומודל שאילתה | RequestDto, PagedResult, RequestQueryParams, Mapping מפורש | חוזה API מתועד ב-Swagger | T1.2 | 0.5 |
-| T2.2 | Validation לפרמטרים | PageSize מקסימלי (100), רשימה סגורה של שדות מיון, טווח תאריכים תקין, Enums חוקיים | 400 עם ProblemDetails לקלט שגוי | T2.1 | 1 |
-| T2.3 | שירות שאילתות | סינון משולב, חיפוש ב-Title וב-OrganizationName, מיון דינמי, Skip/Take על IQueryable, AsNoTracking, Projection ל-DTO, CancellationToken | שאילתת SQL אחת לעמוד + אחת ל-Count | T2.1, T1.3 | 2 |
-| T2.4 | Aggregations | ספירה לפי Status ולפי Priority (גלובלי, כדי לאפשר Cache), בשאילתה אחת עם COUNT מותנה בצד ה-DB | Endpoint נתונים מסכמים | T2.3 | 1 |
-| T2.5 | Controllers | GET /api/requests, GET /api/requests/{id}, GET /api/requests/stats | Endpoints פעילים ב-Swagger | T2.2, T2.3, T2.4 | 0.5 |
-| T2.6 | טיפול גלובלי בשגיאות ו-Logging | Exception Handler עם ProblemDetails, Logging מובנה ללא מידע רגיש | תגובות שגיאה אחידות | T0.3 | 1 |
+| T2.1 | DTOs ומודל שאילתה ✓ הושלם | RequestDto, PagedResult, RequestQueryParams, Mapping מפורש | חוזה API מתועד ב-Swagger | T1.2 | 0.5 |
+| T2.2 | Validation לפרמטרים ✓ הושלם | PageSize מקסימלי (100), רשימה סגורה של שדות מיון, טווח תאריכים תקין, Enums חוקיים | 400 עם ProblemDetails לקלט שגוי | T2.1 | 1 |
+| T2.3 | שירות שאילתות ✓ הושלם | סינון משולב, חיפוש ב-Title וב-OrganizationName, מיון דינמי, Skip/Take על IQueryable, AsNoTracking, Projection ל-DTO, CancellationToken | שאילתת SQL אחת לעמוד + אחת ל-Count. **בוצע:** בשלב זה נוספה ההחלטה על Repository ספציפי ב-DAL, ללא Generic Repository (docs/decisions.md) | T2.1, T1.3 | 2 |
+| T2.4 | Aggregations ✓ הושלם | ספירה לפי Status ולפי Priority (גלובלי, כדי לאפשר Cache), בשאילתה אחת עם COUNT מותנה בצד ה-DB | Endpoint נתונים מסכמים | T2.3 | 1 |
+| T2.5 | Controllers ✓ הושלם | GET /api/requests, GET /api/requests/{id}, GET /api/requests/stats | Endpoints פעילים ב-Swagger | T2.2, T2.3, T2.4 | 0.5 |
+| T2.6 | טיפול גלובלי בשגיאות ו-Logging ✓ הושלם | Exception Handler עם ProblemDetails, Logging מובנה ללא מידע רגיש | תגובות שגיאה אחידות | T0.3 | 1 |
 
 ### E3 – עדכון סטטוס ו-Concurrency (3.5 ש')
 
@@ -93,9 +93,9 @@ Oct 23, 2026 ·@tamar
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T8.1 | Unit – Validation | פרמטרים שגויים נדחים (PageSize, מיון, תאריכים) | בדיקה עוברת | T2.2 | 0.5 |
+| T8.1 | Unit – Validation ✓ הושלם | פרמטרים שגויים נדחים (PageSize, מיון, תאריכים) | בדיקה עוברת | T2.2 | 0.5 |
 | T8.2 | Unit – מעברי סטטוס | מעבר מותר ומעבר אסור | בדיקה עוברת | T3.1 | 0.5 |
-| T8.3 | Integration – שליפה וסינון | WebApplicationFactory מול SQL Server אמיתי (Testcontainers), בדיקת סינון, מיון ודפדוף | בדיקת API+DB | T2.5, T0.4 | 1.5 |
+| T8.3 | Integration – שליפה וסינון ✓ הושלם | WebApplicationFactory מול SQL Server אמיתי (Testcontainers), בדיקת סינון, מיון ודפדוף | בדיקת API+DB | T2.5, T0.4 | 1.5 |
 | T8.4 | Integration – Concurrency | שני עדכונים שרצים במקביל באמת (Task.WhenAll) עם אותו Version: בדיוק אחד 200 ואחד 409; בדיקת Audit יחיד | בדיקה עוברת | T3.3, T8.3 | 1 |
 | T8.5 | Integration – Bulk | חלק קיים, חלק חסר, חלק בהתנגשות | בדיקה עוברת | T5.2, T8.3 | 1 |
 | T8.6 | Angular (אופציונלי) | בדיקת Debounce ו-switchMap ב-Service או ברכיב | – | T7.3 | 0.5 |

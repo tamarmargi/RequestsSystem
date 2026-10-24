@@ -31,3 +31,17 @@ This document records, per development step, which parts were generated with Cla
 ### Reviewed / decided manually
 
 - TODO: fill in by the developer
+
+## Step C – Read API (T2.1–T2.6, T8.1, T8.3)
+
+### Generated with Claude Code
+
+- DAL: `RequestFilter`, `RequestStats`, `IRequestRepository` / `RequestRepository` (filtering, search, stable sorting, paging, single-query stats).
+- BL: DTOs (`RequestDto`, `PagedResult<T>`, `RequestQueryParameters`, `RequestStatsDto`), `RequestMapping`, `RequestQueryParametersValidator`, `ValidationException`, `IRequestQueryService` / `RequestQueryService`.
+- API: `RequestsController`, `GlobalExceptionHandler`, JSON enum-as-string and ProblemDetails setup in `Program.cs`, `Requests.http` examples.
+- Tests: `RequestQueryParametersValidatorTests`, `GlobalExceptionHandlerTests`, the Testcontainers fixture (`ApiFixture`) and `RequestsApiTests`.
+- Documentation: README sections (API, Running tests, Avoiding loading all data into memory) and decisions 10–14.
+
+### Reviewed / decided manually
+
+- TODO: fill in by the developer

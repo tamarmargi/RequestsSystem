@@ -53,3 +53,30 @@
 - **Decision:** In development the Angular dev server proxies `/api` to `http://localhost:5000` (`frontend/proxy.conf.json`); the app only calls relative URLs.
 - **Reason:** The browser calls the same origin, so no CORS configuration is needed in development.
 - **Note:** In production the frontend would be served behind the same host as the API, or CORS would be configured explicitly.
+
+## 10. Specific repository in the DAL (no generic repository)
+
+- **Decision:** One specific repository, `IRequestRepository` / `RequestRepository`, with methods for the queries the application needs (`SearchAsync`, `GetByIdAsync`, `GetStatsAsync`). `IQueryable` never leaves the DAL.
+- **Reason:** Keeps EF Core and SQL inside the DAL; all request queries live in one place, which is where the performance work (indexes, query shape) happens; avoids the over-engineering of a generic repository on top of EF Core, which already is a repository / unit of work.
+- **Alternatives:** The BL uses `DbContext` directly; a generic `IRepository<T>`.
+
+## 11. Stable sorting with Id as a tie-breaker
+
+- **Decision:** Every sort field is followed by `Id` as a secondary sort in the same direction (e.g. `ORDER BY Priority DESC, Id DESC`).
+- **Reason:** Without a unique tie-breaker, the order of rows with equal sort values is undefined, so with `OFFSET/FETCH` the same row can appear on two pages or be skipped.
+
+## 12. Date range semantics
+
+- **Decision:** `createdFrom` and `createdTo` are dates (`yyyy-MM-dd`), and the range includes both days. It is implemented as `CreatedAt >= createdFrom 00:00 UTC` and `CreatedAt < (createdTo + 1 day) 00:00 UTC`.
+- **Reason:** "Up to and including 31 January" is what users mean; an exclusive upper bound on the next day covers the whole last day without precision issues such as `23:59:59.999`.
+
+## 13. Stats computed over all requests, in one query
+
+- **Decision:** `GET /api/requests/stats` counts over the whole table, independent of list filters, in a single SQL query with conditional counts.
+- **Reason:** The result is identical for all users, so it can be cached later; one pass over the table instead of one query per group.
+- **Alternatives:** Stats per current filter.
+
+## 14. Validation in the BL, mapped to 400 by a global handler
+
+- **Decision:** Query parameters are validated with FluentValidation in the BL service, which throws an HTTP-agnostic `ValidationException`; `GlobalExceptionHandler` in the API maps it to `400 ValidationProblemDetails`. Model-binding errors (e.g. `status=Banana`) use the same format and camelCase field names.
+- **Reason:** The rules live with the business logic and stay independent of HTTP; all error responses are uniform ProblemDetails.

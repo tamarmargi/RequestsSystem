@@ -1,0 +1,93 @@
+@host = http://localhost:5000
+
+### Health
+GET {{host}}/api/health
+Accept: application/json
+
+### List: defaults (page 1, 20 items, newest first)
+GET {{host}}/api/requests
+Accept: application/json
+
+### List: filter by status + priority
+GET {{host}}/api/requests?status=Waiting&priority=High
+Accept: application/json
+
+### List: combined filter (status, organization, date range)
+GET {{host}}/api/requests?status=InProgress&organizationName=עיריית חיפה&createdFrom=2025-01-01&createdTo=2026-06-30
+Accept: application/json
+
+### List: search in Hebrew (Title or OrganizationName contains)
+GET {{host}}/api/requests?search=תלונה
+Accept: application/json
+
+### List: search by organization text
+GET {{host}}/api/requests?search=המרכז הרפואי
+Accept: application/json
+
+### List: date range (inclusive of both days)
+GET {{host}}/api/requests?createdFrom=2026-01-01&createdTo=2026-01-31
+Accept: application/json
+
+### List: sort by createdAt asc
+GET {{host}}/api/requests?sortBy=createdAt&sortDirection=asc
+Accept: application/json
+
+### List: sort by createdAt desc
+GET {{host}}/api/requests?sortBy=createdAt&sortDirection=desc
+Accept: application/json
+
+### List: sort by updatedAt asc
+GET {{host}}/api/requests?sortBy=updatedAt&sortDirection=asc
+Accept: application/json
+
+### List: sort by updatedAt desc
+GET {{host}}/api/requests?sortBy=updatedAt&sortDirection=desc
+Accept: application/json
+
+### List: sort by priority asc
+GET {{host}}/api/requests?sortBy=priority&sortDirection=asc
+Accept: application/json
+
+### List: sort by priority desc
+GET {{host}}/api/requests?sortBy=priority&sortDirection=desc
+Accept: application/json
+
+### List: sort by title asc
+GET {{host}}/api/requests?sortBy=title&sortDirection=asc
+Accept: application/json
+
+### List: sort by title desc
+GET {{host}}/api/requests?sortBy=title&sortDirection=desc
+Accept: application/json
+
+### List: sort by organizationName asc
+GET {{host}}/api/requests?sortBy=organizationName&sortDirection=asc
+Accept: application/json
+
+### List: sort by organizationName desc
+GET {{host}}/api/requests?sortBy=organizationName&sortDirection=desc
+Accept: application/json
+
+### List: page 2
+GET {{host}}/api/requests?page=2&pageSize=20
+Accept: application/json
+
+### Invalid: pageSize=500 (expect 400)
+GET {{host}}/api/requests?pageSize=500
+Accept: application/json
+
+### Invalid: status=Banana (expect 400)
+GET {{host}}/api/requests?status=Banana
+Accept: application/json
+
+### Get by id
+GET {{host}}/api/requests/1
+Accept: application/json
+
+### Get by id that does not exist (expect 404)
+GET {{host}}/api/requests/999999
+Accept: application/json
+
+### Stats over all requests
+GET {{host}}/api/requests/stats
+Accept: application/json
