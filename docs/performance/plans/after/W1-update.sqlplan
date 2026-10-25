@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.564" Build="16.0.4255.1">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementText="INSERT INTO [RequestStatusHistory] ([ChangedAt], [ChangedBy], [NewStatus], [PreviousStatus], [RequestId])&#xA;OUTPUT INSERTED.[Id]&#xA;VALUES (@p0, @p1, @p2, @p3, @p4)" StatementId="1" StatementCompId="11" StatementType="INSERT" StatementSqlHandle="0x0900E15A4438E20571D4CADEE9148848A73E0000000000000000000000000000000000000000000000000000" DatabaseContextSettingsId="1" ParentObjectId="0" StatementParameterizationType="1" RetrievedFromCache="true" StatementSubTreeCost="0.0232907" StatementEstRows="1" SecurityPolicyApplied="false" StatementOptmLevel="TRIVIAL" QueryHash="0x97C53F2522408CBB" QueryPlanHash="0x29BDB10373E598CE" CardinalityEstimationModelVersion="160">
+          <StatementSetOptions QUOTED_IDENTIFIER="true" ARITHABORT="false" CONCAT_NULL_YIELDS_NULL="true" ANSI_NULLS="true" ANSI_PADDING="true" ANSI_WARNINGS="true" NUMERIC_ROUNDABORT="false"></StatementSetOptions>
+          <QueryPlan DegreeOfParallelism="0" NonParallelPlanReason="DMLQueryReturnsOutputToClient" CachedPlanSize="32" CompileTime="0" CompileCPU="0" CompileMemory="200">
+            <MemoryGrantInfo SerialRequiredMemory="0" SerialDesiredMemory="0" GrantedMemory="0" MaxUsedMemory="0"></MemoryGrantInfo>
+            <OptimizerHardwareDependentProperties EstimatedAvailableMemoryGrant="52992" EstimatedPagesCached="39744" EstimatedAvailableDegreeOfParallelism="6" MaxCompileMemory="3842728"></OptimizerHardwareDependentProperties>
+            <QueryTimeStats ElapsedTime="0" CpuTime="0"></QueryTimeStats>
+            <RelOp NodeId="1" PhysicalOp="Assert" LogicalOp="Assert" EstimateRows="1" EstimateIO="0" EstimateCPU="1.8e-07" AvgRowSize="15" EstimatedTotalSubtreeCost="0.0232907" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+              <OutputList>
+                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Column="Id"></ColumnReference>
+              </OutputList>
+              <RunTimeInformation>
+                <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+              </RunTimeInformation>
+              <Assert StartupExpression="0">
+                <RelOp NodeId="2" PhysicalOp="Nested Loops" LogicalOp="Left Semi Join" EstimateRows="1" EstimateIO="0" EstimateCPU="4.18e-06" AvgRowSize="16" EstimatedTotalSubtreeCost="0.0232905" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                  <OutputList>
+                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Column="Id"></ColumnReference>
+                    <ColumnReference Column="Expr1005"></ColumnReference>
+                  </OutputList>
+                  <RunTimeInformation>
+                    <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+                  </RunTimeInformation>
+                  <NestedLoops Optimized="0">
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1005"></ColumnReference>
+                      </DefinedValue>
+                    </DefinedValues>
+                    <OuterReferences>
+                      <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Column="RequestId"></ColumnReference>
+                    </OuterReferences>
+                    <ProbeColumn>
+                      <ColumnReference Column="Expr1005"></ColumnReference>
+                    </ProbeColumn>
+                    <RelOp NodeId="3" PhysicalOp="Clustered Index Insert" LogicalOp="Insert" EstimateRows="1" EstimateIO="0.02" EstimateCPU="2e-06" AvgRowSize="19" EstimatedTotalSubtreeCost="0.0200033" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                      <OutputList>
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Column="Id"></ColumnReference>
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Column="RequestId"></ColumnReference>
+                      </OutputList>
+                      <RunTimeInformation>
+                        <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualScans="0" ActualLogicalReads="3" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+                      </RunTimeInformation>
+                      <Update DMLRequestSort="0">
+                        <Object Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Index="[PK_RequestStatusHistory]" IndexKind="Clustered" Storage="RowStore"></Object>
+                        <Object Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Index="[IX_RequestStatusHistory_RequestId_ChangedAt]" IndexKind="NonClustered" Storage="RowStore"></Object>
+                        <SetPredicate>
+                          <ScalarOperator ScalarString="[RequestsDb].[dbo].[RequestStatusHistory].[ChangedAt] = RaiseIfNullInsert([@p0]),[RequestsDb].[dbo].[RequestStatusHistory].[ChangedBy] = RaiseIfNullInsert([@p1]),[RequestsDb].[dbo].[RequestStatusHistory].[NewStatus] = RaiseIfNullInsert([@p2]),[RequestsDb].[dbo].[RequestStatusHistory].[PreviousStatus] = RaiseIfNullInsert([@p3]),[RequestsDb].[dbo].[RequestStatusHistory].[RequestId] = RaiseIfNullInsert([@p4]),[RequestsDb].[dbo].[RequestStatusHistory].[Id] = [Expr1002]">
+                            <ScalarExpressionList>
+                              <ScalarOperator>
+                                <MultipleAssign>
+                                  <Assign>
+                                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Column="ChangedAt"></ColumnReference>
+                                    <ScalarOperator>
+                                      <Intrinsic FunctionName="RaiseIfNullInsert">
+                                        <ScalarOperator>
+                                          <Identifier>
+                                            <ColumnReference Column="@p0"></ColumnReference>
+                                          </Identifier>
+                                        </ScalarOperator>
+                                      </Intrinsic>
+                                    </ScalarOperator>
+                                  </Assign>
+                                  <Assign>
+                                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Column="ChangedBy"></ColumnReference>
+                                    <ScalarOperator>
+                                      <Intrinsic FunctionName="RaiseIfNullInsert">
+                                        <ScalarOperator>
+                                          <Identifier>
+                                            <ColumnReference Column="@p1"></ColumnReference>
+                                          </Identifier>
+                                        </ScalarOperator>
+                                      </Intrinsic>
+                                    </ScalarOperator>
+                                  </Assign>
+                                  <Assign>
+                                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Column="NewStatus"></ColumnReference>
+                                    <ScalarOperator>
+                                      <Intrinsic FunctionName="RaiseIfNullInsert">
+                                        <ScalarOperator>
+                                          <Identifier>
+                                            <ColumnReference Column="@p2"></ColumnReference>
+                                          </Identifier>
+                                        </ScalarOperator>
+                                      </Intrinsic>
+                                    </ScalarOperator>
+                                  </Assign>
+                                  <Assign>
+                                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Column="PreviousStatus"></ColumnReference>
+                                    <ScalarOperator>
+                                      <Intrinsic FunctionName="RaiseIfNullInsert">
+                                        <ScalarOperator>
+                                          <Identifier>
+                                            <ColumnReference Column="@p3"></ColumnReference>
+                                          </Identifier>
+                                        </ScalarOperator>
+                                      </Intrinsic>
+                                    </ScalarOperator>
+                                  </Assign>
+                                  <Assign>
+                                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Column="RequestId"></ColumnReference>
+                                    <ScalarOperator>
+                                      <Intrinsic FunctionName="RaiseIfNullInsert">
+                                        <ScalarOperator>
+                                          <Identifier>
+                                            <ColumnReference Column="@p4"></ColumnReference>
+                                          </Identifier>
+                                        </ScalarOperator>
+                                      </Intrinsic>
+                                    </ScalarOperator>
+                                  </Assign>
+                                  <Assign>
+                                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Column="Id"></ColumnReference>
+                                    <ScalarOperator>
+                                      <Identifier>
+                                        <ColumnReference Column="Expr1002"></ColumnReference>
+                                      </Identifier>
+                                    </ScalarOperator>
+                                  </Assign>
+                                </MultipleAssign>
+                              </ScalarOperator>
+                            </ScalarExpressionList>
+                          </ScalarOperator>
+                        </SetPredicate>
+                        <RelOp NodeId="4" PhysicalOp="Compute Scalar" LogicalOp="Compute Scalar" EstimateRows="1" EstimateIO="0" EstimateCPU="1e-07" AvgRowSize="15" EstimatedTotalSubtreeCost="1.257e-06" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                          <OutputList>
+                            <ColumnReference Column="Expr1002"></ColumnReference>
+                          </OutputList>
+                          <RunTimeInformation>
+                            <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+                          </RunTimeInformation>
+                          <ComputeScalar ComputeSequence="1">
+                            <DefinedValues>
+                              <DefinedValue>
+                                <ColumnReference Column="Expr1002"></ColumnReference>
+                                <ScalarOperator ScalarString="getidentity((1269579561),(5),NULL)">
+                                  <Intrinsic FunctionName="getidentity">
+                                    <ScalarOperator>
+                                      <Const ConstValue="(1269579561)"></Const>
+                                    </ScalarOperator>
+                                    <ScalarOperator>
+                                      <Const ConstValue="(5)"></Const>
+                                    </ScalarOperator>
+                                    <ScalarOperator>
+                                      <Const ConstValue="NULL"></Const>
+                                    </ScalarOperator>
+                                  </Intrinsic>
+                                </ScalarOperator>
+                              </DefinedValue>
+                            </DefinedValues>
+                            <RelOp NodeId="5" PhysicalOp="Constant Scan" LogicalOp="Constant Scan" EstimateRows="1" EstimateIO="0" EstimateCPU="1.157e-06" AvgRowSize="9" EstimatedTotalSubtreeCost="1.157e-06" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                              <OutputList></OutputList>
+                              <RunTimeInformation>
+                                <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+                              </RunTimeInformation>
+                              <ConstantScan></ConstantScan>
+                            </RelOp>
+                          </ComputeScalar>
+                        </RelOp>
+                      </Update>
+                    </RelOp>
+                    <RelOp NodeId="6" PhysicalOp="Clustered Index Seek" LogicalOp="Clustered Index Seek" EstimateRows="1" EstimatedRowsRead="1" EstimateIO="0.003125" EstimateCPU="0.0001581" AvgRowSize="9" EstimatedTotalSubtreeCost="0.0032831" TableCardinality="100000" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                      <OutputList></OutputList>
+                      <RunTimeInformation>
+                        <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualScans="0" ActualLogicalReads="3" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" ActualRowsRead="1" ActualEndOfScans="0" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+                      </RunTimeInformation>
+                      <IndexScan Ordered="1" ScanDirection="FORWARD" ForcedIndex="1" ForceSeek="0" ForceScan="0" NoExpandHint="0" Storage="RowStore">
+                        <DefinedValues></DefinedValues>
+                        <Object Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Index="[PK_Requests]" IndexKind="Clustered" Storage="RowStore"></Object>
+                        <SeekPredicates>
+                          <SeekPredicateNew>
+                            <SeekKeys>
+                              <Prefix ScanType="EQ">
+                                <RangeColumns>
+                                  <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Id"></ColumnReference>
+                                </RangeColumns>
+                                <RangeExpressions>
+                                  <ScalarOperator ScalarString="[RequestsDb].[dbo].[RequestStatusHistory].[RequestId]">
+                                    <Identifier>
+                                      <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[RequestStatusHistory]" Column="RequestId"></ColumnReference>
+                                    </Identifier>
+                                  </ScalarOperator>
+                                </RangeExpressions>
+                              </Prefix>
+                            </SeekKeys>
+                          </SeekPredicateNew>
+                        </SeekPredicates>
+                      </IndexScan>
+                    </RelOp>
+                  </NestedLoops>
+                </RelOp>
+                <Predicate>
+                  <ScalarOperator ScalarString="CASE WHEN [Expr1005] IS NULL THEN (0) ELSE NULL END">
+                    <IF>
+                      <Condition>
+                        <ScalarOperator>
+                          <Logical Operation="IS NULL">
+                            <ScalarOperator>
+                              <Identifier>
+                                <ColumnReference Column="Expr1005"></ColumnReference>
+                              </Identifier>
+                            </ScalarOperator>
+                          </Logical>
+                        </ScalarOperator>
+                      </Condition>
+                      <Then>
+                        <ScalarOperator>
+                          <Const ConstValue="(0)"></Const>
+                        </ScalarOperator>
+                      </Then>
+                      <Else>
+                        <ScalarOperator>
+                          <Const ConstValue="NULL"></Const>
+                        </ScalarOperator>
+                      </Else>
+                    </IF>
+                  </ScalarOperator>
+                </Predicate>
+              </Assert>
+            </RelOp>
+            <ParameterList>
+              <ColumnReference Column="@p4" ParameterDataType="int" ParameterCompiledValue="(4088)" ParameterRuntimeValue="(4088)"></ColumnReference>
+              <ColumnReference Column="@p3" ParameterDataType="tinyint" ParameterCompiledValue="(1)" ParameterRuntimeValue="(1)"></ColumnReference>
+              <ColumnReference Column="@p2" ParameterDataType="tinyint" ParameterCompiledValue="(2)" ParameterRuntimeValue="(2)"></ColumnReference>
+              <ColumnReference Column="@p1" ParameterDataType="nvarchar(100)" ParameterCompiledValue="N'perf'" ParameterRuntimeValue="N'perf'"></ColumnReference>
+              <ColumnReference Column="@p0" ParameterDataType="datetime2(7)" ParameterCompiledValue="'2026-10-25 00:50:06.8651359'" ParameterRuntimeValue="'2026-10-25 00:50:07.7811193'"></ColumnReference>
+            </ParameterList>
+          </QueryPlan>
+        </StmtSimple>
+        <StmtSimple StatementText="UPDATE [Requests] SET [Status] = @p5, [UpdatedAt] = @p6&#xA;OUTPUT INSERTED.[RowVersion]&#xA;WHERE [Id] = @p7 AND [RowVersion] = @p8" StatementId="2" StatementCompId="12" StatementType="UPDATE" StatementSqlHandle="0x090081DE5F91269E78C8EA7195750153A9D50000000000000000000000000000000000000000000000000000" DatabaseContextSettingsId="1" ParentObjectId="0" StatementParameterizationType="1" RetrievedFromCache="true" StatementSubTreeCost="0.0332866" StatementEstRows="1" SecurityPolicyApplied="false" StatementOptmLevel="TRIVIAL" QueryHash="0x11EA2577653430CA" QueryPlanHash="0xA11A6D3AA30CCE72" CardinalityEstimationModelVersion="160">
+          <StatementSetOptions QUOTED_IDENTIFIER="true" ARITHABORT="false" CONCAT_NULL_YIELDS_NULL="true" ANSI_NULLS="true" ANSI_PADDING="true" ANSI_WARNINGS="true" NUMERIC_ROUNDABORT="false" />
+          <QueryPlan DegreeOfParallelism="0" NonParallelPlanReason="DMLQueryReturnsOutputToClient" CachedPlanSize="48" CompileTime="1" CompileCPU="1" CompileMemory="384">
+            <MemoryGrantInfo SerialRequiredMemory="0" SerialDesiredMemory="0" GrantedMemory="0" MaxUsedMemory="0" />
+            <OptimizerHardwareDependentProperties EstimatedAvailableMemoryGrant="52992" EstimatedPagesCached="39744" EstimatedAvailableDegreeOfParallelism="6" MaxCompileMemory="3842728" />
+            <OptimizerStatsUsage>
+              <StatisticsInfo LastUpdate="2026-10-25T00:45:39.81" ModificationCount="0" SamplingPercent="59.386" Statistics="[PK_Requests]" Table="[Requests]" Schema="[dbo]" Database="[RequestsDb]" />
+            </OptimizerStatsUsage>
+            <QueryTimeStats ElapsedTime="0" CpuTime="0" />
+            <RelOp NodeId="2" PhysicalOp="Clustered Index Update" LogicalOp="Update" EstimateRows="1" EstimateIO="0.03" EstimateCPU="3e-06" AvgRowSize="15" EstimatedTotalSubtreeCost="0.0332866" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+              <OutputList>
+                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="RowVersion" />
+              </OutputList>
+              <RunTimeInformation>
+                <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualScans="0" ActualLogicalReads="0" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" />
+              </RunTimeInformation>
+              <Update DMLRequestSort="0">
+                <Object Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Index="[PK_Requests]" IndexKind="Clustered" Storage="RowStore" />
+                <Object Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Index="[IX_Requests_Status_CreatedAt]" IndexKind="NonClustered" Storage="RowStore" />
+                <Object Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Index="[IX_Requests_Status_Priority]" IndexKind="NonClustered" Storage="RowStore" />
+                <SetPredicate>
+                  <ScalarOperator ScalarString="[RequestsDb].[dbo].[Requests].[Status] = RaiseIfNullUpdate([@p5]),[RequestsDb].[dbo].[Requests].[UpdatedAt] = RaiseIfNullUpdate([@p6]),[RequestsDb].[dbo].[Requests].[RowVersion] = [Expr1002]">
+                    <ScalarExpressionList>
+                      <ScalarOperator>
+                        <MultipleAssign>
+                          <Assign>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Status" />
+                            <ScalarOperator>
+                              <Intrinsic FunctionName="RaiseIfNullUpdate">
+                                <ScalarOperator>
+                                  <Identifier>
+                                    <ColumnReference Column="@p5" />
+                                  </Identifier>
+                                </ScalarOperator>
+                              </Intrinsic>
+                            </ScalarOperator>
+                          </Assign>
+                          <Assign>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="UpdatedAt" />
+                            <ScalarOperator>
+                              <Intrinsic FunctionName="RaiseIfNullUpdate">
+                                <ScalarOperator>
+                                  <Identifier>
+                                    <ColumnReference Column="@p6" />
+                                  </Identifier>
+                                </ScalarOperator>
+                              </Intrinsic>
+                            </ScalarOperator>
+                          </Assign>
+                          <Assign>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="RowVersion" />
+                            <ScalarOperator>
+                              <Identifier>
+                                <ColumnReference Column="Expr1002" />
+                              </Identifier>
+                            </ScalarOperator>
+                          </Assign>
+                        </MultipleAssign>
+                      </ScalarOperator>
+                    </ScalarExpressionList>
+                  </ScalarOperator>
+                </SetPredicate>
+                <RelOp NodeId="3" PhysicalOp="Compute Scalar" LogicalOp="Compute Scalar" EstimateRows="1" EstimateIO="0" EstimateCPU="1e-07" AvgRowSize="27" EstimatedTotalSubtreeCost="0.00328358" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                  <OutputList>
+                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Id" />
+                    <ColumnReference Column="Expr1002" />
+                    <ColumnReference Column="Expr1008" />
+                    <ColumnReference Column="Expr1009" />
+                  </OutputList>
+                  <RunTimeInformation>
+                    <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" />
+                  </RunTimeInformation>
+                  <ComputeScalar>
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1008" />
+                        <ScalarOperator ScalarString="[Expr1008]">
+                          <Identifier>
+                            <ColumnReference Column="Expr1008" />
+                          </Identifier>
+                        </ScalarOperator>
+                      </DefinedValue>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1009" />
+                        <ScalarOperator ScalarString="[Expr1009]">
+                          <Identifier>
+                            <ColumnReference Column="Expr1009" />
+                          </Identifier>
+                        </ScalarOperator>
+                      </DefinedValue>
+                    </DefinedValues>
+                    <RelOp NodeId="4" PhysicalOp="Compute Scalar" LogicalOp="Compute Scalar" EstimateRows="1" EstimateIO="0" EstimateCPU="1e-07" AvgRowSize="27" EstimatedTotalSubtreeCost="0.00328358" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                      <OutputList>
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Id" />
+                        <ColumnReference Column="Expr1002" />
+                        <ColumnReference Column="Expr1008" />
+                        <ColumnReference Column="Expr1009" />
+                      </OutputList>
+                      <ComputeScalar>
+                        <DefinedValues>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1008" />
+                            <ScalarOperator ScalarString="CASE WHEN CASE WHEN [RequestsDb].[dbo].[Requests].[Status] = [@p5] THEN (1) ELSE (0) END THEN (0) ELSE (1) END">
+                              <IF>
+                                <Condition>
+                                  <ScalarOperator>
+                                    <IF>
+                                      <Condition>
+                                        <ScalarOperator>
+                                          <Compare CompareOp="BINARY IS">
+                                            <ScalarOperator>
+                                              <Identifier>
+                                                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Status" />
+                                              </Identifier>
+                                            </ScalarOperator>
+                                            <ScalarOperator>
+                                              <Identifier>
+                                                <ColumnReference Column="@p5" />
+                                              </Identifier>
+                                            </ScalarOperator>
+                                          </Compare>
+                                        </ScalarOperator>
+                                      </Condition>
+                                      <Then>
+                                        <ScalarOperator>
+                                          <Const ConstValue="(1)" />
+                                        </ScalarOperator>
+                                      </Then>
+                                      <Else>
+                                        <ScalarOperator>
+                                          <Const ConstValue="(0)" />
+                                        </ScalarOperator>
+                                      </Else>
+                                    </IF>
+                                  </ScalarOperator>
+                                </Condition>
+                                <Then>
+                                  <ScalarOperator>
+                                    <Const ConstValue="(0)" />
+                                  </ScalarOperator>
+                                </Then>
+                                <Else>
+                                  <ScalarOperator>
+                                    <Const ConstValue="(1)" />
+                                  </ScalarOperator>
+                                </Else>
+                              </IF>
+                            </ScalarOperator>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1009" />
+                            <ScalarOperator ScalarString="CASE WHEN CASE WHEN [RequestsDb].[dbo].[Requests].[Status] = [@p5] THEN (1) ELSE (0) END THEN (0) ELSE (1) END">
+                              <IF>
+                                <Condition>
+                                  <ScalarOperator>
+                                    <IF>
+                                      <Condition>
+                                        <ScalarOperator>
+                                          <Compare CompareOp="BINARY IS">
+                                            <ScalarOperator>
+                                              <Identifier>
+                                                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Status" />
+                                              </Identifier>
+                                            </ScalarOperator>
+                                            <ScalarOperator>
+                                              <Identifier>
+                                                <ColumnReference Column="@p5" />
+                                              </Identifier>
+                                            </ScalarOperator>
+                                          </Compare>
+                                        </ScalarOperator>
+                                      </Condition>
+                                      <Then>
+                                        <ScalarOperator>
+                                          <Const ConstValue="(1)" />
+                                        </ScalarOperator>
+                                      </Then>
+                                      <Else>
+                                        <ScalarOperator>
+                                          <Const ConstValue="(0)" />
+                                        </ScalarOperator>
+                                      </Else>
+                                    </IF>
+                                  </ScalarOperator>
+                                </Condition>
+                                <Then>
+                                  <ScalarOperator>
+                                    <Const ConstValue="(0)" />
+                                  </ScalarOperator>
+                                </Then>
+                                <Else>
+                                  <ScalarOperator>
+                                    <Const ConstValue="(1)" />
+                                  </ScalarOperator>
+                                </Else>
+                              </IF>
+                            </ScalarOperator>
+                          </DefinedValue>
+                        </DefinedValues>
+                        <RelOp NodeId="5" PhysicalOp="Top" LogicalOp="Top" EstimateRows="1" EstimateIO="0" EstimateCPU="1e-07" AvgRowSize="20" EstimatedTotalSubtreeCost="0.00328348" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                          <OutputList>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Id" />
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Status" />
+                            <ColumnReference Column="Expr1002" />
+                          </OutputList>
+                          <RunTimeInformation>
+                            <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row" />
+                          </RunTimeInformation>
+                          <Top RowCount="0" IsPercent="0" WithTies="0">
+                            <TopExpression>
+                              <ScalarOperator ScalarString="(1)">
+                                <Const ConstValue="(1)" />
+                              </ScalarOperator>
+                            </TopExpression>
+                            <RelOp NodeId="6" PhysicalOp="Compute Scalar" LogicalOp="Compute Scalar" EstimateRows="1" EstimateIO="0" EstimateCPU="1e-07" AvgRowSize="20" EstimatedTotalSubtreeCost="0.00328338" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                              <OutputList>
+                                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Id" />
+                                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Status" />
+                                <ColumnReference Column="Expr1002" />
+                              </OutputList>
+                              <RunTimeInformation>
+                                <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualEndOfScans="0" ActualExecutions="1" ActualExecutionMode="Row" />
+                              </RunTimeInformation>
+                              <ComputeScalar>
+                                <DefinedValues>
+                                  <DefinedValue>
+                                    <ColumnReference Column="Expr1002" />
+                                    <ScalarOperator ScalarString="gettimestamp((5))">
+                                      <Intrinsic FunctionName="gettimestamp">
+                                        <ScalarOperator>
+                                          <Const ConstValue="(5)" />
+                                        </ScalarOperator>
+                                      </Intrinsic>
+                                    </ScalarOperator>
+                                  </DefinedValue>
+                                </DefinedValues>
+                                <RelOp NodeId="7" PhysicalOp="Clustered Index Seek" LogicalOp="Clustered Index Seek" EstimateRows="1" EstimatedRowsRead="1" EstimateIO="0.003125" EstimateCPU="0.0001581" AvgRowSize="20" EstimatedTotalSubtreeCost="0.0032831" TableCardinality="100000" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                                  <OutputList>
+                                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Id" />
+                                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Status" />
+                                  </OutputList>
+                                  <RunTimeInformation>
+                                    <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualScans="0" ActualLogicalReads="3" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" ActualRowsRead="1" ActualEndOfScans="0" ActualExecutions="1" ActualExecutionMode="Row" />
+                                  </RunTimeInformation>
+                                  <IndexScan Ordered="1" ScanDirection="FORWARD" ForcedIndex="0" ForceSeek="0" ForceScan="0" NoExpandHint="0" Storage="RowStore">
+                                    <DefinedValues>
+                                      <DefinedValue>
+                                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Id" />
+                                      </DefinedValue>
+                                      <DefinedValue>
+                                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Status" />
+                                      </DefinedValue>
+                                    </DefinedValues>
+                                    <Object Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Index="[PK_Requests]" IndexKind="Clustered" Storage="RowStore" />
+                                    <SeekPredicates>
+                                      <SeekPredicateNew>
+                                        <SeekKeys>
+                                          <Prefix ScanType="EQ">
+                                            <RangeColumns>
+                                              <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="Id" />
+                                            </RangeColumns>
+                                            <RangeExpressions>
+                                              <ScalarOperator ScalarString="[@p7]">
+                                                <Identifier>
+                                                  <ColumnReference Column="@p7" />
+                                                </Identifier>
+                                              </ScalarOperator>
+                                            </RangeExpressions>
+                                          </Prefix>
+                                        </SeekKeys>
+                                      </SeekPredicateNew>
+                                    </SeekPredicates>
+                                    <Predicate>
+                                      <ScalarOperator ScalarString="[RequestsDb].[dbo].[Requests].[RowVersion]=CONVERT_IMPLICIT(timestamp,[@p8],0)">
+                                        <Compare CompareOp="EQ">
+                                          <ScalarOperator>
+                                            <Identifier>
+                                              <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Column="RowVersion" />
+                                            </Identifier>
+                                          </ScalarOperator>
+                                          <ScalarOperator>
+                                            <Convert DataType="timestamp" Style="0" Implicit="1">
+                                              <ScalarOperator>
+                                                <Identifier>
+                                                  <ColumnReference Column="@p8" />
+                                                </Identifier>
+                                              </ScalarOperator>
+                                            </Convert>
+                                          </ScalarOperator>
+                                        </Compare>
+                                      </ScalarOperator>
+                                    </Predicate>
+                                  </IndexScan>
+                                </RelOp>
+                              </ComputeScalar>
+                            </RelOp>
+                          </Top>
+                        </RelOp>
+                      </ComputeScalar>
+                    </RelOp>
+                  </ComputeScalar>
+                </RelOp>
+              </Update>
+            </RelOp>
+            <ParameterList>
+              <ColumnReference Column="@p6" ParameterDataType="datetime2(7)" ParameterCompiledValue="'2026-10-25 00:50:06.8651359'" ParameterRuntimeValue="'2026-10-25 00:50:07.7811193'" />
+              <ColumnReference Column="@p5" ParameterDataType="tinyint" ParameterCompiledValue="(2)" ParameterRuntimeValue="(2)" />
+              <ColumnReference Column="@p8" ParameterDataType="varbinary(8)" ParameterCompiledValue="0x000000000007C0BE" ParameterRuntimeValue="0x000000000007C0BE" />
+              <ColumnReference Column="@p7" ParameterDataType="int" ParameterCompiledValue="(4088)" ParameterRuntimeValue="(4088)" />
+            </ParameterList>
+          </QueryPlan>
+        </StmtSimple>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>

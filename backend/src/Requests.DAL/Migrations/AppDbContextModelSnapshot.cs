@@ -64,6 +64,25 @@ namespace Requests.DAL.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAt", "Id")
+                        .IsDescending()
+                        .HasDatabaseName("IX_Requests_CreatedAt");
+
+                    b.HasIndex("Status", "Priority")
+                        .HasDatabaseName("IX_Requests_Status_Priority");
+
+                    b.HasIndex("AssignedTo", "CreatedAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("IX_Requests_AssignedTo");
+
+                    b.HasIndex("OrganizationName", "CreatedAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("IX_Requests_OrganizationName");
+
+                    b.HasIndex("Status", "CreatedAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("IX_Requests_Status_CreatedAt");
+
                     b.ToTable("Requests", (string)null);
                 });
 

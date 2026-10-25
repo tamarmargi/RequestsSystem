@@ -1,0 +1,490 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.564" Build="16.0.4255.1">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementText="SELECT COUNT(*), COUNT(CASE&#xA;    WHEN [t].[Status] = CAST(0 AS tinyint) THEN 1&#xA;END), COUNT(CASE&#xA;    WHEN [t].[Status] = CAST(1 AS tinyint) THEN 1&#xA;END), COUNT(CASE&#xA;    WHEN [t].[Status] = CAST(2 AS tinyint) THEN 1&#xA;END), COUNT(CASE&#xA;    WHEN [t].[Status] = CAST(3 AS tinyint) THEN 1&#xA;END), COUNT(CASE&#xA;    WHEN [t].[Priority] = CAST(0 AS tinyint) THEN 1&#xA;END), COUNT(CASE&#xA;    WHEN [t].[Priority] = CAST(1 AS tinyint) THEN 1&#xA;END), COUNT(CASE&#xA;    WHEN [t].[Priority] = CAST(2 AS tinyint) THEN 1&#xA;END)&#xA;FROM (&#xA;    SELECT [r].[Priority], [r].[Status], 1 AS [Key]&#xA;    FROM [Requests] AS [r]&#xA;) AS [t]&#xA;GROUP BY [t].[Key]" StatementId="1" StatementCompId="2" StatementType="SELECT" StatementSqlHandle="0x09009A7005CAE583D4EC1B6A45FC3508FB7B0000000000000000000000000000000000000000000000000000" DatabaseContextSettingsId="1" ParentObjectId="0" StatementParameterizationType="0" RetrievedFromCache="true" StatementSubTreeCost="0.293653" StatementEstRows="1" SecurityPolicyApplied="false" StatementOptmLevel="FULL" QueryHash="0x144541AFF9AFEBB1" QueryPlanHash="0xA52CC23E915BDCB6" StatementOptmEarlyAbortReason="GoodEnoughPlanFound" CardinalityEstimationModelVersion="160">
+          <StatementSetOptions QUOTED_IDENTIFIER="true" ARITHABORT="false" CONCAT_NULL_YIELDS_NULL="true" ANSI_NULLS="true" ANSI_PADDING="true" ANSI_WARNINGS="true" NUMERIC_ROUNDABORT="false"></StatementSetOptions>
+          <QueryPlan DegreeOfParallelism="1" CachedPlanSize="48" CompileTime="1" CompileCPU="1" CompileMemory="528">
+            <MemoryGrantInfo SerialRequiredMemory="0" SerialDesiredMemory="0" GrantedMemory="0" MaxUsedMemory="0"></MemoryGrantInfo>
+            <OptimizerHardwareDependentProperties EstimatedAvailableMemoryGrant="52992" EstimatedPagesCached="39744" EstimatedAvailableDegreeOfParallelism="6" MaxCompileMemory="3842904"></OptimizerHardwareDependentProperties>
+            <QueryTimeStats ElapsedTime="53" CpuTime="53"></QueryTimeStats>
+            <RelOp NodeId="0" PhysicalOp="Compute Scalar" LogicalOp="Compute Scalar" EstimateRows="1" EstimateIO="0" EstimateCPU="0" AvgRowSize="39" EstimatedTotalSubtreeCost="0.293653" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+              <OutputList>
+                <ColumnReference Column="Expr1002"></ColumnReference>
+                <ColumnReference Column="Expr1003"></ColumnReference>
+                <ColumnReference Column="Expr1004"></ColumnReference>
+                <ColumnReference Column="Expr1005"></ColumnReference>
+                <ColumnReference Column="Expr1006"></ColumnReference>
+                <ColumnReference Column="Expr1007"></ColumnReference>
+                <ColumnReference Column="Expr1008"></ColumnReference>
+                <ColumnReference Column="Expr1009"></ColumnReference>
+              </OutputList>
+              <ComputeScalar>
+                <DefinedValues>
+                  <DefinedValue>
+                    <ColumnReference Column="Expr1002"></ColumnReference>
+                    <ScalarOperator ScalarString="CONVERT_IMPLICIT(int,[Expr1033],0)">
+                      <Convert DataType="int" Style="0" Implicit="1">
+                        <ScalarOperator>
+                          <Identifier>
+                            <ColumnReference Column="Expr1033"></ColumnReference>
+                          </Identifier>
+                        </ScalarOperator>
+                      </Convert>
+                    </ScalarOperator>
+                  </DefinedValue>
+                  <DefinedValue>
+                    <ColumnReference Column="Expr1003"></ColumnReference>
+                    <ScalarOperator ScalarString="CONVERT_IMPLICIT(int,[Expr1034],0)">
+                      <Convert DataType="int" Style="0" Implicit="1">
+                        <ScalarOperator>
+                          <Identifier>
+                            <ColumnReference Column="Expr1034"></ColumnReference>
+                          </Identifier>
+                        </ScalarOperator>
+                      </Convert>
+                    </ScalarOperator>
+                  </DefinedValue>
+                  <DefinedValue>
+                    <ColumnReference Column="Expr1004"></ColumnReference>
+                    <ScalarOperator ScalarString="CONVERT_IMPLICIT(int,[Expr1035],0)">
+                      <Convert DataType="int" Style="0" Implicit="1">
+                        <ScalarOperator>
+                          <Identifier>
+                            <ColumnReference Column="Expr1035"></ColumnReference>
+                          </Identifier>
+                        </ScalarOperator>
+                      </Convert>
+                    </ScalarOperator>
+                  </DefinedValue>
+                  <DefinedValue>
+                    <ColumnReference Column="Expr1005"></ColumnReference>
+                    <ScalarOperator ScalarString="CONVERT_IMPLICIT(int,[Expr1036],0)">
+                      <Convert DataType="int" Style="0" Implicit="1">
+                        <ScalarOperator>
+                          <Identifier>
+                            <ColumnReference Column="Expr1036"></ColumnReference>
+                          </Identifier>
+                        </ScalarOperator>
+                      </Convert>
+                    </ScalarOperator>
+                  </DefinedValue>
+                  <DefinedValue>
+                    <ColumnReference Column="Expr1006"></ColumnReference>
+                    <ScalarOperator ScalarString="CONVERT_IMPLICIT(int,[Expr1037],0)">
+                      <Convert DataType="int" Style="0" Implicit="1">
+                        <ScalarOperator>
+                          <Identifier>
+                            <ColumnReference Column="Expr1037"></ColumnReference>
+                          </Identifier>
+                        </ScalarOperator>
+                      </Convert>
+                    </ScalarOperator>
+                  </DefinedValue>
+                  <DefinedValue>
+                    <ColumnReference Column="Expr1007"></ColumnReference>
+                    <ScalarOperator ScalarString="CONVERT_IMPLICIT(int,[Expr1038],0)">
+                      <Convert DataType="int" Style="0" Implicit="1">
+                        <ScalarOperator>
+                          <Identifier>
+                            <ColumnReference Column="Expr1038"></ColumnReference>
+                          </Identifier>
+                        </ScalarOperator>
+                      </Convert>
+                    </ScalarOperator>
+                  </DefinedValue>
+                  <DefinedValue>
+                    <ColumnReference Column="Expr1008"></ColumnReference>
+                    <ScalarOperator ScalarString="CONVERT_IMPLICIT(int,[Expr1039],0)">
+                      <Convert DataType="int" Style="0" Implicit="1">
+                        <ScalarOperator>
+                          <Identifier>
+                            <ColumnReference Column="Expr1039"></ColumnReference>
+                          </Identifier>
+                        </ScalarOperator>
+                      </Convert>
+                    </ScalarOperator>
+                  </DefinedValue>
+                  <DefinedValue>
+                    <ColumnReference Column="Expr1009"></ColumnReference>
+                    <ScalarOperator ScalarString="CONVERT_IMPLICIT(int,[Expr1040],0)">
+                      <Convert DataType="int" Style="0" Implicit="1">
+                        <ScalarOperator>
+                          <Identifier>
+                            <ColumnReference Column="Expr1040"></ColumnReference>
+                          </Identifier>
+                        </ScalarOperator>
+                      </Convert>
+                    </ScalarOperator>
+                  </DefinedValue>
+                </DefinedValues>
+                <RelOp NodeId="1" PhysicalOp="Stream Aggregate" LogicalOp="Aggregate" EstimateRows="1" EstimateIO="0" EstimateCPU="0.0600005" AvgRowSize="39" EstimatedTotalSubtreeCost="0.293653" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                  <OutputList>
+                    <ColumnReference Column="Expr1033"></ColumnReference>
+                    <ColumnReference Column="Expr1034"></ColumnReference>
+                    <ColumnReference Column="Expr1035"></ColumnReference>
+                    <ColumnReference Column="Expr1036"></ColumnReference>
+                    <ColumnReference Column="Expr1037"></ColumnReference>
+                    <ColumnReference Column="Expr1038"></ColumnReference>
+                    <ColumnReference Column="Expr1039"></ColumnReference>
+                    <ColumnReference Column="Expr1040"></ColumnReference>
+                  </OutputList>
+                  <RunTimeInformation>
+                    <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualElapsedms="52" ActualCPUms="52" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+                  </RunTimeInformation>
+                  <StreamAggregate>
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1033"></ColumnReference>
+                        <ScalarOperator ScalarString="Count(*)">
+                          <Aggregate AggType="countstar" Distinct="0"></Aggregate>
+                        </ScalarOperator>
+                      </DefinedValue>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1034"></ColumnReference>
+                        <ScalarOperator ScalarString="COUNT([Expr1010])">
+                          <Aggregate Distinct="0" AggType="COUNT_BIG">
+                            <ScalarOperator>
+                              <Identifier>
+                                <ColumnReference Column="Expr1010"></ColumnReference>
+                              </Identifier>
+                            </ScalarOperator>
+                          </Aggregate>
+                        </ScalarOperator>
+                      </DefinedValue>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1035"></ColumnReference>
+                        <ScalarOperator ScalarString="COUNT([Expr1011])">
+                          <Aggregate Distinct="0" AggType="COUNT_BIG">
+                            <ScalarOperator>
+                              <Identifier>
+                                <ColumnReference Column="Expr1011"></ColumnReference>
+                              </Identifier>
+                            </ScalarOperator>
+                          </Aggregate>
+                        </ScalarOperator>
+                      </DefinedValue>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1036"></ColumnReference>
+                        <ScalarOperator ScalarString="COUNT([Expr1012])">
+                          <Aggregate Distinct="0" AggType="COUNT_BIG">
+                            <ScalarOperator>
+                              <Identifier>
+                                <ColumnReference Column="Expr1012"></ColumnReference>
+                              </Identifier>
+                            </ScalarOperator>
+                          </Aggregate>
+                        </ScalarOperator>
+                      </DefinedValue>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1037"></ColumnReference>
+                        <ScalarOperator ScalarString="COUNT([Expr1013])">
+                          <Aggregate Distinct="0" AggType="COUNT_BIG">
+                            <ScalarOperator>
+                              <Identifier>
+                                <ColumnReference Column="Expr1013"></ColumnReference>
+                              </Identifier>
+                            </ScalarOperator>
+                          </Aggregate>
+                        </ScalarOperator>
+                      </DefinedValue>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1038"></ColumnReference>
+                        <ScalarOperator ScalarString="COUNT([Expr1014])">
+                          <Aggregate Distinct="0" AggType="COUNT_BIG">
+                            <ScalarOperator>
+                              <Identifier>
+                                <ColumnReference Column="Expr1014"></ColumnReference>
+                              </Identifier>
+                            </ScalarOperator>
+                          </Aggregate>
+                        </ScalarOperator>
+                      </DefinedValue>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1039"></ColumnReference>
+                        <ScalarOperator ScalarString="COUNT([Expr1015])">
+                          <Aggregate Distinct="0" AggType="COUNT_BIG">
+                            <ScalarOperator>
+                              <Identifier>
+                                <ColumnReference Column="Expr1015"></ColumnReference>
+                              </Identifier>
+                            </ScalarOperator>
+                          </Aggregate>
+                        </ScalarOperator>
+                      </DefinedValue>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1040"></ColumnReference>
+                        <ScalarOperator ScalarString="COUNT([Expr1016])">
+                          <Aggregate Distinct="0" AggType="COUNT_BIG">
+                            <ScalarOperator>
+                              <Identifier>
+                                <ColumnReference Column="Expr1016"></ColumnReference>
+                              </Identifier>
+                            </ScalarOperator>
+                          </Aggregate>
+                        </ScalarOperator>
+                      </DefinedValue>
+                    </DefinedValues>
+                    <RelOp NodeId="2" PhysicalOp="Compute Scalar" LogicalOp="Compute Scalar" EstimateRows="100000" EstimateIO="0" EstimateCPU="0.01" AvgRowSize="35" EstimatedTotalSubtreeCost="0.233652" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                      <OutputList>
+                        <ColumnReference Column="Expr1010"></ColumnReference>
+                        <ColumnReference Column="Expr1011"></ColumnReference>
+                        <ColumnReference Column="Expr1012"></ColumnReference>
+                        <ColumnReference Column="Expr1013"></ColumnReference>
+                        <ColumnReference Column="Expr1014"></ColumnReference>
+                        <ColumnReference Column="Expr1015"></ColumnReference>
+                        <ColumnReference Column="Expr1016"></ColumnReference>
+                      </OutputList>
+                      <ComputeScalar>
+                        <DefinedValues>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1010"></ColumnReference>
+                            <ScalarOperator ScalarString="CASE WHEN [RequestsDb].[dbo].[Requests].[Status] as [r].[Status]=(0) THEN (1) ELSE NULL END">
+                              <IF>
+                                <Condition>
+                                  <ScalarOperator>
+                                    <Compare CompareOp="EQ">
+                                      <ScalarOperator>
+                                        <Identifier>
+                                          <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Status"></ColumnReference>
+                                        </Identifier>
+                                      </ScalarOperator>
+                                      <ScalarOperator>
+                                        <Const ConstValue="(0)"></Const>
+                                      </ScalarOperator>
+                                    </Compare>
+                                  </ScalarOperator>
+                                </Condition>
+                                <Then>
+                                  <ScalarOperator>
+                                    <Const ConstValue="(1)"></Const>
+                                  </ScalarOperator>
+                                </Then>
+                                <Else>
+                                  <ScalarOperator>
+                                    <Const ConstValue="NULL"></Const>
+                                  </ScalarOperator>
+                                </Else>
+                              </IF>
+                            </ScalarOperator>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1011"></ColumnReference>
+                            <ScalarOperator ScalarString="CASE WHEN [RequestsDb].[dbo].[Requests].[Status] as [r].[Status]=(1) THEN (1) ELSE NULL END">
+                              <IF>
+                                <Condition>
+                                  <ScalarOperator>
+                                    <Compare CompareOp="EQ">
+                                      <ScalarOperator>
+                                        <Identifier>
+                                          <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Status"></ColumnReference>
+                                        </Identifier>
+                                      </ScalarOperator>
+                                      <ScalarOperator>
+                                        <Const ConstValue="(1)"></Const>
+                                      </ScalarOperator>
+                                    </Compare>
+                                  </ScalarOperator>
+                                </Condition>
+                                <Then>
+                                  <ScalarOperator>
+                                    <Const ConstValue="(1)"></Const>
+                                  </ScalarOperator>
+                                </Then>
+                                <Else>
+                                  <ScalarOperator>
+                                    <Const ConstValue="NULL"></Const>
+                                  </ScalarOperator>
+                                </Else>
+                              </IF>
+                            </ScalarOperator>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1012"></ColumnReference>
+                            <ScalarOperator ScalarString="CASE WHEN [RequestsDb].[dbo].[Requests].[Status] as [r].[Status]=(2) THEN (1) ELSE NULL END">
+                              <IF>
+                                <Condition>
+                                  <ScalarOperator>
+                                    <Compare CompareOp="EQ">
+                                      <ScalarOperator>
+                                        <Identifier>
+                                          <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Status"></ColumnReference>
+                                        </Identifier>
+                                      </ScalarOperator>
+                                      <ScalarOperator>
+                                        <Const ConstValue="(2)"></Const>
+                                      </ScalarOperator>
+                                    </Compare>
+                                  </ScalarOperator>
+                                </Condition>
+                                <Then>
+                                  <ScalarOperator>
+                                    <Const ConstValue="(1)"></Const>
+                                  </ScalarOperator>
+                                </Then>
+                                <Else>
+                                  <ScalarOperator>
+                                    <Const ConstValue="NULL"></Const>
+                                  </ScalarOperator>
+                                </Else>
+                              </IF>
+                            </ScalarOperator>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1013"></ColumnReference>
+                            <ScalarOperator ScalarString="CASE WHEN [RequestsDb].[dbo].[Requests].[Status] as [r].[Status]=(3) THEN (1) ELSE NULL END">
+                              <IF>
+                                <Condition>
+                                  <ScalarOperator>
+                                    <Compare CompareOp="EQ">
+                                      <ScalarOperator>
+                                        <Identifier>
+                                          <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Status"></ColumnReference>
+                                        </Identifier>
+                                      </ScalarOperator>
+                                      <ScalarOperator>
+                                        <Const ConstValue="(3)"></Const>
+                                      </ScalarOperator>
+                                    </Compare>
+                                  </ScalarOperator>
+                                </Condition>
+                                <Then>
+                                  <ScalarOperator>
+                                    <Const ConstValue="(1)"></Const>
+                                  </ScalarOperator>
+                                </Then>
+                                <Else>
+                                  <ScalarOperator>
+                                    <Const ConstValue="NULL"></Const>
+                                  </ScalarOperator>
+                                </Else>
+                              </IF>
+                            </ScalarOperator>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1014"></ColumnReference>
+                            <ScalarOperator ScalarString="CASE WHEN [RequestsDb].[dbo].[Requests].[Priority] as [r].[Priority]=(0) THEN (1) ELSE NULL END">
+                              <IF>
+                                <Condition>
+                                  <ScalarOperator>
+                                    <Compare CompareOp="EQ">
+                                      <ScalarOperator>
+                                        <Identifier>
+                                          <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Priority"></ColumnReference>
+                                        </Identifier>
+                                      </ScalarOperator>
+                                      <ScalarOperator>
+                                        <Const ConstValue="(0)"></Const>
+                                      </ScalarOperator>
+                                    </Compare>
+                                  </ScalarOperator>
+                                </Condition>
+                                <Then>
+                                  <ScalarOperator>
+                                    <Const ConstValue="(1)"></Const>
+                                  </ScalarOperator>
+                                </Then>
+                                <Else>
+                                  <ScalarOperator>
+                                    <Const ConstValue="NULL"></Const>
+                                  </ScalarOperator>
+                                </Else>
+                              </IF>
+                            </ScalarOperator>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1015"></ColumnReference>
+                            <ScalarOperator ScalarString="CASE WHEN [RequestsDb].[dbo].[Requests].[Priority] as [r].[Priority]=(1) THEN (1) ELSE NULL END">
+                              <IF>
+                                <Condition>
+                                  <ScalarOperator>
+                                    <Compare CompareOp="EQ">
+                                      <ScalarOperator>
+                                        <Identifier>
+                                          <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Priority"></ColumnReference>
+                                        </Identifier>
+                                      </ScalarOperator>
+                                      <ScalarOperator>
+                                        <Const ConstValue="(1)"></Const>
+                                      </ScalarOperator>
+                                    </Compare>
+                                  </ScalarOperator>
+                                </Condition>
+                                <Then>
+                                  <ScalarOperator>
+                                    <Const ConstValue="(1)"></Const>
+                                  </ScalarOperator>
+                                </Then>
+                                <Else>
+                                  <ScalarOperator>
+                                    <Const ConstValue="NULL"></Const>
+                                  </ScalarOperator>
+                                </Else>
+                              </IF>
+                            </ScalarOperator>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Column="Expr1016"></ColumnReference>
+                            <ScalarOperator ScalarString="CASE WHEN [RequestsDb].[dbo].[Requests].[Priority] as [r].[Priority]=(2) THEN (1) ELSE NULL END">
+                              <IF>
+                                <Condition>
+                                  <ScalarOperator>
+                                    <Compare CompareOp="EQ">
+                                      <ScalarOperator>
+                                        <Identifier>
+                                          <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Priority"></ColumnReference>
+                                        </Identifier>
+                                      </ScalarOperator>
+                                      <ScalarOperator>
+                                        <Const ConstValue="(2)"></Const>
+                                      </ScalarOperator>
+                                    </Compare>
+                                  </ScalarOperator>
+                                </Condition>
+                                <Then>
+                                  <ScalarOperator>
+                                    <Const ConstValue="(1)"></Const>
+                                  </ScalarOperator>
+                                </Then>
+                                <Else>
+                                  <ScalarOperator>
+                                    <Const ConstValue="NULL"></Const>
+                                  </ScalarOperator>
+                                </Else>
+                              </IF>
+                            </ScalarOperator>
+                          </DefinedValue>
+                        </DefinedValues>
+                        <RelOp NodeId="3" PhysicalOp="Index Scan" LogicalOp="Index Scan" EstimateRows="100000" EstimatedRowsRead="100000" EstimateIO="0.113495" EstimateCPU="0.110157" AvgRowSize="9" EstimatedTotalSubtreeCost="0.223652" TableCardinality="100000" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                          <OutputList>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Status"></ColumnReference>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Priority"></ColumnReference>
+                          </OutputList>
+                          <RunTimeInformation>
+                            <RunTimeCountersPerThread Thread="0" ActualRows="100000" Batches="0" ActualElapsedms="18" ActualCPUms="18" ActualScans="1" ActualLogicalReads="152" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" ActualRowsRead="100000" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+                          </RunTimeInformation>
+                          <IndexScan Ordered="0" ForcedIndex="0" ForceSeek="0" ForceScan="0" NoExpandHint="0" Storage="RowStore">
+                            <DefinedValues>
+                              <DefinedValue>
+                                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Status"></ColumnReference>
+                              </DefinedValue>
+                              <DefinedValue>
+                                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Priority"></ColumnReference>
+                              </DefinedValue>
+                            </DefinedValues>
+                            <Object Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Index="[IX_Requests_Status_Priority]" Alias="[r]" IndexKind="NonClustered" Storage="RowStore"></Object>
+                          </IndexScan>
+                        </RelOp>
+                      </ComputeScalar>
+                    </RelOp>
+                  </StreamAggregate>
+                </RelOp>
+              </ComputeScalar>
+            </RelOp>
+          </QueryPlan>
+        </StmtSimple>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>

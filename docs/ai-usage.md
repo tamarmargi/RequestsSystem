@@ -73,3 +73,17 @@ This document records, per development step, which parts were generated with Cla
 ### Reviewed / decided manually
 
 - TODO: fill in by the developer
+
+## Step F – Performance and indexes (T1.3, T9.1–T9.3)
+
+### Generated with Claude Code
+
+- Capture of the exact SQL EF Core sends (from the plan cache) into `docs/performance/queries.sql`.
+- Measurement script `docs/performance/measure.ps1` (STATISTICS IO/TIME medians, actual plans as `.sqlplan`, plan operators, API timings) and the experiment files `filtered-index-test.sql` and `bottleneck-tests.sql`.
+- The before / after / filtered-index / bottleneck measurements and their results files.
+- The indexes in `RequestConfiguration` and the migration `AddRequestIndexes`; `Cache:StatsSeconds = 0` to disable the stats cache for measurement.
+- The report draft `docs/performance/README.md`, the README sections Performance and Database & Indexes, decisions 24–26.
+
+### Reviewed / decided manually
+
+- TODO: fill in by the developer

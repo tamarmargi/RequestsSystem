@@ -78,6 +78,18 @@ public sealed class MemoryStatsCacheTests : IDisposable
         _factoryCalls.Should().BeGreaterThan(1);
     }
 
+    [Fact]
+    public async Task ZeroSeconds_DisablesTheCache()
+    {
+        var disabled = new MemoryStatsCache(
+            _memoryCache, Options.Create(new CacheOptions { StatsSeconds = 0 }), NullLogger<MemoryStatsCache>.Instance);
+
+        await disabled.GetOrCreateAsync(Factory);
+        await disabled.GetOrCreateAsync(Factory);
+
+        _factoryCalls.Should().Be(2);
+    }
+
     public void Dispose() => _memoryCache.Dispose();
 
     private Task<RequestStatsDto> Factory()

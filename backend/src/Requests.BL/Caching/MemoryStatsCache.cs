@@ -26,6 +26,11 @@ public sealed class MemoryStatsCache : IStatsCache
 
     public async Task<RequestStatsDto> GetOrCreateAsync(Func<Task<RequestStatsDto>> factory)
     {
+        if (_duration <= TimeSpan.Zero)
+        {
+            return await factory();
+        }
+
         if (_cache.TryGetValue(Key, out RequestStatsDto? cached) && cached is not null)
         {
             _logger.LogDebug("Stats cache hit");

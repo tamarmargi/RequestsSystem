@@ -27,6 +27,32 @@ public class RequestConfiguration : IEntityTypeConfiguration<Request>
             .HasForeignKey(h => h.RequestId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // No additional indexes yet: they will be added after performance measurement.
+        // Indexes chosen by measured queries (docs/performance/README.md). Key order and directions match the
+        // ORDER BY of the list queries (CreatedAt DESC, Id DESC as the stable tie-breaker), so the first page is
+        // read in order from the index with no Sort operator.
+
+        // Default list sort without filters (and the narrowest choice for nothing else).
+        builder.HasIndex(r => new { r.CreatedAt, r.Id })
+            .IsDescending(true, true)
+            .HasDatabaseName("IX_Requests_CreatedAt");
+
+        // Status filter with the default sort.
+        builder.HasIndex(r => new { r.Status, r.CreatedAt, r.Id })
+            .IsDescending(false, true, true)
+            .HasDatabaseName("IX_Requests_Status_CreatedAt");
+
+        // Handler filter with the default sort.
+        builder.HasIndex(r => new { r.AssignedTo, r.CreatedAt, r.Id })
+            .IsDescending(false, true, true)
+            .HasDatabaseName("IX_Requests_AssignedTo");
+
+        // Organization filter with the default sort.
+        builder.HasIndex(r => new { r.OrganizationName, r.CreatedAt, r.Id })
+            .IsDescending(false, true, true)
+            .HasDatabaseName("IX_Requests_OrganizationName");
+
+        // Narrow index for the stats aggregate (and Status + Priority filters).
+        builder.HasIndex(r => new { r.Status, r.Priority })
+            .HasDatabaseName("IX_Requests_Status_Priority");
     }
 }

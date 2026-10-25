@@ -176,7 +176,28 @@ See [docs/decisions.md](docs/decisions.md) for technical decisions.
 
 ## Database & Indexes
 
-TODO
+SQL Server 2022, schema created by EF Core migrations (`InitialCreate`, `AddRequestIndexes`). Every index
+was chosen from a measured query and verified in its actual execution plan
+([performance report](docs/performance/README.md)).
+
+| Index | Columns | Scenario |
+|---|---|---|
+| `PK_Requests` (clustered) | `Id` | Get by id, status update (`WHERE Id = … AND RowVersion = …`), bulk load (`WHERE Id IN …`) |
+| `IX_Requests_CreatedAt` | `CreatedAt DESC, Id DESC` | Sorting: the default list order (`createdAt desc`) without filters; first page of a search |
+| `IX_Requests_Status_CreatedAt` | `Status, CreatedAt DESC, Id DESC` | Filter by status, sorted by the default order |
+| `IX_Requests_AssignedTo` | `AssignedTo, CreatedAt DESC, Id DESC` | Filter by handler, sorted by the default order |
+| `IX_Requests_OrganizationName` | `OrganizationName, CreatedAt DESC, Id DESC` | Filter by organization, sorted by the default order |
+| `IX_Requests_Status_Priority` | `Status, Priority` | Stats (one narrow scan instead of the table); status + priority counts; the unfiltered COUNT |
+| `IX_RequestStatusHistory_RequestId_ChangedAt` | `RequestId, ChangedAt` | History of one request, newest first |
+
+- Composite indexes end with `Id`, in the same direction as the sort, matching the stable sort with `Id` as
+  tie-breaker. The first page is read in order straight from the index, with no Sort operator.
+- **Search** (`LIKE '%term%'` on `Title` / `OrganizationName`) cannot use a B-tree index. Its first page
+  benefits from `IX_Requests_CreatedAt`, but its COUNT scans the table (see [Performance](#performance)).
+- No filtered index for open requests: SQL Server cannot use it for the parameterized queries EF sends
+  (verified in the plan, see [decision 25](docs/decisions.md)).
+- Other sort fields (`updatedAt`, `priority`, `title`, `organizationName`) have no dedicated index. They are
+  less common choices; each would cost another index on every write.
 
 ### Avoiding loading all data into memory
 
@@ -187,8 +208,8 @@ TODO
 - Only the current page (at most 100 rows, enforced by validation) leaves the database.
 - Stats are computed in SQL by a single aggregate query (`COUNT(*)` plus conditional
   `COUNT(CASE WHEN …)` per status and priority), one pass over the table instead of one query per group.
-- The `Requests` table has no indexes besides the primary key yet; indexes will be added and measured in
-  the performance step.
+- The indexes above let SQL Server read only the first rows of the page in order (e.g. 70 pages for the
+  default list instead of the whole table), instead of sorting all matching rows.
 
 ## Concurrency
 
@@ -330,7 +351,32 @@ no other code changes.
 
 ## Performance
 
-TODO
+Measured on the 100,000 seeded requests with the exact SQL EF Core sends, before and after the indexes
+(logical reads, `STATISTICS TIME`, actual execution plans, and API response times). Full report with plans:
+**[docs/performance/README.md](docs/performance/README.md)**.
+
+| Operation | Logical reads before → after | API median before → after |
+|---|---:|---:|
+| Default list, page 1 (`GET /api/requests`) | 2,134 → 70 (page) + 2,030 → 152 (COUNT) | 54 → 15.9 ms |
+| Status + priority filter | 2,030 → 418 (page) + 2,030 → 8 (COUNT) | 43.4 → 10.3 ms |
+| Stats, uncached | 2,030 → 152 | 50 → 38.7 ms |
+| Filter by handler / organization (page) | 2,030 → 71 / 72 | – |
+
+- **Indexes added:** `IX_Requests_CreatedAt`, `IX_Requests_Status_CreatedAt`, `IX_Requests_AssignedTo`,
+  `IX_Requests_OrganizationName`, `IX_Requests_Status_Priority` (see [Database & Indexes](#database--indexes)).
+  Plans changed from *Clustered Index Scan + Sort* to *Index Seek / ordered Index Scan + 20 Key Lookups*.
+- **Main bottleneck: text search.** `LIKE '%term%'` scans the whole table for the COUNT in both runs
+  (2,030 reads, ~350 ms), which is >99% of a search request. Proposed: SQL Server Full-Text Search
+  (`CONTAINS`), or "has more" instead of an exact total for searches.
+- **Deep paging:** page 4000 reads 245,185 pages (a plan reused from page 1 does 80,000 Key Lookups) vs 70
+  for page 1. Proposed: keyset pagination, measured at 72 reads for the same page.
+- **Write cost:** 5 more indexes on `Requests` (~15 MB). A status update maintains only the two that contain
+  `Status` (6 → 29 reads, still under 1 ms).
+
+Reproduce: seed (`dotnet run --project backend/src/Requests.Api -- --seed`), start the API with
+`Cache__StatsSeconds=0`, then run `./docs/performance/measure.ps1 -Label before` on a database with only the
+primary key (`dotnet ef database update InitialCreate …`) and `-Label after` with all migrations applied.
+Details in the [report](docs/performance/README.md#how-to-reproduce).
 
 ## Technical Decisions
 
@@ -349,6 +395,10 @@ TODO
   and writes the history rows in the same statement batch.
 - **Stats cache is per instance** (see [Cache](#cache)); running several API instances needs the Redis
   implementation of `IStatsCache`.
+- **Search scans the table** (`LIKE '%term%'`), and its COUNT costs ~350 ms on 100,000 rows; Full-Text Search
+  or "has more" instead of an exact total would fix it ([performance report](docs/performance/README.md)).
+- **Deep pages are slow** with `OFFSET` (page 4000: 245,185 reads vs 70 for page 1); keyset pagination would
+  make every page cost the same, at the price of no random page jumps.
 
 ## AI Usage
 

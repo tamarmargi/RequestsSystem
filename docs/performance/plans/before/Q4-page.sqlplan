@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.564" Build="16.0.4255.1">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementText="SELECT [r].[Id], [r].[AssignedTo], [r].[CreatedAt], [r].[OrganizationName], [r].[Priority], [r].[RowVersion], [r].[Status], [r].[Title], [r].[UpdatedAt]&#xA;FROM [Requests] AS [r]&#xA;WHERE [r].[OrganizationName] = @__filter_OrganizationName_0&#xA;ORDER BY [r].[CreatedAt] DESC, [r].[Id] DESC&#xA;OFFSET @__p_1 ROWS FETCH NEXT @__p_2 ROWS ONLY" StatementId="1" StatementCompId="6" StatementType="SELECT" StatementSqlHandle="0x09008AC2927889126C729EE68DD62687CF810000000000000000000000000000000000000000000000000000" DatabaseContextSettingsId="1" ParentObjectId="0" StatementParameterizationType="1" RetrievedFromCache="true" StatementSubTreeCost="1.68546" StatementEstRows="20" SecurityPolicyApplied="false" StatementOptmLevel="FULL" QueryHash="0xACA06662C387787E" QueryPlanHash="0x9A9F166E4A8D3F84" CardinalityEstimationModelVersion="160">
+          <StatementSetOptions QUOTED_IDENTIFIER="true" ARITHABORT="false" CONCAT_NULL_YIELDS_NULL="true" ANSI_NULLS="true" ANSI_PADDING="true" ANSI_WARNINGS="true" NUMERIC_ROUNDABORT="false"></StatementSetOptions>
+          <QueryPlan DegreeOfParallelism="1" MemoryGrant="1408" CachedPlanSize="40" CompileTime="1" CompileCPU="1" CompileMemory="264">
+            <MissingIndexes>
+              <MissingIndexGroup Impact="97.4574">
+                <MissingIndex Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]">
+                  <ColumnGroup Usage="EQUALITY">
+                    <Column Name="[OrganizationName]" ColumnId="3"></Column>
+                  </ColumnGroup>
+                  <ColumnGroup Usage="INCLUDE">
+                    <Column Name="[Title]" ColumnId="2"></Column>
+                    <Column Name="[Status]" ColumnId="4"></Column>
+                    <Column Name="[Priority]" ColumnId="5"></Column>
+                    <Column Name="[AssignedTo]" ColumnId="6"></Column>
+                    <Column Name="[CreatedAt]" ColumnId="7"></Column>
+                    <Column Name="[UpdatedAt]" ColumnId="8"></Column>
+                    <Column Name="[RowVersion]" ColumnId="9"></Column>
+                  </ColumnGroup>
+                </MissingIndex>
+              </MissingIndexGroup>
+            </MissingIndexes>
+            <MemoryGrantInfo SerialRequiredMemory="512" SerialDesiredMemory="1408" RequiredMemory="512" DesiredMemory="1408" RequestedMemory="1408" GrantWaitTime="0" MaxQueryMemory="956288" GrantedMemory="1408" MaxUsedMemory="224" LastRequestedMemory="1408" IsMemoryGrantFeedbackAdjusted="No: Accurate Grant"></MemoryGrantInfo>
+            <OptimizerHardwareDependentProperties EstimatedAvailableMemoryGrant="52992" EstimatedPagesCached="39744" EstimatedAvailableDegreeOfParallelism="6" MaxCompileMemory="3848960"></OptimizerHardwareDependentProperties>
+            <OptimizerStatsUsage>
+              <StatisticsInfo LastUpdate="2026-10-25T00:45:27.09" ModificationCount="0" SamplingPercent="59.386" Statistics="[_WA_Sys_00000003_49C3F6B7]" Table="[Requests]" Schema="[dbo]" Database="[RequestsDb]"></StatisticsInfo>
+            </OptimizerStatsUsage>
+            <QueryTimeStats ElapsedTime="14" CpuTime="14"></QueryTimeStats>
+            <RelOp NodeId="0" PhysicalOp="Top" LogicalOp="Top" EstimateRows="20" EstimateIO="0" EstimateCPU="2e-06" AvgRowSize="381" EstimatedTotalSubtreeCost="1.68546" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+              <OutputList>
+                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Id"></ColumnReference>
+                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Title"></ColumnReference>
+                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="OrganizationName"></ColumnReference>
+                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Status"></ColumnReference>
+                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Priority"></ColumnReference>
+                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="AssignedTo"></ColumnReference>
+                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="CreatedAt"></ColumnReference>
+                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="UpdatedAt"></ColumnReference>
+                <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="RowVersion"></ColumnReference>
+              </OutputList>
+              <RunTimeInformation>
+                <RunTimeCountersPerThread Thread="0" ActualRows="20" Batches="0" ActualElapsedms="14" ActualCPUms="14" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+              </RunTimeInformation>
+              <Top RowCount="0" IsPercent="0" WithTies="0">
+                <OffsetExpression>
+                  <ScalarOperator ScalarString="CONVERT_IMPLICIT(bigint,[@__p_1],0)">
+                    <Identifier>
+                      <ColumnReference Column="ConstExpr1002">
+                        <ScalarOperator>
+                          <Convert DataType="bigint" Style="0" Implicit="1">
+                            <ScalarOperator>
+                              <Identifier>
+                                <ColumnReference Column="@__p_1"></ColumnReference>
+                              </Identifier>
+                            </ScalarOperator>
+                          </Convert>
+                        </ScalarOperator>
+                      </ColumnReference>
+                    </Identifier>
+                  </ScalarOperator>
+                </OffsetExpression>
+                <TopExpression>
+                  <ScalarOperator ScalarString="CONVERT_IMPLICIT(bigint,[@__p_2],0)">
+                    <Identifier>
+                      <ColumnReference Column="ConstExpr1001">
+                        <ScalarOperator>
+                          <Convert DataType="bigint" Style="0" Implicit="1">
+                            <ScalarOperator>
+                              <Identifier>
+                                <ColumnReference Column="@__p_2"></ColumnReference>
+                              </Identifier>
+                            </ScalarOperator>
+                          </Convert>
+                        </ScalarOperator>
+                      </ColumnReference>
+                    </Identifier>
+                  </ScalarOperator>
+                </TopExpression>
+                <RelOp NodeId="1" PhysicalOp="Sort" LogicalOp="Sort" EstimateRows="20" EstimateRowsWithoutRowGoal="1054.13" EstimateIO="0.0112613" EstimateCPU="0.0166137" AvgRowSize="381" EstimatedTotalSubtreeCost="1.68545" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                  <OutputList>
+                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Id"></ColumnReference>
+                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Title"></ColumnReference>
+                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="OrganizationName"></ColumnReference>
+                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Status"></ColumnReference>
+                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Priority"></ColumnReference>
+                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="AssignedTo"></ColumnReference>
+                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="CreatedAt"></ColumnReference>
+                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="UpdatedAt"></ColumnReference>
+                    <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="RowVersion"></ColumnReference>
+                  </OutputList>
+                  <MemoryFractions Input="1" Output="1"></MemoryFractions>
+                  <RunTimeInformation>
+                    <RunTimeCountersPerThread Thread="0" ActualRows="20" Batches="0" ActualElapsedms="14" ActualCPUms="14" ActualScans="0" ActualLogicalReads="0" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" ActualRebinds="1" ActualRewinds="0" ActualEndOfScans="0" ActualExecutions="1" InputMemoryGrant="1408" OutputMemoryGrant="1024" UsedMemoryGrant="224" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+                  </RunTimeInformation>
+                  <Sort Distinct="0">
+                    <OrderBy>
+                      <OrderByColumn Ascending="0">
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="CreatedAt"></ColumnReference>
+                      </OrderByColumn>
+                      <OrderByColumn Ascending="0">
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Id"></ColumnReference>
+                      </OrderByColumn>
+                    </OrderBy>
+                    <RelOp NodeId="2" PhysicalOp="Clustered Index Scan" LogicalOp="Clustered Index Scan" EstimateRows="1054.13" EstimatedRowsRead="100000" EstimateIO="1.49942" EstimateCPU="0.110157" AvgRowSize="381" EstimatedTotalSubtreeCost="1.60958" TableCardinality="100000" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                      <OutputList>
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Id"></ColumnReference>
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Title"></ColumnReference>
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="OrganizationName"></ColumnReference>
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Status"></ColumnReference>
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Priority"></ColumnReference>
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="AssignedTo"></ColumnReference>
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="CreatedAt"></ColumnReference>
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="UpdatedAt"></ColumnReference>
+                        <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="RowVersion"></ColumnReference>
+                      </OutputList>
+                      <RunTimeInformation>
+                        <RunTimeCountersPerThread Thread="0" ActualRows="1065" Batches="0" ActualElapsedms="13" ActualCPUms="13" ActualScans="1" ActualLogicalReads="2030" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" ActualRowsRead="100000" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+                      </RunTimeInformation>
+                      <IndexScan Ordered="0" ForcedIndex="0" ForceScan="0" NoExpandHint="0" Storage="RowStore">
+                        <DefinedValues>
+                          <DefinedValue>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Id"></ColumnReference>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Title"></ColumnReference>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="OrganizationName"></ColumnReference>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Status"></ColumnReference>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Priority"></ColumnReference>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="AssignedTo"></ColumnReference>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="CreatedAt"></ColumnReference>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="UpdatedAt"></ColumnReference>
+                          </DefinedValue>
+                          <DefinedValue>
+                            <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="RowVersion"></ColumnReference>
+                          </DefinedValue>
+                        </DefinedValues>
+                        <Object Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Index="[PK_Requests]" Alias="[r]" IndexKind="Clustered" Storage="RowStore"></Object>
+                        <Predicate>
+                          <ScalarOperator ScalarString="[RequestsDb].[dbo].[Requests].[OrganizationName] as [r].[OrganizationName]=[@__filter_OrganizationName_0]">
+                            <Compare CompareOp="EQ">
+                              <ScalarOperator>
+                                <Identifier>
+                                  <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="OrganizationName"></ColumnReference>
+                                </Identifier>
+                              </ScalarOperator>
+                              <ScalarOperator>
+                                <Identifier>
+                                  <ColumnReference Column="@__filter_OrganizationName_0"></ColumnReference>
+                                </Identifier>
+                              </ScalarOperator>
+                            </Compare>
+                          </ScalarOperator>
+                        </Predicate>
+                      </IndexScan>
+                    </RelOp>
+                  </Sort>
+                </RelOp>
+              </Top>
+            </RelOp>
+            <ParameterList>
+              <ColumnReference Column="@__p_1" ParameterDataType="int" ParameterCompiledValue="(0)" ParameterRuntimeValue="(0)"></ColumnReference>
+              <ColumnReference Column="@__p_2" ParameterDataType="int" ParameterCompiledValue="(20)" ParameterRuntimeValue="(20)"></ColumnReference>
+              <ColumnReference Column="@__filter_OrganizationName_0" ParameterDataType="nvarchar(200)" ParameterCompiledValue="N'Jordan Valley Logistics Ltd'" ParameterRuntimeValue="N'Jordan Valley Logistics Ltd'"></ColumnReference>
+            </ParameterList>
+          </QueryPlan>
+        </StmtSimple>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>

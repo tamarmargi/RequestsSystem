@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.564" Build="16.0.4255.1">
+  <BatchSequence>
+    <Batch>
+      <Statements>
+        <StmtSimple StatementText="SELECT COUNT(*)&#xA;FROM [Requests] AS [r]&#xA;WHERE [r].[Status] = @__filter_Status_0 AND [r].[Priority] = @__filter_Priority_1" StatementId="1" StatementCompId="6" StatementType="SELECT" StatementSqlHandle="0x0900CA45910B29CC3889F2CF9361C8893BA50000000000000000000000000000000000000000000000000000" DatabaseContextSettingsId="1" ParentObjectId="0" StatementParameterizationType="1" RetrievedFromCache="true" StatementSubTreeCost="0.0259677" StatementEstRows="1" SecurityPolicyApplied="false" StatementOptmLevel="TRIVIAL" QueryHash="0x6DC1AA40BE298DA6" QueryPlanHash="0xE9E4C1679CCAF1F0" CardinalityEstimationModelVersion="160">
+          <StatementSetOptions QUOTED_IDENTIFIER="true" ARITHABORT="false" CONCAT_NULL_YIELDS_NULL="true" ANSI_NULLS="true" ANSI_PADDING="true" ANSI_WARNINGS="true" NUMERIC_ROUNDABORT="false"></StatementSetOptions>
+          <QueryPlan DegreeOfParallelism="1" CachedPlanSize="24" CompileTime="1" CompileCPU="1" CompileMemory="168">
+            <MemoryGrantInfo SerialRequiredMemory="0" SerialDesiredMemory="0" GrantedMemory="0" MaxUsedMemory="0"></MemoryGrantInfo>
+            <OptimizerHardwareDependentProperties EstimatedAvailableMemoryGrant="52992" EstimatedPagesCached="39744" EstimatedAvailableDegreeOfParallelism="6" MaxCompileMemory="3843184"></OptimizerHardwareDependentProperties>
+            <OptimizerStatsUsage>
+              <StatisticsInfo LastUpdate="2026-10-25T00:45:09.51" ModificationCount="0" SamplingPercent="59.386" Statistics="[_WA_Sys_00000005_49C3F6B7]" Table="[Requests]" Schema="[dbo]" Database="[RequestsDb]"></StatisticsInfo>
+              <StatisticsInfo LastUpdate="2026-10-25T00:49:30.48" ModificationCount="0" SamplingPercent="100" Statistics="[IX_Requests_AssignedTo]" Table="[Requests]" Schema="[dbo]" Database="[RequestsDb]"></StatisticsInfo>
+              <StatisticsInfo LastUpdate="2026-10-25T00:49:30.72" ModificationCount="0" SamplingPercent="100" Statistics="[IX_Requests_CreatedAt]" Table="[Requests]" Schema="[dbo]" Database="[RequestsDb]"></StatisticsInfo>
+              <StatisticsInfo LastUpdate="2026-10-25T00:49:31.18" ModificationCount="0" SamplingPercent="100" Statistics="[IX_Requests_Status_Priority]" Table="[Requests]" Schema="[dbo]" Database="[RequestsDb]"></StatisticsInfo>
+              <StatisticsInfo LastUpdate="2026-10-25T00:49:30.96" ModificationCount="0" SamplingPercent="100" Statistics="[IX_Requests_OrganizationName]" Table="[Requests]" Schema="[dbo]" Database="[RequestsDb]"></StatisticsInfo>
+              <StatisticsInfo LastUpdate="2026-10-25T00:49:31.10" ModificationCount="0" SamplingPercent="100" Statistics="[IX_Requests_Status_CreatedAt]" Table="[Requests]" Schema="[dbo]" Database="[RequestsDb]"></StatisticsInfo>
+            </OptimizerStatsUsage>
+            <QueryTimeStats ElapsedTime="0" CpuTime="0"></QueryTimeStats>
+            <RelOp NodeId="0" PhysicalOp="Compute Scalar" LogicalOp="Compute Scalar" EstimateRows="1" EstimateIO="0" EstimateCPU="0" AvgRowSize="11" EstimatedTotalSubtreeCost="0.0259677" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+              <OutputList>
+                <ColumnReference Column="Expr1001"></ColumnReference>
+              </OutputList>
+              <ComputeScalar>
+                <DefinedValues>
+                  <DefinedValue>
+                    <ColumnReference Column="Expr1001"></ColumnReference>
+                    <ScalarOperator ScalarString="CONVERT_IMPLICIT(int,[Expr1002],0)">
+                      <Convert DataType="int" Style="0" Implicit="1">
+                        <ScalarOperator>
+                          <Identifier>
+                            <ColumnReference Column="Expr1002"></ColumnReference>
+                          </Identifier>
+                        </ScalarOperator>
+                      </Convert>
+                    </ScalarOperator>
+                  </DefinedValue>
+                </DefinedValues>
+                <RelOp NodeId="1" PhysicalOp="Stream Aggregate" LogicalOp="Aggregate" EstimateRows="1" EstimateIO="0" EstimateCPU="0.0050005" AvgRowSize="11" EstimatedTotalSubtreeCost="0.0259677" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                  <OutputList>
+                    <ColumnReference Column="Expr1002"></ColumnReference>
+                  </OutputList>
+                  <RunTimeInformation>
+                    <RunTimeCountersPerThread Thread="0" ActualRows="1" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+                  </RunTimeInformation>
+                  <StreamAggregate>
+                    <DefinedValues>
+                      <DefinedValue>
+                        <ColumnReference Column="Expr1002"></ColumnReference>
+                        <ScalarOperator ScalarString="Count(*)">
+                          <Aggregate AggType="countstar" Distinct="0"></Aggregate>
+                        </ScalarOperator>
+                      </DefinedValue>
+                    </DefinedValues>
+                    <RelOp NodeId="2" PhysicalOp="Index Seek" LogicalOp="Index Seek" EstimateRows="8333.33" EstimatedRowsRead="8333.33" EstimateIO="0.0116435" EstimateCPU="0.00932367" AvgRowSize="9" EstimatedTotalSubtreeCost="0.0209672" TableCardinality="100000" Parallel="0" EstimateRebinds="0" EstimateRewinds="0" EstimatedExecutionMode="Row">
+                      <OutputList></OutputList>
+                      <RunTimeInformation>
+                        <RunTimeCountersPerThread Thread="0" ActualRows="2312" Batches="0" ActualElapsedms="0" ActualCPUms="0" ActualScans="1" ActualLogicalReads="8" ActualPhysicalReads="0" ActualReadAheads="0" ActualLobLogicalReads="0" ActualLobPhysicalReads="0" ActualLobReadAheads="0" ActualRowsRead="2312" ActualEndOfScans="1" ActualExecutions="1" ActualExecutionMode="Row"></RunTimeCountersPerThread>
+                      </RunTimeInformation>
+                      <IndexScan Ordered="1" ScanDirection="FORWARD" ForcedIndex="0" ForceSeek="0" ForceScan="0" NoExpandHint="0" Storage="RowStore">
+                        <DefinedValues></DefinedValues>
+                        <Object Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Index="[IX_Requests_Status_Priority]" Alias="[r]" IndexKind="NonClustered" Storage="RowStore"></Object>
+                        <SeekPredicates>
+                          <SeekPredicateNew>
+                            <SeekKeys>
+                              <Prefix ScanType="EQ">
+                                <RangeColumns>
+                                  <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Status"></ColumnReference>
+                                  <ColumnReference Database="[RequestsDb]" Schema="[dbo]" Table="[Requests]" Alias="[r]" Column="Priority"></ColumnReference>
+                                </RangeColumns>
+                                <RangeExpressions>
+                                  <ScalarOperator ScalarString="[@__filter_Status_0]">
+                                    <Identifier>
+                                      <ColumnReference Column="@__filter_Status_0"></ColumnReference>
+                                    </Identifier>
+                                  </ScalarOperator>
+                                  <ScalarOperator ScalarString="[@__filter_Priority_1]">
+                                    <Identifier>
+                                      <ColumnReference Column="@__filter_Priority_1"></ColumnReference>
+                                    </Identifier>
+                                  </ScalarOperator>
+                                </RangeExpressions>
+                              </Prefix>
+                            </SeekKeys>
+                          </SeekPredicateNew>
+                        </SeekPredicates>
+                      </IndexScan>
+                    </RelOp>
+                  </StreamAggregate>
+                </RelOp>
+              </ComputeScalar>
+            </RelOp>
+            <ParameterList>
+              <ColumnReference Column="@__filter_Priority_1" ParameterDataType="tinyint" ParameterCompiledValue="(2)" ParameterRuntimeValue="(2)"></ColumnReference>
+              <ColumnReference Column="@__filter_Status_0" ParameterDataType="tinyint" ParameterCompiledValue="(0)" ParameterRuntimeValue="(0)"></ColumnReference>
+            </ParameterList>
+          </QueryPlan>
+        </StmtSimple>
+      </Statements>
+    </Batch>
+  </BatchSequence>
+</ShowPlanXML>

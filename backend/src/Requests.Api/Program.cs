@@ -15,7 +15,7 @@ builder.Services.AddDal(builder.Configuration);
 builder.Services.AddBl();
 builder.Services.AddOptions<CacheOptions>()
     .Bind(builder.Configuration.GetSection(CacheOptions.SectionName))
-    .Validate(options => options.StatsSeconds > 0, "Cache:StatsSeconds must be greater than 0.")
+    .Validate(options => options.StatsSeconds >= 0, "Cache:StatsSeconds must be 0 (disabled) or greater.")
     .ValidateOnStart();
 
 builder.Services.AddControllers()

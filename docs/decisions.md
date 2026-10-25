@@ -131,3 +131,20 @@
 - **Reason:** The stats are an expensive aggregate, identical for all users and read on every page load. Invalidation makes changes visible immediately. The absolute expiration bounds any staleness, including the race where a read that started before an update re-caches old values. A single instance needs nothing more.
 - **Multi-instance note:** Each instance has its own memory cache, so an invalidation would not reach the others. Switch `IStatsCache` to a Redis implementation (`IDistributedCache`) with pub/sub invalidation or versioned keys; no other code changes.
 - **Alternatives:** Redis from the start (unnecessary for a single instance).
+
+## 24. Indexes chosen by measured queries, not per column
+
+- **Decision:** Indexes on `Requests` are added only for queries that were measured with the exact SQL EF Core sends, and kept only if the actual execution plan of a measured query uses them: `IX_Requests_CreatedAt`, `IX_Requests_Status_CreatedAt`, `IX_Requests_AssignedTo`, `IX_Requests_OrganizationName`, `IX_Requests_Status_Priority` (see `docs/performance/README.md`).
+- **Reason:** Each index speeds up specific reads but slows every write and takes space (the five indexes take about as much space as the table, and the seeder's bulk insert went from ~8 s to ~13–16 s). An index per column would mostly not match the real `WHERE` + `ORDER BY` combinations.
+- **Alternatives:** One index per filterable column; indexes from the missing-index suggestions without measuring.
+
+## 25. No filtered index for open requests
+
+- **Decision:** No filtered index such as `(AssignedTo, CreatedAt DESC, Id DESC) WHERE Status <> 3`.
+- **Reason:** Measured with the query EF sends for `?status=InProgress&assignedTo=…`: SQL Server did not use it (2,030 reads, Clustered Index Scan), and the plan reports `UnmatchedIndexes` with reason `Parameterization`. A cached plan for `Status = @p` must be valid for every value, including `3`, so an index that only contains `Status <> 3` cannot be used. Only the same query with literals (which the API never sends) used it (117 reads). It would only add write cost.
+- **Alternatives:** Keep it and add `OPTION (RECOMPILE)` or literal SQL for that query (loses plan reuse; not worth it for this workload).
+
+## 26. Composite indexes include Id as the last key
+
+- **Decision:** Composite indexes for the list end with `CreatedAt DESC, Id DESC`, the exact `ORDER BY` of the list queries (decision 11: `Id` is the stable tie-breaker).
+- **Reason:** When the index order matches the whole `ORDER BY`, SQL Server reads the top rows of the page directly from the index and stops; there is no Sort operator (Q1-page: 2,134 → 70 reads). With `CreatedAt` alone, rows with equal `CreatedAt` would still need sorting by `Id`.
