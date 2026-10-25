@@ -35,6 +35,11 @@ public class RequestRepository : IRequestRepository
     public Task<Request?> GetForUpdateAsync(int id, CancellationToken ct) =>
         _db.Requests.FirstOrDefaultAsync(r => r.Id == id, ct);
 
+    public async Task<IReadOnlyDictionary<int, Request>> GetManyForUpdateAsync(IReadOnlyCollection<int> ids, CancellationToken ct) =>
+        await _db.Requests
+            .Where(r => ids.Contains(r.Id))
+            .ToDictionaryAsync(r => r.Id, ct);
+
     public async Task<bool> SaveStatusChangeAsync(
         Request request, byte[] expectedVersion, RequestStatus newStatus, string changedBy, CancellationToken ct)
     {

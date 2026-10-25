@@ -145,3 +145,60 @@ Content-Type: application/json
 ### History of a request, newest first
 GET {{host}}/api/requests/{{requestId}}/history
 Accept: application/json
+
+# ---------------------------------------------------------------------------------------------------------
+# Bulk status update (partial success). Copy real versions from GET requests first:
+#   @bulkValidId:      an InProgress request and its current version (expect Updated)
+#   999999:            does not exist (expect NotFound)
+#   @bulkStaleId:      any InProgress/Waiting request with an OLD version, e.g. one you changed above (expect Conflict)
+#   @bulkCompletedId:  a Completed request with its current version; Completed is final (expect InvalidTransition)
+# ---------------------------------------------------------------------------------------------------------
+@bulkValidId = 3
+@bulkValidVersion = AAAAAAAAB9E=
+@bulkStaleId = {{requestId}}
+@bulkStaleVersion = {{version}}
+@bulkCompletedId = 1
+@bulkCompletedVersion = AAAAAAADGCc=
+
+### Mixed bulk call (expect 200: succeeded 1, failed 3, results in input order)
+POST {{host}}/api/requests/bulk-status
+Content-Type: application/json
+X-User-Name: dana.levi
+
+{
+  "newStatus": "Completed",
+  "items": [
+    { "id": {{bulkValidId}}, "version": "{{bulkValidVersion}}" },
+    { "id": 999999, "version": "AAAAAAAAB9E=" },
+    { "id": {{bulkStaleId}}, "version": "{{bulkStaleVersion}}" },
+    { "id": {{bulkCompletedId}}, "version": "{{bulkCompletedVersion}}" }
+  ]
+}
+
+### Duplicate ids (expect 400, nothing changed)
+POST {{host}}/api/requests/bulk-status
+Content-Type: application/json
+
+{
+  "newStatus": "Completed",
+  "items": [
+    { "id": 5, "version": "AAAAAAAAB9E=" },
+    { "id": 5, "version": "AAAAAAAAB9E=" }
+  ]
+}
+
+### Empty list (expect 400)
+POST {{host}}/api/requests/bulk-status
+Content-Type: application/json
+
+{ "newStatus": "Completed", "items": [] }
+
+### 101 items (expect 400, nothing changed)
+# Too long to keep here; generate the body and send it with curl from bash:
+#   items=$(for i in $(seq 1 101); do printf '{"id":%d,"version":"AAAAAAAAB9E="},' "$i"; done)
+#   curl -i -X POST http://localhost:5000/api/requests/bulk-status -H "Content-Type: application/json" \
+#        -d "{\"newStatus\":\"Completed\",\"items\":[${items%,}]}"
+# or from PowerShell:
+#   $items = 1..101 | ForEach-Object { @{ id = $_; version = 'AAAAAAAAB9E=' } }
+#   Invoke-RestMethod -Method Post http://localhost:5000/api/requests/bulk-status -ContentType 'application/json' `
+#       -Body (@{ newStatus = 'Completed'; items = $items } | ConvertTo-Json)

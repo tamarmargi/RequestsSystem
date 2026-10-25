@@ -66,15 +66,15 @@ Oct 23, 2026 ·@tamar
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T5.1 | החלטה ונימוק | Partial Success: כשל של פנייה אחת לא חוסם את השאר; כל פריט נושא Version משלו | סעיף בתיעוד + דוגמת תגובה | T3.3 | 0.5 |
-| T5.2 | Endpoint Bulk | POST /api/requests/bulk-status, עד 100 מזהים ללא כפילויות, תוצאה לכל פריט (Updated, NotFound, Conflict, InvalidTransition) וסיכום | תגובה ברורה ללקוח, Audit לכל הצלחה | T5.1, T4.1 | 1.5 |
+| T5.1 | החלטה ונימוק ✓ הושלם | Partial Success: כשל של פנייה אחת לא חוסם את השאר; כל פריט נושא Version משלו | סעיף בתיעוד + דוגמת תגובה | T3.3 | 0.5 |
+| T5.2 | Endpoint Bulk ✓ הושלם | POST /api/requests/bulk-status, עד 100 מזהים ללא כפילויות, תוצאה לכל פריט (Updated, NotFound, Conflict, InvalidTransition) וסיכום | תגובה ברורה ללקוח, Audit לכל הצלחה | T5.1, T4.1 | 1.5 |
 
 ### E6 – Cache (1.5 ש')
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T6.1 | Cache לנתונים המסכמים | IMemoryCache מאחורי ממשק, Absolute Expiration של 60 שניות, Invalidation בכל עדכון בודד ו-Bulk | Cache עם Invalidation מוכח בבדיקה | T2.4, T3.2, T5.2 | 1 |
-| T6.2 | תכנון לריבוי מופעים | מעבר ל-IDistributedCache (Redis) והפצת Invalidation בין מופעים | סעיף בתיעוד | T6.1 | 0.5 |
+| T6.1 | Cache לנתונים המסכמים ✓ הושלם | IMemoryCache מאחורי ממשק, Absolute Expiration של 60 שניות, Invalidation בכל עדכון בודד ו-Bulk | Cache עם Invalidation מוכח בבדיקה | T2.4, T3.2, T5.2 | 1 |
+| T6.2 | תכנון לריבוי מופעים ✓ הושלם | מעבר ל-IDistributedCache (Redis) והפצת Invalidation בין מופעים | סעיף בתיעוד | T6.1 | 0.5 |
 
 ### E7 – Angular (8 ש')
 
@@ -97,7 +97,7 @@ Oct 23, 2026 ·@tamar
 | T8.2 | Unit – מעברי סטטוס ✓ הושלם | מעבר מותר ומעבר אסור | בדיקה עוברת | T3.1 | 0.5 |
 | T8.3 | Integration – שליפה וסינון ✓ הושלם | WebApplicationFactory מול SQL Server אמיתי (Testcontainers), בדיקת סינון, מיון ודפדוף | בדיקת API+DB | T2.5, T0.4 | 1.5 |
 | T8.4 | Integration – Concurrency ✓ הושלם | שני עדכונים שרצים במקביל באמת (Task.WhenAll) עם אותו Version: בדיוק אחד 200 ואחד 409; בדיקת Audit יחיד | בדיקה עוברת | T3.3, T8.3 | 1 |
-| T8.5 | Integration – Bulk | חלק קיים, חלק חסר, חלק בהתנגשות | בדיקה עוברת | T5.2, T8.3 | 1 |
+| T8.5 | Integration – Bulk ✓ הושלם | חלק קיים, חלק חסר, חלק בהתנגשות | בדיקה עוברת | T5.2, T8.3 | 1 |
 | T8.6 | Angular (אופציונלי) | בדיקת Debounce ו-switchMap ב-Service או ברכיב | – | T7.3 | 0.5 |
 
 ### E9 – ביצועים (3.5 ש')
@@ -167,5 +167,5 @@ Oct 23, 2026 ·@tamar
 - [x] Aggregations גלובליים ולא לפי פילטרים (מאפשר Cache)
 - [x] Cache ב-IMemoryCache ולא Redis (שרת יחיד; Redis מתועד לריבוי מופעים)
 - [x] Version בגוף הבקשה או בכותרת If-Match? — הוחלט: בגוף הבקשה (`version`), 409 באי-התאמה
-- [ ] קוד תגובה ל-Bulk: 200 עם תוצאה לכל פריט, או 207 Multi-Status?
+- [x] קוד תגובה ל-Bulk: 200 עם תוצאה לכל פריט, או 207 Multi-Status? — הוחלט: 200 עם תוצאה לכל פריט (207 נתמך גרוע בצד הלקוח)
 - [x] ChangedBy: משתמש מדומה מכותרת, או אימות בסיסי? — הוחלט: כותרת `X-User-Name` (ברירת מחדל "anonymous"), ללא אימות

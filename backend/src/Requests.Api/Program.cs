@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Requests.Api.ErrorHandling;
 using Requests.Api.Http;
 using Requests.BL;
+using Requests.BL.Caching;
 using Requests.DAL;
 using Requests.DAL.Seeding;
 
@@ -12,6 +13,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDal(builder.Configuration);
 builder.Services.AddBl();
+builder.Services.AddOptions<CacheOptions>()
+    .Bind(builder.Configuration.GetSection(CacheOptions.SectionName))
+    .Validate(options => options.StatsSeconds > 0, "Cache:StatsSeconds must be greater than 0.")
+    .ValidateOnStart();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

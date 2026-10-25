@@ -106,3 +106,28 @@
 
 - **Decision:** `AppDbContext` overrides `SaveChanges` / `SaveChangesAsync` and sets `UpdatedAt = DateTime.UtcNow` on every modified `Request`.
 - **Reason:** No code path can forget it. (The seeder uses `SqlBulkCopy`, bypasses `SaveChanges`, and is not affected.)
+
+## 20. Bulk update: partial success
+
+- **Decision:** `POST /api/requests/bulk-status` processes every item independently; a failed item never rolls back or blocks the others, and the response reports the outcome of each item.
+- **Reason:** The items are independent requests with their own versions. One conflict should not block 99 valid updates, and the client sees exactly what failed and can retry only those items.
+- **Alternatives:** All-or-nothing (one transaction for the whole batch).
+
+## 21. Bulk update: one transaction per item
+
+- **Decision:** All items are loaded with one query, then each successful item is saved with its own `SaveChanges` (its own transaction, including its history row). After a concurrency failure the repository detaches the failed request and its history row, so the next item is not affected.
+- **Reason:** With a single `SaveChanges` for the batch, one concurrency failure rolls back everything, which contradicts partial success.
+- **Alternatives:** A batched save with retry of the remaining entries after removing the failed ones; a set-based SQL update with `OUTPUT`.
+
+## 22. Bulk response: 200 with per-item results, not 207
+
+- **Decision:** A valid bulk request always returns `200` with `{ succeeded, failed, results }`, even if every item failed; `400` only for an invalid request.
+- **Reason:** `207 Multi-Status` comes from WebDAV and is poorly supported by clients; the body already carries all the detail.
+- **Alternatives:** `207 Multi-Status`.
+
+## 23. Cache: IMemoryCache behind IStatsCache, absolute expiration + explicit invalidation
+
+- **Decision:** Only the global stats are cached, in `IMemoryCache` behind the `IStatsCache` interface, with absolute expiration (60 s, configurable) and explicit invalidation after every successful single or bulk update (only after the save).
+- **Reason:** The stats are an expensive aggregate, identical for all users and read on every page load. Invalidation makes changes visible immediately. The absolute expiration bounds any staleness, including the race where a read that started before an update re-caches old values. A single instance needs nothing more.
+- **Multi-instance note:** Each instance has its own memory cache, so an invalidation would not reach the others. Switch `IStatsCache` to a Redis implementation (`IDistributedCache`) with pub/sub invalidation or versioned keys; no other code changes.
+- **Alternatives:** Redis from the start (unnecessary for a single instance).

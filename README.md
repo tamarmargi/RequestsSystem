@@ -131,6 +131,7 @@ Endpoints implemented so far (full specification in [docs/api-contract.md](docs/
 | `GET /api/requests/stats` | Counts over all requests: total, per status and per priority. |
 | `PATCH /api/requests/{id}/status` | Changes the status, with optimistic concurrency on `version` (see [Concurrency](#concurrency)). `200` updated request, `400` invalid body or transition, `404`, `409` with the current state. Optional `X-User-Name` header for the audit row. |
 | `GET /api/requests/{id}/history` | Status change history, newest first, or `404`. |
+| `POST /api/requests/bulk-status` | Changes the status of 1–100 requests with partial success (see [Bulk Update](#bulk-update)). `200` with a result per item whenever the request is valid; `400` for an invalid request (nothing changed). |
 | `GET /api/health` | Liveness check. |
 
 Enums are strings, dates are UTC ISO 8601, `version` is the Base64 `rowversion`, and every error is an
@@ -259,11 +260,73 @@ descending). It uses the existing index on `(RequestId, ChangedAt)`.
 
 ## Bulk Update
 
-TODO
+`POST /api/requests/bulk-status` changes the status of up to 100 requests in one call, with **partial
+success**: every item succeeds or fails on its own.
+
+**Why partial success?** The items are independent requests, each with its own version. One request that
+someone else changed in the meantime should not block 99 valid updates, and with all-or-nothing the user
+would have to fix and resend the whole batch without knowing which items were the problem. With partial
+success the client sees exactly what failed and why, and can retry only those items.
+
+**Two levels of errors:**
+
+- *Request-level* (`400` ValidationProblemDetails, nothing touched in the database): missing or unknown
+  `newStatus`, empty list, more than 100 items, duplicate ids, a `version` that is not Base64 of 8 bytes.
+- *Item-level* (inside a `200` response): `NotFound`, `Conflict` (stale version, or someone saved in between)
+  and `InvalidTransition` (with a message naming the current status, the requested one and the allowed targets).
+
+**How it runs.** All requests are loaded with **one query** (`WHERE Id IN (…)`). Then each item, in input
+order, goes through the same code as the single `PATCH`: exists → version → transition → save. Each
+successful item is saved with **its own `SaveChanges`, so its own transaction**, which writes the status
+change and its **audit history row** together (`ChangedBy` from `X-User-Name`). A save that fails because of
+a concurrency conflict detaches that request and its pending history row, so the next item in the same
+`DbContext` is not affected. The stats cache is invalidated once at the end, only if at least one item
+was updated.
+
+Example response (one item of each outcome, results in the order of the request):
+
+```json
+{
+  "succeeded": 1,
+  "failed": 3,
+  "results": [
+    { "id": 77048, "outcome": "Updated", "version": "AAAAAAAGKIo=" },
+    { "id": 999999, "outcome": "NotFound", "message": "Request 999999 does not exist." },
+    { "id": 4088, "outcome": "Conflict", "message": "The request was modified by another user." },
+    { "id": 49769, "outcome": "InvalidTransition", "message": "Cannot change status from Completed to Completed. Allowed from Completed: none (Completed is final)." }
+  ]
+}
+```
+
+**Why `200` and not `207 Multi-Status`?** `207` comes from WebDAV and is poorly supported by HTTP clients
+and tooling (many treat it as plain success anyway). The request itself was processed successfully, and the
+body already carries the outcome of every item, plus `succeeded` / `failed` counts.
 
 ## Cache
 
-TODO
+**What is cached:** only the stats (`GET /api/requests/stats`). They are an aggregate over the whole table,
+which is expensive. They are identical for all users and read on every page load, and a few seconds of
+staleness in summary counts is harmless. The list is not cached: with free-text search, filters, sorting
+and paging, almost every query is different, so the hit rate would be near zero.
+
+**How:** `IStatsCache` (BL) with the implementation `MemoryStatsCache` over `IMemoryCache`, registered as a
+singleton. It never captures scoped services: the factory that queries the database is passed in on every
+call. Expiration is **absolute**, 60 seconds by default (`Cache:StatsSeconds` in `appsettings.json`), so the
+stats are never older than that. Sliding expiration would keep a frequently read value alive forever.
+
+**Invalidation:** after every successful single status change, and after a bulk update when at least one
+item was updated. It happens **only after the save succeeded**, never before: invalidating first would let
+a concurrent read re-cache the old values before the change is committed. Hits, misses and invalidations
+are logged at Debug (enabled in `appsettings.Development.json`).
+
+**Known race:** a stats read that started *before* an update can finish *after* the invalidation and put the
+old values back in the cache. The absolute expiration bounds this: the stale value lives at most 60 seconds.
+
+**Multiple instances:** each instance would have its own memory cache, and an invalidation on one instance
+would not reach the others. The fix is a Redis implementation of `IStatsCache` (over `IDistributedCache`),
+plus either broadcasting the invalidation to all instances (e.g. Redis pub/sub) or versioned keys (a
+counter in Redis that is incremented on every change and is part of the cache key). Thanks to the interface,
+no other code changes.
 
 ## Performance
 
@@ -279,6 +342,13 @@ TODO
   client can send any name. In a real system it would come from the authenticated user (e.g. a claim of a
   validated JWT), not from a header the client controls. Header values must also be ASCII: browsers refuse
   header values with characters such as Hebrew letters.
+- **Bulk update saves each item separately**: up to 100 `SaveChanges` round trips (plus one reload per
+  save-time conflict). This keeps partial success simple and correct. A possible improvement is a single
+  batched save with per-entry conflict handling (detach the failed entries and retry the rest), or a
+  set-based SQL `UPDATE … WHERE Id = … AND RowVersion = …` with `OUTPUT` that returns which rows changed,
+  and writes the history rows in the same statement batch.
+- **Stats cache is per instance** (see [Cache](#cache)); running several API instances needs the Redis
+  implementation of `IStatsCache`.
 
 ## AI Usage
 

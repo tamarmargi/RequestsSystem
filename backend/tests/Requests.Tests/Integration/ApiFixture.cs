@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Requests.BL.Caching;
 using Requests.DAL;
 using Requests.DAL.Entities;
 using Requests.DAL.Seeding;
@@ -61,7 +62,16 @@ public sealed class ApiFixture : IAsyncLifetime
     /// <summary>
     /// Inserts a fresh request, so a test that changes data works on its own row and does not affect other tests.
     /// </summary>
-    public Task<Request> CreateRequestAsync(RequestStatus status) => QueryDbAsync(async db =>
+    public async Task<Request> CreateRequestAsync(RequestStatus status)
+    {
+        var request = await InsertRequestAsync(status);
+
+        // A direct database write bypasses the API, so the cached stats are dropped here, as the API does after its writes.
+        Factory.Services.GetRequiredService<IStatsCache>().Invalidate();
+        return request;
+    }
+
+    private Task<Request> InsertRequestAsync(RequestStatus status) => QueryDbAsync(async db =>
     {
         var created = DateTime.UtcNow.AddDays(-1);
         var request = new Request

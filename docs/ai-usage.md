@@ -59,3 +59,17 @@ This document records, per development step, which parts were generated with Cla
 ### Reviewed / decided manually
 
 - TODO: fill in by the developer
+
+## Step E – Bulk update and cache (T5.1–T6.2, T8.5)
+
+### Generated with Claude Code
+
+- DAL: `GetManyForUpdateAsync` (one `WHERE Id IN` query), and the documented clean-context behavior of `SaveStatusChangeAsync` after a failed save.
+- BL: `BulkUpdateStatusRequest` / `BulkItem`, `BulkUpdateResultDto` / `BulkItemResultDto` / `BulkOutcome`, `BulkUpdateStatusRequestValidator`, `BulkUpdateStatusAsync` (sharing the per-item checks with the single update); `IStatsCache`, `MemoryStatsCache`, `CacheOptions`, cache use in `RequestQueryService` and invalidation in `RequestCommandService`.
+- API: `POST /api/requests/bulk-status`, `CacheOptions` binding and validation, `Requests.http` examples.
+- Tests: `BulkUpdateStatusRequestValidatorTests`, `MemoryStatsCacheTests` (fake clock), `BulkUpdateTests` (mixed, failure in the middle, all valid, 400 cases, cache invalidation after PATCH and bulk), `RequestRepositoryTests` (clean context after a failed save).
+- Documentation: the bulk section of the API contract, the README sections Bulk Update and Cache, decisions 20–23.
+
+### Reviewed / decided manually
+
+- TODO: fill in by the developer

@@ -124,6 +124,10 @@ A single `RequestDto`.
 
 Global aggregations (not affected by list filters).
 
+The result is cached on the server for at most 60 seconds (`Cache:StatsSeconds`) and dropped after every
+successful status change through `PATCH …/status` or `POST …/bulk-status`, so changes made through the API
+are visible on the next call.
+
 ### Response `200 OK`
 
 ```json
@@ -285,18 +289,52 @@ Change the status of many requests in one call. **Partial success**: each item s
 
 | Field | Type | Rules |
 |---|---|---|
-| `newStatus` | `RequestStatus` | Required |
-| `items` | array of `{ id: integer, version: string }` | 1–100 items, no duplicate `id`s |
+| `newStatus` | `RequestStatus` | Required; the same target status for every item |
+| `items` | array of `{ id: integer, version: string }` | 1–100 items, no duplicate `id`s; each `version` is the one the client last received for that request |
+
+The optional `X-User-Name` header is stored as `changedBy` in the history row of every updated item (same
+rules as for `PATCH …/status`).
+
+### Request-level validation
+
+If any of these rules fails, the whole call is rejected with `400` ValidationProblemDetails and **nothing is
+touched in the database**:
+
+| Rule | Error key | Example message |
+|---|---|---|
+| `newStatus` is present and a known value | `newStatus` | `newStatus must be one of: New, InProgress, Waiting, Completed.` |
+| `items` is present and not empty | `items` | `items must contain at least one item.` |
+| at most 100 items | `items` | `items must contain at most 100 items.` |
+| no duplicate `id`s | `items` | `items must not contain duplicate ids: 5.` |
+| every `version` is valid Base64 of 8 bytes | `items[i].version` | `version must be the Base64 value received from the API.` |
+
+### Per-item processing and outcomes
+
+All requests are loaded with one query. Then each item, **in input order**, goes through the same checks, in
+the same order, as `PATCH …/status`, and a successful item is saved **in its own transaction** together with
+its history row. A failed item never rolls back the items saved before it, and does not prevent the items
+after it.
+
+| Outcome | When | Extra fields |
+|---|---|---|
+| `Updated` | The status was changed and a history row was written | `version`: the new version |
+| `NotFound` | No request with this `id` | `message` |
+| `Conflict` | `version` is out of date, or someone saved the request between the load and the save | `message` |
+| `InvalidTransition` | The transition from the current status to `newStatus` is not allowed (see the transitions table) | `message` naming the current status, the requested one and the allowed targets |
 
 ### Response `200 OK`
+
+Returned **whenever the request itself is valid**, even if every item failed.
 
 ```json
 {
   "succeeded": 1,
-  "failed": 1,
+  "failed": 3,
   "results": [
-    { "id": 1234, "outcome": "Updated" },
-    { "id": 1235, "outcome": "Conflict", "message": "The request was modified by another user." }
+    { "id": 77048, "outcome": "Updated", "version": "AAAAAAAGKIo=" },
+    { "id": 999999, "outcome": "NotFound", "message": "Request 999999 does not exist." },
+    { "id": 4088, "outcome": "Conflict", "message": "The request was modified by another user." },
+    { "id": 49769, "outcome": "InvalidTransition", "message": "Cannot change status from Completed to Completed. Allowed from Completed: none (Completed is final)." }
   ]
 }
 ```
@@ -307,16 +345,21 @@ Change the status of many requests in one call. **Partial success**: each item s
 | `failed` | integer | Number of other results |
 | `results[].id` | integer | |
 | `results[].outcome` | string | `Updated` \| `NotFound` \| `Conflict` \| `InvalidTransition` |
+| `results[].version` | string (Base64), optional | Present on `Updated`: the new version of the request |
 | `results[].message` | string, optional | Present on failures |
 
-`results` has one entry per item, in the order of the request.
+`results` has exactly one entry per item, **in the order of the request**. To retry a `Conflict`, the client
+reloads the request (`GET /api/requests/{id}`) to get its current state and version.
 
 ### Status codes
 
 | Code | When |
 |---|---|
-| 200 | The request was processed (even if some or all items failed — see `results`) |
-| 400 | The request itself is invalid: missing/unknown `newStatus`, 0 or more than 100 items, duplicate `id`s, invalid `version` — ProblemDetails |
+| 200 | The request was valid and processed (even if some or all items failed — see `results`) |
+| 400 | The request itself is invalid (rules above) — ValidationProblemDetails; nothing was changed |
+
+Why `200` and not `207 Multi-Status`: `207` comes from WebDAV and is poorly supported by HTTP clients; the
+body already carries the outcome of every item.
 
 ---
 

@@ -86,6 +86,17 @@ public class RequestsController : ControllerBase
         };
     }
 
+    /// <summary>
+    /// Changes the status of up to 100 requests. Partial success: each item succeeds or fails on its own, and the
+    /// response is 200 whenever the request itself is valid. ChangedBy comes from X-User-Name.
+    /// </summary>
+    [HttpPost("bulk-status")]
+    [Consumes("application/json")]
+    [ProducesResponseType(typeof(BulkUpdateResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<BulkUpdateResultDto>> BulkUpdateStatus(BulkUpdateStatusRequest body, CancellationToken ct) =>
+        Ok(await _commandService.BulkUpdateStatusAsync(body, _currentUser.UserName, ct));
+
     private ObjectResult ProblemResult(int statusCode, string title, string detail, RequestDto? current = null)
     {
         var problem = _problemDetailsFactory.CreateProblemDetails(HttpContext, statusCode, title, detail: detail);

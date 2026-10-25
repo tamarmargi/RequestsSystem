@@ -19,10 +19,19 @@ public interface IRequestRepository
     Task<Request?> GetForUpdateAsync(int id, CancellationToken ct);
 
     /// <summary>
+    /// The existing requests among <paramref name="ids"/> as tracked entities, loaded with a single query
+    /// (WHERE Id IN ...). Missing ids are simply absent from the result.
+    /// </summary>
+    Task<IReadOnlyDictionary<int, Request>> GetManyForUpdateAsync(IReadOnlyCollection<int> ids, CancellationToken ct);
+
+    /// <summary>
     /// Changes the status of a tracked request and adds its history row, in a single transaction. The UPDATE only
     /// succeeds if the row still has <paramref name="expectedVersion"/>.
     /// </summary>
-    /// <returns>false if the request was changed or deleted by someone else in the meantime (nothing is saved).</returns>
+    /// <returns>
+    /// false if the request was changed or deleted by someone else in the meantime. Nothing is saved, and the
+    /// request and its pending history row are detached, so a later save in the same context is not affected.
+    /// </returns>
     Task<bool> SaveStatusChangeAsync(
         Request request, byte[] expectedVersion, RequestStatus newStatus, string changedBy, CancellationToken ct);
 

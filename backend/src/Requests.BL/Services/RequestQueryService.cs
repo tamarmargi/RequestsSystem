@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using Requests.BL.Caching;
 using Requests.BL.Dtos;
 using Requests.BL.Mapping;
 using Requests.DAL.Repositories;
@@ -12,15 +13,18 @@ public class RequestQueryService : IRequestQueryService
 {
     private readonly IRequestRepository _repository;
     private readonly IValidator<RequestQueryParameters> _validator;
+    private readonly IStatsCache _statsCache;
     private readonly ILogger<RequestQueryService> _logger;
 
     public RequestQueryService(
         IRequestRepository repository,
         IValidator<RequestQueryParameters> validator,
+        IStatsCache statsCache,
         ILogger<RequestQueryService> logger)
     {
         _repository = repository;
         _validator = validator;
+        _statsCache = statsCache;
         _logger = logger;
     }
 
@@ -69,13 +73,14 @@ public class RequestQueryService : IRequestQueryService
         return history.Select(h => h.ToDto()).ToList();
     }
 
-    public async Task<RequestStatsDto> GetStatsAsync(CancellationToken ct)
-    {
-        var stopwatch = Stopwatch.StartNew();
-        var stats = await _repository.GetStatsAsync(ct);
-        _logger.LogInformation("Request stats computed in {ElapsedMs} ms", stopwatch.ElapsedMilliseconds);
-        return stats.ToDto();
-    }
+    public Task<RequestStatsDto> GetStatsAsync(CancellationToken ct) =>
+        _statsCache.GetOrCreateAsync(async () =>
+        {
+            var stopwatch = Stopwatch.StartNew();
+            var stats = await _repository.GetStatsAsync(ct);
+            _logger.LogInformation("Request stats computed in {ElapsedMs} ms", stopwatch.ElapsedMilliseconds);
+            return stats.ToDto();
+        });
 
     private static RequestFilter ToFilter(RequestQueryParameters p) => new()
     {

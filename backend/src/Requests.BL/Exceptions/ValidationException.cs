@@ -19,6 +19,7 @@ public class ValidationException : Exception
             .GroupBy(e => ToCamelCase(e.PropertyName))
             .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray()));
 
+    // Each segment of a path: "Items[0].Version" -> "items[0].version".
     private static string ToCamelCase(string name) =>
-        string.IsNullOrEmpty(name) ? name : char.ToLowerInvariant(name[0]) + name[1..];
+        string.Join('.', name.Split('.').Select(s => s.Length == 0 ? s : char.ToLowerInvariant(s[0]) + s[1..]));
 }
