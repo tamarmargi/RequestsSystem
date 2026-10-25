@@ -29,9 +29,7 @@ public class RequestQueryService : IRequestQueryService
         var validation = await _validator.ValidateAsync(parameters, ct);
         if (!validation.IsValid)
         {
-            throw new ValidationException(validation.Errors
-                .GroupBy(e => ToCamelCase(e.PropertyName))
-                .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray()));
+            throw ValidationException.From(validation);
         }
 
         var filter = ToFilter(parameters);
@@ -58,6 +56,17 @@ public class RequestQueryService : IRequestQueryService
     {
         var request = await _repository.GetByIdAsync(id, ct);
         return request?.ToDto();
+    }
+
+    public async Task<IReadOnlyList<RequestHistoryItemDto>?> GetHistoryAsync(int id, CancellationToken ct)
+    {
+        if (!await _repository.ExistsAsync(id, ct))
+        {
+            return null;
+        }
+
+        var history = await _repository.GetHistoryAsync(id, ct);
+        return history.Select(h => h.ToDto()).ToList();
     }
 
     public async Task<RequestStatsDto> GetStatsAsync(CancellationToken ct)
@@ -90,7 +99,4 @@ public class RequestQueryService : IRequestQueryService
         string.IsNullOrWhiteSpace(sortBy) ? SortField.CreatedAt : Enum.Parse<SortField>(sortBy.Trim(), ignoreCase: true);
 
     private static string? NullIfBlank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-
-    private static string ToCamelCase(string name) =>
-        string.IsNullOrEmpty(name) ? name : char.ToLowerInvariant(name[0]) + name[1..];
 }

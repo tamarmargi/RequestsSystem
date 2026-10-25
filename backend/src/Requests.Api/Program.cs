@@ -1,7 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Requests.Api.ErrorHandling;
+using Requests.Api.Http;
 using Requests.BL;
 using Requests.DAL;
 using Requests.DAL.Seeding;
@@ -12,17 +14,31 @@ builder.Services.AddDal(builder.Configuration);
 builder.Services.AddBl();
 
 builder.Services.AddControllers()
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        // Generic "The input was not valid." instead of serializer messages that name internal types.
+        options.AllowInputFormatterExceptionMessages = false;
+    })
     .ConfigureApiBehaviorOptions(options =>
     {
-        // Binding errors (e.g. status=Banana) use the same camelCase field names as the BL validation errors.
+        // Binding errors (e.g. status=Banana in the query or the body) use the same camelCase field names as the
+        // BL validation errors: "$.newStatus" -> "newStatus", "Status" -> "status".
         var defaultFactory = options.InvalidModelStateResponseFactory;
         options.InvalidModelStateResponseFactory = context =>
         {
             var result = (ObjectResult)defaultFactory(context);
             if (result.Value is ValidationProblemDetails problem)
             {
-                var errors = problem.Errors.ToDictionary(e => JsonNamingPolicy.CamelCase.ConvertName(e.Key), e => e.Value);
+                // An unreadable body also adds "The body field is required." under the parameter name; it only
+                // repeats the real error, so it is dropped when there is one.
+                var bodyParameters = context.ActionDescriptor.Parameters
+                    .Where(p => p.BindingInfo?.BindingSource == BindingSource.Body)
+                    .Select(p => p.Name)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var errors = problem.Errors
+                    .Where(e => !(bodyParameters.Contains(e.Key) && problem.Errors.Count > 1))
+                    .ToDictionary(e => JsonNamingPolicy.CamelCase.ConvertName(e.Key.TrimStart('$', '.')), e => e.Value);
                 problem.Errors.Clear();
                 foreach (var (key, messages) in errors)
                 {
@@ -33,6 +49,8 @@ builder.Services.AddControllers()
             return result;
         };
     });
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<CurrentUserAccessor>();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddEndpointsApiExplorer();

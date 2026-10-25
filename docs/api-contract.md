@@ -146,7 +146,9 @@ Every enum value is always present as a key (`0` when there are no requests in i
 
 ## GET /api/requests/{id}/history
 
-Status change history of one request, **newest first**.
+Status change history of one request, **newest first** (ordered by `changedAt` descending; rows with the same
+`changedAt` by insertion order, newest first). Every successful `PATCH …/status` adds exactly one row, in the
+same transaction as the change. Rows from the seeded test data have `changedBy: "system"` for the first step.
 
 ### Response `200 OK`
 
@@ -179,6 +181,12 @@ A request that was never changed returns `200` with `[]`.
 
 Change the status of one request, with optimistic concurrency.
 
+### Headers
+
+| Header | Required | Notes |
+|---|---|---|
+| `X-User-Name` | No | Stored as `changedBy` in the history row. Trimmed and cut to 100 characters; missing or empty → `"anonymous"`. Use ASCII values: browsers refuse header values with characters such as Hebrew letters. There is no authentication yet. |
+
 ### Body
 
 ```json
@@ -188,7 +196,33 @@ Change the status of one request, with optimistic concurrency.
 | Field | Type | Rules |
 |---|---|---|
 | `newStatus` | `RequestStatus` | Required; the transition from the current status must be allowed |
-| `version` | string (Base64) | Required; the `version` the client last received for this request |
+| `version` | string (Base64) | Required; the `version` the client last received for this request (Base64 of 8 bytes) |
+
+### Allowed transitions
+
+| From | Allowed to |
+|---|---|
+| `New` | `InProgress` |
+| `InProgress` | `Waiting`, `Completed` |
+| `Waiting` | `InProgress`, `Completed` |
+| `Completed` | – (final) |
+
+Changing a status to itself is not allowed.
+
+### Order of checks
+
+The checks run in this order; the first one that fails decides the response.
+
+| # | Check | Failure |
+|---|---|---|
+| 1 | Body is valid (`newStatus` is a known value, `version` is present and valid Base64 of 8 bytes) | `400` ValidationProblemDetails with `errors` |
+| 2 | The request exists | `404` ProblemDetails |
+| 3 | `version` equals the current version | `409` with `current` |
+| 4 | The transition is allowed (table above) | `400` ProblemDetails, title `Invalid status transition` |
+| 5 | Save: the database `UPDATE` matches the row only if the version is still the same | `409` with `current` (someone saved between check 3 and the save) |
+
+The version check (3) comes before the transition rule (4): when the client's data is stale, a transition
+error would be misleading; the current state is the actionable answer.
 
 ### Response `200 OK`
 
@@ -199,23 +233,37 @@ The updated `RequestDto` (with the new `status`, `updatedAt` and `version`).
 | Code | When |
 |---|---|
 | 200 | Updated |
-| 400 | Invalid body (missing/unknown `newStatus`, missing or non-Base64 `version`), or the transition is not allowed — ProblemDetails |
+| 400 | Invalid body (missing/unknown `newStatus`, missing or malformed `version`) — ValidationProblemDetails with `errors`; or the transition is not allowed — ProblemDetails with `detail` |
 | 404 | No request with this `id` |
 | 409 | Conflict: `version` does not match (someone else changed the request). ProblemDetails with the current state under `current` |
+
+`400` body for a transition that is not allowed:
+
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+  "title": "Invalid status transition",
+  "status": 400,
+  "detail": "Cannot change status from Completed to New. Allowed from Completed: none (Completed is final).",
+  "traceId": "00-e95ece38406873d03e0f6057b82fa307-a7e95ff184c582fc-00"
+}
+```
 
 `409` body:
 
 ```json
 {
   "type": "https://tools.ietf.org/html/rfc9110#section-15.5.10",
-  "title": "The request was modified by another user.",
+  "title": "The request was modified by another user",
   "status": 409,
-  "detail": "The version you sent is out of date.",
-  "current": { "id": 1234, "title": "...", "organizationName": "...", "status": "Waiting", "priority": "High", "assignedTo": "דנה לוי", "createdAt": "...", "updatedAt": "2026-03-06T08:00:00Z", "version": "AAAAAAAAB+A=" }
+  "detail": "The version you sent is out of date. See 'current' for the latest state.",
+  "traceId": "00-e9f7592e727e40d68f2de36682aa029a-ee2d12f315ca83ec-00",
+  "current": { "id": 4088, "title": "...", "organizationName": "Galil Systems Ltd", "status": "Waiting", "priority": "Low", "assignedTo": "יעל ברק", "createdAt": "2024-10-01T01:15:48Z", "updatedAt": "2026-10-25T00:15:46.9581555Z", "version": "AAAAAAAGKIc=" }
 }
 ```
 
-`current` is a `RequestDto`. The client may retry with `current.version`.
+`current` is a `RequestDto`. The client should show the user the current state and, if the user still wants
+the change, send it again with `current.version`.
 
 ---
 

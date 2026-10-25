@@ -104,11 +104,13 @@ public class RequestsApiTests
     }
 
     [Fact]
-    public async Task Stats_TotalEqualsSeededCount_AndStatusCountsSumToTotal()
+    public async Task Stats_TotalEqualsRequestCount_AndStatusCountsSumToTotal()
     {
         var stats = await _fixture.Client.GetFromJsonAsync<RequestStatsDto>("/api/requests/stats", ApiFixture.Json);
 
-        stats!.Total.Should().Be(ApiFixture.SeededRequestCount);
+        // Other integration tests add their own requests, so compare with the database instead of the seeded count.
+        var requestCount = await _fixture.QueryDbAsync(db => db.Requests.CountAsync());
+        stats!.Total.Should().Be(requestCount).And.BeGreaterThanOrEqualTo(ApiFixture.SeededRequestCount);
         (stats.ByStatus.New + stats.ByStatus.InProgress + stats.ByStatus.Waiting + stats.ByStatus.Completed)
             .Should().Be(stats.Total);
         (stats.ByPriority.Low + stats.ByPriority.Medium + stats.ByPriority.High).Should().Be(stats.Total);

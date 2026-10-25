@@ -45,3 +45,17 @@ This document records, per development step, which parts were generated with Cla
 ### Reviewed / decided manually
 
 - TODO: fill in by the developer
+
+## Step D – Status update, concurrency and audit (T3.1–T4.2, T8.2, T8.4)
+
+### Generated with Claude Code
+
+- BL: `StatusTransitions`, `UpdateStatusRequest`, `RequestHistoryItemDto`, `UpdateStatusRequestValidator`, `UpdateStatusResult`, `IRequestCommandService` / `RequestCommandService`, history in `RequestQueryService`.
+- DAL: `UpdatedAt` in `AppDbContext.SaveChanges`, `GetForUpdateAsync`, `SaveStatusChangeAsync` (original RowVersion + history row in one transaction), `GetHistoryAsync`, `ExistsAsync`.
+- API: `CurrentUserAccessor` (`X-User-Name`), `PATCH …/status` and `GET …/history` in `RequestsController`, cleaner binding errors, `Requests.http` examples.
+- Tests: `StatusTransitionsTests` (all 16 pairs), `UpdateStatusRequestValidatorTests`, `StatusUpdateTests` (success, anonymous, stale version, parallel `Task.WhenAll`, invalid transition, 404, history order).
+- Documentation: Concurrency and Audit history in the README, the PATCH and history sections of the API contract, decisions 15–19.
+
+### Reviewed / decided manually
+
+- TODO: fill in by the developer

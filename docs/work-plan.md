@@ -50,17 +50,17 @@ Oct 23, 2026 ·@tamar
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T3.1 | מעברי סטטוס | הגדרת מעברים מותרים (למשל Completed סופי), שירות בדיקה | מחלקה ב-BL עם בדיקות יחידה | T1.1 | 0.5 |
-| T3.2 | Endpoint עדכון סטטוס | PATCH /api/requests/{id}/status עם Version בגוף או ב-If-Match; 404 לפנייה חסרה, 400/422 לסטטוס או מעבר לא חוקי | Endpoint עם קודי HTTP מתועדים | T3.1, T2.6 | 1.5 |
-| T3.3 | Optimistic Concurrency | rowversion כ-Concurrency Token, תפיסת DbUpdateConcurrencyException והחזרת 409 עם המצב העדכני | עדכון מתחרה נדחה ב-DB, לא רק ב-UI | T3.2, T1.2 | 1 |
-| T3.4 | עדכון UpdatedAt עקבי | SaveChanges Interceptor שמעדכן UpdatedAt בכל שינוי | אין עדכון שמדלג על UpdatedAt | T1.2 | 0.5 |
+| T3.1 | מעברי סטטוס ✓ הושלם | הגדרת מעברים מותרים (למשל Completed סופי), שירות בדיקה | מחלקה ב-BL עם בדיקות יחידה | T1.1 | 0.5 |
+| T3.2 | Endpoint עדכון סטטוס ✓ הושלם | PATCH /api/requests/{id}/status עם Version בגוף או ב-If-Match; 404 לפנייה חסרה, 400/422 לסטטוס או מעבר לא חוקי | Endpoint עם קודי HTTP מתועדים | T3.1, T2.6 | 1.5 |
+| T3.3 | Optimistic Concurrency ✓ הושלם | rowversion כ-Concurrency Token, תפיסת DbUpdateConcurrencyException והחזרת 409 עם המצב העדכני | עדכון מתחרה נדחה ב-DB, לא רק ב-UI | T3.2, T1.2 | 1 |
+| T3.4 | עדכון UpdatedAt עקבי ✓ הושלם | SaveChanges Interceptor שמעדכן UpdatedAt בכל שינוי | אין עדכון שמדלג על UpdatedAt | T1.2 | 0.5 |
 
 ### E4 – היסטוריית שינויים (1 ש')
 
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
-| T4.1 | שמירת Audit | רשומה עם RequestId, PreviousStatus, NewStatus, ChangedAt, ChangedBy באותה טרנזקציה של העדכון | אין עדכון בלי Audit ולהפך | T3.3 | 0.5 |
-| T4.2 | Endpoint היסטוריה | GET /api/requests/{id}/history ממוין לפי זמן, אינדקס על RequestId+ChangedAt | Endpoint פעיל | T4.1 | 0.5 |
+| T4.1 | שמירת Audit ✓ הושלם | רשומה עם RequestId, PreviousStatus, NewStatus, ChangedAt, ChangedBy באותה טרנזקציה של העדכון | אין עדכון בלי Audit ולהפך | T3.3 | 0.5 |
+| T4.2 | Endpoint היסטוריה ✓ הושלם | GET /api/requests/{id}/history ממוין לפי זמן, אינדקס על RequestId+ChangedAt | Endpoint פעיל | T4.1 | 0.5 |
 
 ### E5 – עדכון Bulk (2 ש')
 
@@ -94,9 +94,9 @@ Oct 23, 2026 ·@tamar
 | מזהה | משימה | מה נדרש | תוצר | תלוי ב- | ש' |
 | --- | --- | --- | --- | --- | --- |
 | T8.1 | Unit – Validation ✓ הושלם | פרמטרים שגויים נדחים (PageSize, מיון, תאריכים) | בדיקה עוברת | T2.2 | 0.5 |
-| T8.2 | Unit – מעברי סטטוס | מעבר מותר ומעבר אסור | בדיקה עוברת | T3.1 | 0.5 |
+| T8.2 | Unit – מעברי סטטוס ✓ הושלם | מעבר מותר ומעבר אסור | בדיקה עוברת | T3.1 | 0.5 |
 | T8.3 | Integration – שליפה וסינון ✓ הושלם | WebApplicationFactory מול SQL Server אמיתי (Testcontainers), בדיקת סינון, מיון ודפדוף | בדיקת API+DB | T2.5, T0.4 | 1.5 |
-| T8.4 | Integration – Concurrency | שני עדכונים שרצים במקביל באמת (Task.WhenAll) עם אותו Version: בדיוק אחד 200 ואחד 409; בדיקת Audit יחיד | בדיקה עוברת | T3.3, T8.3 | 1 |
+| T8.4 | Integration – Concurrency ✓ הושלם | שני עדכונים שרצים במקביל באמת (Task.WhenAll) עם אותו Version: בדיוק אחד 200 ואחד 409; בדיקת Audit יחיד | בדיקה עוברת | T3.3, T8.3 | 1 |
 | T8.5 | Integration – Bulk | חלק קיים, חלק חסר, חלק בהתנגשות | בדיקה עוברת | T5.2, T8.3 | 1 |
 | T8.6 | Angular (אופציונלי) | בדיקת Debounce ו-switchMap ב-Service או ברכיב | – | T7.3 | 0.5 |
 
@@ -166,6 +166,6 @@ Oct 23, 2026 ·@tamar
 
 - [x] Aggregations גלובליים ולא לפי פילטרים (מאפשר Cache)
 - [x] Cache ב-IMemoryCache ולא Redis (שרת יחיד; Redis מתועד לריבוי מופעים)
-- [ ] Version בגוף הבקשה או בכותרת If-Match?
+- [x] Version בגוף הבקשה או בכותרת If-Match? — הוחלט: בגוף הבקשה (`version`), 409 באי-התאמה
 - [ ] קוד תגובה ל-Bulk: 200 עם תוצאה לכל פריט, או 207 Multi-Status?
-- [ ] ChangedBy: משתמש מדומה מכותרת, או אימות בסיסי?
+- [x] ChangedBy: משתמש מדומה מכותרת, או אימות בסיסי? — הוחלט: כותרת `X-User-Name` (ברירת מחדל "anonymous"), ללא אימות

@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Requests.DAL;
+using Requests.DAL.Entities;
 using Requests.DAL.Seeding;
 using Testcontainers.MsSql;
 
@@ -56,6 +57,27 @@ public sealed class ApiFixture : IAsyncLifetime
         await Factory.DisposeAsync();
         await _sqlServer.DisposeAsync();
     }
+
+    /// <summary>
+    /// Inserts a fresh request, so a test that changes data works on its own row and does not affect other tests.
+    /// </summary>
+    public Task<Request> CreateRequestAsync(RequestStatus status) => QueryDbAsync(async db =>
+    {
+        var created = DateTime.UtcNow.AddDays(-1);
+        var request = new Request
+        {
+            Title = "Integration test request",
+            OrganizationName = "Integration Tests Ltd",
+            Status = status,
+            Priority = RequestPriority.Medium,
+            AssignedTo = status == RequestStatus.New ? null : "test-handler",
+            CreatedAt = created,
+            UpdatedAt = created
+        };
+        db.Requests.Add(request);
+        await db.SaveChangesAsync();
+        return request;
+    });
 
     /// <summary>Runs <paramref name="query"/> directly against the test database.</summary>
     public async Task<T> QueryDbAsync<T>(Func<AppDbContext, Task<T>> query)

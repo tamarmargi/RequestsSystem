@@ -11,4 +11,7 @@ public interface IRequestQueryService
     Task<RequestDto?> GetByIdAsync(int id, CancellationToken ct);
 
     Task<RequestStatsDto> GetStatsAsync(CancellationToken ct);
+
+    /// <summary>Status changes newest first, or null if the request does not exist.</summary>
+    Task<IReadOnlyList<RequestHistoryItemDto>?> GetHistoryAsync(int id, CancellationToken ct);
 }

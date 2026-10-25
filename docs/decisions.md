@@ -80,3 +80,29 @@
 
 - **Decision:** Query parameters are validated with FluentValidation in the BL service, which throws an HTTP-agnostic `ValidationException`; `GlobalExceptionHandler` in the API maps it to `400 ValidationProblemDetails`. Model-binding errors (e.g. `status=Banana`) use the same format and camelCase field names.
 - **Reason:** The rules live with the business logic and stay independent of HTTP; all error responses are uniform ProblemDetails.
+
+## 15. Status transition rules
+
+- **Decision:** `New → InProgress`; `InProgress → Waiting | Completed`; `Waiting → InProgress | Completed`; `Completed` is final; changing a status to itself is not allowed. Implemented as a static, pure class (`StatusTransitions`) in the BL.
+- **Reason:** A simple workflow that is easy to explain and test. `Completed` is final so finished work cannot be reopened silently. The rules are consistent with the history paths of the seeded data (every seeded transition is allowed; `Waiting → Completed` is allowed but does not occur in the seed).
+
+## 16. Version in the request body rather than If-Match
+
+- **Decision:** The client sends the concurrency token as `version` in the JSON body of `PATCH …/status`; a mismatch returns `409 Conflict`.
+- **Reason:** Simpler for the client and for tests, explicit in the contract, and the same shape works per item in the bulk endpoint.
+- **Alternatives:** ETag / `If-Match` header with `412 Precondition Failed`.
+
+## 17. Conflict is checked before the transition rule
+
+- **Decision:** The version is compared before the transition rule is checked.
+- **Reason:** When the client's data is stale, a transition error would be misleading (the transition may be valid from the real current status, or the request may already be in the target status). `409` with the current state is the actionable answer.
+
+## 18. Result objects instead of exceptions for expected outcomes
+
+- **Decision:** `UpdateStatusAsync` returns a closed set of results (`Success`, `NotFound`, `Conflict`, `InvalidTransition`); the controller maps each one to an HTTP response explicitly. `DbUpdateConcurrencyException` is caught in the DAL and turned into `false`.
+- **Reason:** Not found, conflict and invalid transition are normal business outcomes, not errors; returning them keeps the flow visible and the HTTP mapping in one place. Exceptions are kept for invalid input (`ValidationException`) and unexpected errors.
+
+## 19. UpdatedAt set centrally in SaveChanges
+
+- **Decision:** `AppDbContext` overrides `SaveChanges` / `SaveChangesAsync` and sets `UpdatedAt = DateTime.UtcNow` on every modified `Request`.
+- **Reason:** No code path can forget it. (The seeder uses `SqlBulkCopy`, bypasses `SaveChanges`, and is not affected.)

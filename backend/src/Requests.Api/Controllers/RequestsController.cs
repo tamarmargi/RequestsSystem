@@ -1,19 +1,32 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Requests.Api.Http;
 using Requests.BL.Dtos;
+using Requests.BL.Results;
 using Requests.BL.Services;
 
 namespace Requests.Api.Controllers;
 
 [ApiController]
 [Route("api/requests")]
-[Produces("application/json")]
+// No controller-level [Produces("application/json")]: it would override application/problem+json on error responses.
 public class RequestsController : ControllerBase
 {
     private readonly IRequestQueryService _queryService;
+    private readonly IRequestCommandService _commandService;
+    private readonly CurrentUserAccessor _currentUser;
+    private readonly ProblemDetailsFactory _problemDetailsFactory;
 
-    public RequestsController(IRequestQueryService queryService)
+    public RequestsController(
+        IRequestQueryService queryService,
+        IRequestCommandService commandService,
+        CurrentUserAccessor currentUser,
+        ProblemDetailsFactory problemDetailsFactory)
     {
         _queryService = queryService;
+        _commandService = commandService;
+        _currentUser = currentUser;
+        _problemDetailsFactory = problemDetailsFactory;
     }
 
     /// <summary>Paged, filtered and sorted list of requests.</summary>
@@ -37,5 +50,54 @@ public class RequestsController : ControllerBase
     {
         var request = await _queryService.GetByIdAsync(id, ct);
         return request is null ? NotFound() : Ok(request);
+    }
+
+    /// <summary>Status change history, newest first.</summary>
+    [HttpGet("{id:int}/history")]
+    [ProducesResponseType(typeof(IReadOnlyList<RequestHistoryItemDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<RequestHistoryItemDto>>> GetHistory(int id, CancellationToken ct)
+    {
+        var history = await _queryService.GetHistoryAsync(id, ct);
+        return history is null ? NotFound() : Ok(history);
+    }
+
+    /// <summary>Changes the status, with optimistic concurrency on <c>version</c>. ChangedBy comes from X-User-Name.</summary>
+    [HttpPatch("{id:int}/status")]
+    [Consumes("application/json")]
+    [ProducesResponseType(typeof(RequestDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<RequestDto>> UpdateStatus(int id, UpdateStatusRequest body, CancellationToken ct)
+    {
+        var result = await _commandService.UpdateStatusAsync(id, body, _currentUser.UserName, ct);
+
+        return result switch
+        {
+            UpdateStatusResult.Success success => Ok(success.Request),
+            UpdateStatusResult.NotFound => NotFound(),
+            UpdateStatusResult.InvalidTransition invalid =>
+                ProblemResult(StatusCodes.Status400BadRequest, "Invalid status transition", invalid.Message),
+            UpdateStatusResult.Conflict conflict =>
+                ProblemResult(StatusCodes.Status409Conflict, "The request was modified by another user",
+                    "The version you sent is out of date. See 'current' for the latest state.", conflict.Current),
+            _ => throw new InvalidOperationException($"Unhandled result {result.GetType().Name}.")
+        };
+    }
+
+    private ObjectResult ProblemResult(int statusCode, string title, string detail, RequestDto? current = null)
+    {
+        var problem = _problemDetailsFactory.CreateProblemDetails(HttpContext, statusCode, title, detail: detail);
+        if (current is not null)
+        {
+            problem.Extensions["current"] = current;
+        }
+
+        return new ObjectResult(problem)
+        {
+            StatusCode = statusCode,
+            ContentTypes = { "application/problem+json" }
+        };
     }
 }

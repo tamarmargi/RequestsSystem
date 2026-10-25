@@ -49,5 +49,8 @@ public class GlobalExceptionHandlerTests : IClassFixture<WebApplicationFactory<P
         public Task<RequestDto?> GetByIdAsync(int id, CancellationToken ct) => throw new InvalidOperationException(SecretMessage);
 
         public Task<RequestStatsDto> GetStatsAsync(CancellationToken ct) => throw new InvalidOperationException(SecretMessage);
+
+        public Task<IReadOnlyList<RequestHistoryItemDto>?> GetHistoryAsync(int id, CancellationToken ct) =>
+            throw new InvalidOperationException(SecretMessage);
     }
 }

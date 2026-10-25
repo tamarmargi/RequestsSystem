@@ -91,3 +91,57 @@ Accept: application/json
 ### Stats over all requests
 GET {{host}}/api/requests/stats
 Accept: application/json
+
+# ---------------------------------------------------------------------------------------------------------
+# Status update. First GET the request and copy its "version" into @version below; the client must always
+# send the version it last saw. Request 1 is Completed in the seeded data, so use an open request, e.g. from
+# GET {{host}}/api/requests?status=InProgress&pageSize=1
+# ---------------------------------------------------------------------------------------------------------
+@requestId = 2
+@version = AAAAAAAAB9E=
+
+### Get the current state (copy "version" from the response)
+GET {{host}}/api/requests/{{requestId}}
+Accept: application/json
+
+### Successful status change (expect 200 with the new status and a new version)
+PATCH {{host}}/api/requests/{{requestId}}/status
+Content-Type: application/json
+X-User-Name: dana.levi
+
+{ "newStatus": "Waiting", "version": "{{version}}" }
+
+### The same request again with the old version (expect 409 with "current")
+PATCH {{host}}/api/requests/{{requestId}}/status
+Content-Type: application/json
+X-User-Name: dana.levi
+
+{ "newStatus": "Completed", "version": "{{version}}" }
+
+### Invalid transition: Completed -> New (request 1 is Completed; copy its version first; expect 400)
+PATCH {{host}}/api/requests/1/status
+Content-Type: application/json
+
+{ "newStatus": "New", "version": "AAAAAAADGCc=" }
+
+### Invalid status value (expect 400)
+PATCH {{host}}/api/requests/{{requestId}}/status
+Content-Type: application/json
+
+{ "newStatus": "Banana", "version": "{{version}}" }
+
+### Malformed version (expect 400)
+PATCH {{host}}/api/requests/{{requestId}}/status
+Content-Type: application/json
+
+{ "newStatus": "Waiting", "version": "not-a-version" }
+
+### Non-existing id (expect 404)
+PATCH {{host}}/api/requests/999999/status
+Content-Type: application/json
+
+{ "newStatus": "InProgress", "version": "AAAAAAAAB9E=" }
+
+### History of a request, newest first
+GET {{host}}/api/requests/{{requestId}}/history
+Accept: application/json

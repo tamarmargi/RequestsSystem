@@ -10,6 +10,7 @@ public static class DependencyInjection
     {
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
         services.AddScoped<IRequestQueryService, RequestQueryService>();
+        services.AddScoped<IRequestCommandService, RequestCommandService>();
 
         return services;
     }

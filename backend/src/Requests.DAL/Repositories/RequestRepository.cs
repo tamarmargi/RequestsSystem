@@ -29,6 +29,54 @@ public class RequestRepository : IRequestRepository
     public Task<Request?> GetByIdAsync(int id, CancellationToken ct) =>
         _db.Requests.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id, ct);
 
+    public Task<bool> ExistsAsync(int id, CancellationToken ct) =>
+        _db.Requests.AnyAsync(r => r.Id == id, ct);
+
+    public Task<Request?> GetForUpdateAsync(int id, CancellationToken ct) =>
+        _db.Requests.FirstOrDefaultAsync(r => r.Id == id, ct);
+
+    public async Task<bool> SaveStatusChangeAsync(
+        Request request, byte[] expectedVersion, RequestStatus newStatus, string changedBy, CancellationToken ct)
+    {
+        var requestEntry = _db.Entry(request);
+
+        // EF puts the original RowVersion into the WHERE clause of the UPDATE: the database itself rejects a stale version.
+        requestEntry.Property(r => r.RowVersion).OriginalValue = expectedVersion;
+
+        var history = new RequestStatusHistory
+        {
+            RequestId = request.Id,
+            PreviousStatus = request.Status,
+            NewStatus = newStatus,
+            ChangedAt = DateTime.UtcNow,
+            ChangedBy = changedBy
+        };
+        request.Status = newStatus;
+        var historyEntry = _db.RequestStatusHistory.Add(history);
+
+        try
+        {
+            // One SaveChanges = one transaction for the UPDATE and the history INSERT.
+            await _db.SaveChangesAsync(ct);
+            return true;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // Leave the context clean: nothing from the failed attempt may be saved by a later SaveChanges.
+            historyEntry.State = EntityState.Detached;
+            requestEntry.State = EntityState.Detached;
+            return false;
+        }
+    }
+
+    public async Task<IReadOnlyList<RequestStatusHistory>> GetHistoryAsync(int requestId, CancellationToken ct) =>
+        await _db.RequestStatusHistory
+            .AsNoTracking()
+            .Where(h => h.RequestId == requestId)
+            .OrderByDescending(h => h.ChangedAt)
+            .ThenByDescending(h => h.Id)
+            .ToListAsync(ct);
+
     public async Task<RequestStats> GetStatsAsync(CancellationToken ct)
     {
         // Grouping by a constant gives one group over the whole table: a single SELECT with conditional COUNTs.
