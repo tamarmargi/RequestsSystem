@@ -1,0 +1,91 @@
+<app-page-header [userName]="currentUser.userName()" (editUserName)="editUserName()" />
+
+<main class="main">
+  <div class="title-row">
+    <div>
+      <h1 class="title-row__title">פניות</h1>
+      <p class="title-row__subtitle">ניהול, סינון ועדכון סטטוס של פניות מארגונים ומעסיקים</p>
+    </div>
+    <button type="button" class="btn btn--secondary btn--compact" (click)="refreshAll()">
+      <app-icon name="refresh" />
+      רענון
+    </button>
+  </div>
+
+  @if (stats$ | async; as stats) {
+    <app-stats-cards [state]="stats" />
+  }
+
+  <div class="layout">
+    <app-requests-filters class="layout__sidebar" [form]="state.filtersForm" (clearAll)="state.clearFilters()" />
+
+    @if (vm$ | async; as vm) {
+      <section class="content" aria-label="רשימת פניות" [attr.aria-busy]="vm.status === 'loading'">
+        <div class="toolbar">
+          <div class="toolbar__row">
+            <label for="q" class="visually-hidden">חיפוש</label>
+            <div class="search">
+              <app-icon name="search" [size]="18" class="search__icon" />
+              <input
+                id="q"
+                type="search"
+                class="input search__input"
+                placeholder="חיפוש בכותרת או בשם הארגון"
+                autocomplete="off"
+                [formControl]="state.searchControl"
+              />
+            </div>
+            <div class="count muted" role="status">
+              @if (vm.status === 'ready' || vm.refreshing) {
+                נמצאו <strong class="count__value">{{ vm.totalCount | number }}</strong> פניות
+              }
+            </div>
+          </div>
+          <app-active-filters [query]="vm.query" (remove)="state.removeFilter($event)" />
+        </div>
+
+        @if (state.selectedIds().size > 0) {
+          <app-bulk-action-bar
+            [count]="state.selectedIds().size"
+            [busy]="bulkBusy()"
+            (apply)="applyBulk($event, vm.items)"
+            (clearSelection)="state.clearSelection()"
+          />
+        }
+
+        <div class="progress">
+          @if (vm.refreshing) {
+            <mat-progress-bar mode="indeterminate" aria-label="מרענן את הרשימה" />
+          }
+        </div>
+
+        @if (vm.status === 'error') {
+          <app-list-state kind="error" [error]="vm.error" (retry)="state.refresh()" />
+        } @else if (vm.status === 'loading' && !vm.refreshing) {
+          <app-list-state kind="loading" [rows]="vm.query.pageSize > 20 ? 12 : 8" />
+        } @else if (vm.items.length === 0) {
+          <app-list-state kind="empty" (clearFilters)="state.clearFilters()" />
+        } @else {
+          <app-requests-table
+            [items]="vm.items"
+            [selectedIds]="state.selectedIds()"
+            [sortBy]="vm.query.sortBy"
+            [sortDirection]="vm.query.sortDirection"
+            (sortChange)="state.setSort($event.sortBy, $event.sortDirection)"
+            (toggleRow)="state.toggleSelection($event)"
+            (togglePage)="state.setPageSelection(vm.items, $event)"
+            (changeStatus)="openStatusDialog($event, vm.loadedAt)"
+            (showHistory)="openHistory($event)"
+          />
+          <app-requests-paginator
+            [page]="vm.query.page"
+            [pageSize]="vm.query.pageSize"
+            [totalCount]="vm.totalCount"
+            (pageChange)="state.setPage($event)"
+            (pageSizeChange)="state.setPageSize($event)"
+          />
+        }
+      </section>
+    }
+  </div>
+</main>

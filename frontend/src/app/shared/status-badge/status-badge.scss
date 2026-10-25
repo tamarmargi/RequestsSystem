@@ -1,0 +1,58 @@
+:host {
+  display: inline-flex;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--badge-padding-block) var(--space-10);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-13);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-base);
+  white-space: nowrap;
+}
+
+.badge__dot {
+  width: var(--status-dot-size);
+  height: var(--status-dot-size);
+  border-radius: 50%;
+  flex: none;
+}
+
+.status--new {
+  background: var(--color-status-new-bg);
+  color: var(--color-status-new-text);
+
+  .badge__dot {
+    background: var(--color-status-new-dot);
+  }
+}
+
+.status--in-progress {
+  background: var(--color-status-in-progress-bg);
+  color: var(--color-status-in-progress-text);
+
+  .badge__dot {
+    background: var(--color-status-in-progress-dot);
+  }
+}
+
+.status--waiting {
+  background: var(--color-status-waiting-bg);
+  color: var(--color-status-waiting-text);
+
+  .badge__dot {
+    background: var(--color-status-waiting-dot);
+  }
+}
+
+.status--completed {
+  background: var(--color-status-completed-bg);
+  color: var(--color-status-completed-text);
+
+  .badge__dot {
+    background: var(--color-status-completed-dot);
+  }
+}

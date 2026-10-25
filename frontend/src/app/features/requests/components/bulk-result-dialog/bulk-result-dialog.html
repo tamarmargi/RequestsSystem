@@ -1,0 +1,40 @@
+<div class="dialog__header">
+  <div>
+    <h2 mat-dialog-title class="dialog__title">תוצאת העדכון</h2>
+    <p class="dialog__subtitle">{{ rows.length }} פניות לסטטוס "{{ statusLabel }}"</p>
+  </div>
+</div>
+
+<div class="summary">
+  <div class="summary__card summary__card--ok">
+    <div class="summary__count">{{ data.result.succeeded }}</div>
+    <div class="summary__label">עודכנו בהצלחה</div>
+  </div>
+  <div class="summary__card summary__card--failed">
+    <div class="summary__count">{{ data.result.failed }}</div>
+    <div class="summary__label">לא עודכנו</div>
+  </div>
+</div>
+
+<ul class="rows" aria-label="תוצאה לכל פנייה">
+  @for (row of rows; track row.id) {
+    <li class="row">
+      <div>
+        <strong>{{ row.id }}</strong>
+        @if (row.message) {
+          <span class="muted"> · {{ row.message }}</span>
+        }
+      </div>
+      <span class="outcome" [class]="row.cssClass">{{ row.label }}</span>
+    </li>
+  }
+</ul>
+
+<div class="dialog__actions">
+  <button type="button" class="btn btn--primary" [mat-dialog-close]="close">סגירה</button>
+  @if (data.result.failed > 0) {
+    <button type="button" class="btn btn--secondary" [mat-dialog-close]="reloadFailed">
+      טעינה מחדש של הפניות שלא עודכנו
+    </button>
+  }
+</div>

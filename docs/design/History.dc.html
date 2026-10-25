@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>היסטוריית שינויים</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#007A3D}a:hover{color:#005F2F}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:500;white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+.s-new{background:#E8EFFD;color:#1D4ED8}.s-new .dot{background:#1D4ED8}
+.s-prog{background:#FEF1DF;color:#9A5200}.s-prog .dot{background:#F29219}
+.s-wait{background:#F0EAFB;color:#6A3DB5}.s-wait .dot{background:#6A3DB5}
+.s-done{background:#E9EEEB;color:#3D4943}.s-done .dot{background:#5B6660}
+.step{position:relative;padding:0 28px 22px 0}
+.step::before{content:"";position:absolute;right:6px;top:18px;bottom:0;width:2px;background:#DDE3DF}
+.step:last-child::before{display:none}
+.knob{position:absolute;right:0;top:4px;width:14px;height:14px;border-radius:50%;background:#FFFFFF;border:3px solid #007A3D;box-sizing:border-box}
+</style>
+</helmet>
+<div dir="rtl" style="width: 480px; height: 780px; box-sizing: border-box; background: #FFFFFF; border-inline-start: 1px solid #DDE3DF; box-shadow: 0 12px 32px rgba(27, 36, 32, 0.14); display: flex; flex-direction: column; font-family: 'Heebo', system-ui, sans-serif; color: #1B2420">
+<div style="padding: 20px 24px; border-bottom: 1px solid #EDF0EE; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+<div>
+<h2 style="margin: 0; font-size: 18px; font-weight: 700">היסטוריית שינויים</h2>
+<p style="margin: 4px 0 0; font-size: 14px; color: #5B6660">פנייה 48143 · תלונה על שירות לקוי</p>
+</div>
+<button type="button" aria-label="סגירה" style="width: 36px; height: 36px; border: 0; background: transparent; border-radius: 8px; color: #3D4943; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div style="padding: 16px 24px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; font-size: 13px; border-bottom: 1px solid #EDF0EE">
+<div><div style="color: #5B6660">ארגון</div><div style="font-weight: 500; margin-top: 2px">עמותת אקים</div></div>
+<div><div style="color: #5B6660">סטטוס נוכחי</div><div style="margin-top: 4px"><span class="badge s-done"><span class="dot"></span>הושלמה</span></div></div>
+<div><div style="color: #5B6660">נוצרה</div><div style="font-weight: 500; margin-top: 2px">17.09.2026</div></div>
+<div><div style="color: #5B6660">מטפל</div><div style="font-weight: 500; margin-top: 2px">[שם המטפל]</div></div>
+</div>
+<ol style="list-style: none; margin: 0; padding: 22px 24px; flex: 1; overflow: auto">
+<li class="step">
+<span class="knob"></span>
+<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+<span class="badge s-prog"><span class="dot"></span>בטיפול</span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6660" stroke-width="2" stroke-linecap="round" role="img" aria-label="אל"><path d="M15 6l-6 6 6 6"></path></svg>
+<span class="badge s-done"><span class="dot"></span>הושלמה</span>
+</div>
+<div style="font-size: 13px; color: #5B6660; margin-top: 6px">24.09.2026 · 16:40 · [שם המטפל]</div>
+</li>
+<li class="step">
+<span class="knob" style="border-color: #CDD5D0"></span>
+<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+<span class="badge s-wait"><span class="dot"></span>ממתינה</span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6660" stroke-width="2" stroke-linecap="round" role="img" aria-label="אל"><path d="M15 6l-6 6 6 6"></path></svg>
+<span class="badge s-prog"><span class="dot"></span>בטיפול</span>
+</div>
+<div style="font-size: 13px; color: #5B6660; margin-top: 6px">22.09.2026 · 10:15 · [שם המטפל]</div>
+</li>
+<li class="step">
+<span class="knob" style="border-color: #CDD5D0"></span>
+<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+<span class="badge s-prog"><span class="dot"></span>בטיפול</span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6660" stroke-width="2" stroke-linecap="round" role="img" aria-label="אל"><path d="M15 6l-6 6 6 6"></path></svg>
+<span class="badge s-wait"><span class="dot"></span>ממתינה</span>
+</div>
+<div style="font-size: 13px; color: #5B6660; margin-top: 6px">19.09.2026 · 13:02 · [שם המטפל]</div>
+</li>
+<li class="step">
+<span class="knob" style="border-color: #CDD5D0"></span>
+<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+<span class="badge s-new"><span class="dot"></span>חדשה</span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6660" stroke-width="2" stroke-linecap="round" role="img" aria-label="אל"><path d="M15 6l-6 6 6 6"></path></svg>
+<span class="badge s-prog"><span class="dot"></span>בטיפול</span>
+</div>
+<div style="font-size: 13px; color: #5B6660; margin-top: 6px">17.09.2026 · 09:30 · system</div>
+</li>
+</ol>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":480,"height":780}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+// Shared control classes (buttons, fields, utilities), styled from the tokens as in docs/design.
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+// Buttons ---------------------------------------------------------------------------------------------
+
+.btn {
+  height: var(--control-height);
+  padding: 0 var(--space-18);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-medium);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:focus-visible {
+    outline: var(--border-width-strong) solid var(--color-primary);
+    outline-offset: var(--border-width-strong);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+}
+
+.btn--primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: var(--font-weight-semibold);
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+  }
+}
+
+.btn--secondary {
+  background: var(--color-surface);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+
+  &:hover:not(:disabled) {
+    background: var(--color-surface-muted);
+  }
+}
+
+.btn--outline-primary {
+  background: var(--color-surface);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary-selected);
+  }
+}
+
+.btn--compact {
+  padding: 0 var(--space-16);
+}
+
+.btn--link {
+  height: auto;
+  padding: var(--space-6) var(--space-4);
+  border: 0;
+  background: transparent;
+  color: var(--color-primary);
+
+  &:hover:not(:disabled) {
+    color: var(--color-primary-hover);
+    text-decoration: underline;
+  }
+}
+
+.icon-btn {
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--color-surface-muted);
+    border-color: var(--color-border-strong);
+  }
+
+  &:focus-visible {
+    outline: var(--border-width-strong) solid var(--color-primary);
+    outline-offset: var(--border-width);
+  }
+}
+
+.icon-btn--ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+// Fields ----------------------------------------------------------------------------------------------
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.field__label {
+  font-size: var(--font-size-13);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-strong);
+}
+
+.input,
+.select {
+  width: 100%;
+  box-sizing: border-box;
+  height: var(--control-height);
+  border: var(--border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-12);
+  font: inherit;
+  font-size: var(--font-size-14);
+  color: var(--color-text);
+  background: var(--color-surface);
+
+  &:focus-visible {
+    outline: var(--border-width-strong) solid var(--color-primary);
+    outline-offset: calc(-1 * var(--border-width));
+    border-color: var(--color-primary);
+  }
+
+  &[aria-invalid='true'] {
+    border-color: var(--color-danger);
+  }
+}
+
+.field__error {
+  margin: 0;
+  font-size: var(--font-size-13);
+  line-height: var(--line-height-base);
+  color: var(--color-danger);
+}

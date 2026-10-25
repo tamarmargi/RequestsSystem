@@ -26,13 +26,16 @@ RequestsSystem/
 ├── frontend/                  # Angular 21 client (see frontend/README.md)
 │   ├── proxy.conf.json        # dev proxy: /api → http://localhost:5000
 │   └── src/
-│       ├── styles/            # design tokens (_tokens.scss) used by all component styles
+│       ├── styles/            # design tokens (_tokens.scss), shared control and dialog styles
 │       └── app/
 │           ├── models/        # TypeScript types matching docs/api-contract.md
-│           ├── services/      # HTTP clients (RequestsApiService, HealthService)
-│           ├── core/          # cross-cutting code: ApiError, error interceptor
-│           └── features/      # UI by feature (requests/requests-page)
-├── docs/                      # Technical decisions and work plan
+│           ├── services/      # HTTP client (RequestsApiService)
+│           ├── core/          # cross-cutting: ApiError, error and X-User-Name interceptors, current user
+│           ├── shared/        # labels, transitions, StatusBadge, PriorityLabel, icons, date helpers
+│           └── features/
+│               └── requests/  # RequestsListState, RequestStatusActions, components/ (page, table, dialogs…)
+├── docs/                      # Technical decisions, work plan, API contract, performance report
+│   └── design/                # UI design from Claude Design (*.dc.html, reference only)
 ├── .config/                   # Local .NET tools manifest (dotnet-ef)
 └── docker-compose.yml         # Local SQL Server 2022
 ```
@@ -74,8 +77,8 @@ npm install
 npm start
 ```
 
-Then open http://localhost:4200. The dev server proxies `/api` to the API on port 5000; the page
-shows "השרת זמין" when the API is reachable.
+Then open http://localhost:4200 (the API must be running). The dev server proxies `/api` to the API on
+port 5000. See [Frontend](#frontend).
 
 To run the tests, see [Running tests](#running-tests).
 
@@ -140,6 +143,98 @@ RFC 7807 ProblemDetails (`400` responses include an `errors` object keyed by the
 [backend/src/Requests.Api/Requests.http](backend/src/Requests.Api/Requests.http) contains runnable
 examples for every endpoint, including invalid input (open it in VS Code with the REST Client extension,
 or in Visual Studio / Rider).
+
+## Frontend
+
+Angular 21 (standalone, zoneless) + Angular Material, Hebrew RTL UI, in [frontend/](frontend/README.md).
+
+![מסך הפניות](docs/images/requests-page.png)
+
+| Requirement | How the screen does it |
+|---|---|
+| Server-side search, filter, sort, paging | Every change builds a query for `GET /api/requests`; only the current page (20/50/100 rows) is loaded, never all rows. Sortable columns: created, updated, priority, title, organization. |
+| Debounce | Search, organization and handler inputs: `debounceTime(300)` + `distinctUntilChanged` — typing "בנק" sends one request. |
+| Request cancellation | `switchMap`: a newer query aborts the request in flight (shown as *canceled* in the network log); a stale response can never replace a newer one. |
+| Loading / empty / error states | Skeleton rows; "לא נמצאו פניות…" with "ניקוי כל המסננים"; error with "ניסיון חוזר" that tells "server unreachable" apart from other errors. Refreshing after an update keeps the rows and shows a thin progress bar. |
+| Status update with 409 handling | Status dialog with only the allowed targets; on `409` a conflict dialog (see [Conflict handling in the UI](#conflict-handling-in-the-ui)). |
+| Stats | Cards for the total (with priority breakdown) and per status (count and share), reloaded after every successful update. |
+| History | Side panel with the request summary and a timeline, newest first. |
+| Bulk | Row selection (current page), target status, per-item result dialog; "טעינה מחדש של הפניות שלא עודכנו" keeps the failed items selected. |
+| Shareable state | The query is kept in the URL (`?status=Waiting&sortBy=priority…`), so refresh and links keep it. |
+
+Run: start the API, then `cd frontend && npm install && npm start` and open http://localhost:4200.
+Tests: `cd frontend && npm test` (Vitest, single headless run).
+
+### Frontend architecture
+
+- **Container vs presentational components.** `requests-page` is the only container: it injects the state and
+  the actions, opens dialogs, and passes data down. `stats-cards`, `requests-filters`, `active-filters`,
+  `bulk-action-bar`, `requests-table`, `requests-paginator` and `list-state` only take inputs and emit outputs.
+- **`RequestsListState`** (provided in the page, so it lives and dies with it) owns the search `FormControl`,
+  the filters `FormGroup`, the selection, and three streams:
+
+  ```
+  search / org / handler  → trim → debounceTime(300) → distinctUntilChanged ┐
+  status / priority / dates (date range validated) ─────────────────────────┤ → scan(reducer) → distinctUntilChanged
+  sort / page / page size / clear-all / remove-chip commands ───────────────┘       (any criteria change → page 1)
+      → query$ ─┬→ URL (replaceUrl)
+                └→ switchMap(getRequests) → map(ready) / catchError(error) / startWith(loading) → vm$
+  refresh() ───────→ (same query) ─┘
+  ```
+
+  The inputs are folded by a `scan` reducer (rather than a plain `combineLatest`) so that multi-field changes
+  such as "clear all" and the reset to page 1 are **one** query, never a request that is immediately
+  cancelled. `catchError` is inside the `switchMap`, per request, so an error never ends the stream. The
+  stats are a separate stream, reloaded after every successful update.
+- **Why no NgRx:** one screen with local state; a component-level service with RxJS is enough
+  ([decision 27](docs/decisions.md)).
+- **`RequestStatusActions`** holds the update flows (single, conflict, bulk) and their side effects
+  (snackbar, list and stats refresh), so the components stay simple and the flow is unit-tested.
+- **Errors:** the HTTP interceptor turns every failure into an `ApiError` and rethrows it; it never shows
+  messages. `400` shows the server's `detail` in a snackbar, `404` on update shows "הפנייה לא נמצאה" and
+  refreshes, and the list shows the error state. A `5xx` without a ProblemDetails body (the dev proxy when the
+  API is down) counts as "server unreachable".
+- **Current user:** the user chip in the header edits the name (kept in `localStorage`). An interceptor sends
+  it on every `/api` request as `X-User-Name`, percent-encoded because browsers refuse Hebrew header values;
+  the API decodes it and stores it as `changedBy` ([decision 32](docs/decisions.md)).
+
+### Conflict handling in the UI
+
+![התנגשות](docs/images/conflict.png)
+
+1. The user opens "שינוי סטטוס" on a row; the dialog shows the current status and only the allowed targets.
+2. The client sends `PATCH /api/requests/{id}/status` with the `version` of the row it loaded.
+3. If someone changed the request in the meantime, the server answers `409` with the current state under
+   `current`. Nothing was saved.
+4. The conflict dialog shows **"השינוי שלך"** (the attempted status, and when the user's version was loaded)
+   next to **"המצב הנוכחי בשרת"** (`current.status`). It loads the request history and shows who made the
+   winning change and how long ago (newest history entry, e.g. "עודכן על ידי דנה לוי, לפני 12 שניות").
+5. The user decides:
+   - **"השארת השינוי של המשתמש האחר"** — nothing is sent; the row is updated with `current`.
+   - **"עדכון בכל זאת"** — the change is sent again with `current.version`. If the transition is not allowed
+     from the current status (or it already has that status), the button is disabled and the note explains why.
+     Another `409` opens the dialog again.
+6. After a successful update the list and the stats are refreshed (the user stays on the same page) and a
+   short snackbar confirms it.
+
+### Design
+
+The screens were designed in **Claude Design** ([docs/design](docs/design), 6 screens: Main, StatusDialog,
+Conflict, History, BulkResult, States) and implemented with Angular components and Angular Material.
+
+- **Colors** are taken from the leaves of the Ministry of Environmental Protection logo — green `#007A3D`
+  and orange `#F29219` — without using the logo itself. All values are design tokens (CSS custom properties)
+  in [`_tokens.scss`](frontend/src/styles/_tokens.scss); components use only `var(--token)`, and the Material
+  theme (buttons, checkboxes, dialogs, snackbar, table, progress bar) is mapped to the same tokens.
+- **Typography:** Heebo (Hebrew), sizes 12–30 px.
+- **Accessibility:**
+  - Status meaning never depends on color alone: every badge has a dot **and** a text label, priorities are words.
+  - Text colors meet contrast on their backgrounds; the orange is **never used as text on white** — only as
+    a surface with dark text (the bulk "החלה" button), the 4px header stripe, or a status dot.
+  - Real buttons and labels for every input, `aria-label` on icon buttons, dialogs with titles (the conflict
+    dialog is an `alertdialog`), focus moves to the dialog title and returns to the triggering button on close,
+    `aria-live` for the result count and loading states.
+  - The layout stacks on narrow screens; the wide table scrolls inside its own box, never the page.
 
 ## Running tests
 
@@ -386,8 +481,10 @@ TODO
 
 - **`ChangedBy` comes from a client header (`X-User-Name`)**, because there is no authentication. Any
   client can send any name. In a real system it would come from the authenticated user (e.g. a claim of a
-  validated JWT), not from a header the client controls. Header values must also be ASCII: browsers refuse
-  header values with characters such as Hebrew letters.
+  validated JWT), not from a header the client controls. Because browsers refuse non-ASCII header values,
+  the client percent-encodes the name and the API decodes it ([decision 32](docs/decisions.md)).
+- **Date filters use UTC days**, while the table shows local dates: a request created on 05.09 at 01:00
+  Israel time (04.09 22:00 UTC) is shown as 05.09 but matches the filter day 04.09.
 - **Bulk update saves each item separately**: up to 100 `SaveChanges` round trips (plus one reload per
   save-time conflict). This keeps partial success simple and correct. A possible improvement is a single
   batched save with per-entry conflict handling (detach the failed entries and retry the rest), or a

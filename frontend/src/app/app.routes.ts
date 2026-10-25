@@ -1,8 +1,11 @@
 import { Routes } from '@angular/router';
 
-import { RequestsPage } from './features/requests/requests-page/requests-page';
-
 export const routes: Routes = [
-  { path: '', component: RequestsPage, title: 'ניהול פניות' },
+  {
+    path: '',
+    loadComponent: () =>
+      import('./features/requests/components/requests-page/requests-page').then((m) => m.RequestsPage),
+    title: 'ניהול פניות',
+  },
   { path: '**', redirectTo: '' },
 ];

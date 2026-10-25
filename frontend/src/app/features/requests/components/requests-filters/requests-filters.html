@@ -1,0 +1,66 @@
+<aside class="filters" aria-label="סינון" [formGroup]="form()">
+  <div class="filters__header">
+    <h2 class="filters__title">סינון</h2>
+    <button type="button" class="btn btn--link" (click)="clearAll.emit()">ניקוי הכל</button>
+  </div>
+
+  <div class="field">
+    <label class="field__label" for="f-status">סטטוס</label>
+    <select id="f-status" class="select" formControlName="status">
+      <option [ngValue]="null">הכל</option>
+      @for (status of statuses; track status) {
+        <option [ngValue]="status">{{ statusLabels[status] }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="field">
+    <label class="field__label" for="f-priority">עדיפות</label>
+    <select id="f-priority" class="select" formControlName="priority">
+      <option [ngValue]="null">הכל</option>
+      @for (priority of priorities; track priority) {
+        <option [ngValue]="priority">{{ priorityLabels[priority] }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="field">
+    <label class="field__label" for="f-org">ארגון</label>
+    <input id="f-org" class="input" type="text" placeholder="שם הארגון המלא" formControlName="organizationName" />
+  </div>
+
+  <div class="field">
+    <label class="field__label" for="f-assignee">מטפל</label>
+    <input id="f-assignee" class="input" type="text" placeholder="שם המטפל" formControlName="assignedTo" />
+  </div>
+
+  <div class="dates">
+    <div class="field">
+      <label class="field__label" for="f-from">מתאריך</label>
+      <input
+        id="f-from"
+        class="input"
+        type="date"
+        formControlName="createdFrom"
+        [attr.aria-invalid]="form().hasError('dateRange')"
+        aria-describedby="f-dates-error"
+      />
+    </div>
+    <div class="field">
+      <label class="field__label" for="f-to">עד תאריך</label>
+      <input
+        id="f-to"
+        class="input"
+        type="date"
+        formControlName="createdTo"
+        [attr.aria-invalid]="form().hasError('dateRange')"
+        aria-describedby="f-dates-error"
+      />
+    </div>
+  </div>
+  <div id="f-dates-error" aria-live="polite">
+    @if (form().hasError('dateRange')) {
+      <p class="field__error">תאריך ההתחלה חייב להיות לפני תאריך הסיום או שווה לו. הסינון לפי תאריכים לא הוחל.</p>
+    }
+  </div>
+</aside>

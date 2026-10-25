@@ -23,8 +23,16 @@ public sealed class CurrentUserAccessor
     {
         get
         {
-            var value = _httpContextAccessor.HttpContext?.Request.Headers[HeaderName].ToString().Trim();
-            if (string.IsNullOrEmpty(value))
+            var raw = _httpContextAccessor.HttpContext?.Request.Headers[HeaderName].ToString();
+            if (string.IsNullOrEmpty(raw))
+            {
+                return Anonymous;
+            }
+
+            // Browsers refuse non-ASCII header values (e.g. Hebrew names), so the client sends the value
+            // percent-encoded (encodeURIComponent). Invalid escape sequences are left as they are.
+            var value = Uri.UnescapeDataString(raw).Trim();
+            if (value.Length == 0)
             {
                 return Anonymous;
             }

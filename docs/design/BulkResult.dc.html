@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>תוצאת עדכון מרובה</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#007A3D}a:hover{color:#005F2F}
+.out{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:500;white-space:nowrap}
+.o-ok{background:#E3F2E9;color:#005F2F}
+.o-conf{background:#FEF1DF;color:#9A5200}
+.o-nf{background:#E9EEEB;color:#3D4943}
+.o-inv{background:#FDECEA;color:#B42318}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #EDF0EE;font-size:14px}
+</style>
+</helmet>
+<div dir="rtl" style="width: 640px; height: 640px; box-sizing: border-box; background: rgba(27, 36, 32, 0.45); display: flex; align-items: center; justify-content: center; font-family: 'Heebo', system-ui, sans-serif; color: #1B2420">
+<div role="dialog" aria-labelledby="br-title" style="width: 540px; background: #FFFFFF; border-radius: 14px; box-shadow: 0 12px 32px rgba(27, 36, 32, 0.18); display: flex; flex-direction: column">
+<div style="padding: 20px 24px 0">
+<h2 id="br-title" style="margin: 0; font-size: 18px; font-weight: 700">תוצאת העדכון</h2>
+<p style="margin: 4px 0 0; font-size: 14px; color: #5B6660">4 פניות לסטטוס "הושלמה"</p>
+</div>
+<div style="padding: 16px 24px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<div style="background: #E3F2E9; border-radius: 10px; padding: 12px 16px"><div style="font-size: 26px; font-weight: 700; color: #005F2F">1</div><div style="font-size: 13px; color: #005F2F; font-weight: 500">עודכנו בהצלחה</div></div>
+<div style="background: #FEF1DF; border-radius: 10px; padding: 12px 16px"><div style="font-size: 26px; font-weight: 700; color: #9A5200">3</div><div style="font-size: 13px; color: #9A5200; font-weight: 500">לא עודכנו</div></div>
+</div>
+<div style="padding: 8px 24px 0">
+<div class="row"><div><strong>48176</strong> <span style="color: #5B6660">· בקשה להארכת מועד הגשה</span></div><span class="out o-ok">עודכנה</span></div>
+<div class="row"><div><strong>48188</strong> <span style="color: #5B6660">· עודכנה בינתיים על ידי משתמש אחר</span></div><span class="out o-conf">התנגשות</span></div>
+<div class="row"><div><strong>48151</strong> <span style="color: #5B6660">· לא ניתן לעבור מ"חדשה" ל"הושלמה"</span></div><span class="out o-inv">מעבר לא מותר</span></div>
+<div class="row" style="border-bottom: 0"><div><strong>99999</strong> <span style="color: #5B6660">· הפנייה לא נמצאה</span></div><span class="out o-nf">לא נמצאה</span></div>
+</div>
+<div style="padding: 16px 24px; border-top: 1px solid #EDF0EE; display: flex; gap: 10px; flex-wrap: wrap">
+<button type="button" style="height: 40px; padding: 0 18px; border: 0; border-radius: 8px; background: #007A3D; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">סגירה</button>
+<button type="button" style="height: 40px; padding: 0 18px; border: 1px solid #CDD5D0; border-radius: 8px; background: #FFFFFF; color: #1B2420; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer">טעינה מחדש של הפניות שלא עודכנו</button>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":640,"height":640}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

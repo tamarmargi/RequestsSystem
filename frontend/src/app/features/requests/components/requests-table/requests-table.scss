@@ -1,0 +1,63 @@
+// A wide table scrolls horizontally inside its box. position: relative makes the box the containing block of
+// absolutely positioned descendants (visually-hidden labels), so they are clipped too and never widen the page.
+.scroll {
+  position: relative;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: var(--table-min-width);
+  border-collapse: collapse;
+  font-size: var(--font-size-14);
+}
+
+.cell {
+  padding: var(--space-12) var(--space-14);
+  text-align: start;
+  vertical-align: middle;
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+th.cell {
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+  border-bottom-color: var(--color-border);
+  white-space: nowrap;
+}
+
+// The sorted column is highlighted in the primary color, as in the design.
+th.cell[aria-sort='ascending'],
+th.cell[aria-sort='descending'] {
+  color: var(--color-primary);
+}
+
+.cell--select {
+  width: var(--space-40);
+  padding-block: 0;
+}
+
+.cell--title {
+  font-weight: var(--font-weight-medium);
+}
+
+.cell--actions {
+  // Two icon buttons and the gap between them.
+  width: calc(var(--icon-button-size) * 2 + var(--space-6));
+}
+
+.row--selected .cell {
+  background: var(--color-primary-selected);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-6);
+}
+
+// Material checkbox: no extra touch target padding inside the compact cell.
+.cell--select mat-checkbox {
+  margin-inline-start: calc(-1 * var(--space-10));
+}

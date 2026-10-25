@@ -20,11 +20,14 @@ interface ProblemDetails {
 }
 
 export function toApiError(response: HttpErrorResponse): ApiError {
-  if (response.status === 0) {
+  const body = isProblemDetails(response.error) ? response.error : undefined;
+
+  // Every error from the API has a ProblemDetails body. A 5xx without one comes from a proxy in front of the
+  // API (e.g. the dev server proxy answers 500 with an empty body when the API is down): the API was not reached.
+  if (response.status === 0 || (response.status >= 500 && !body)) {
     return { status: 0, title: 'server unreachable' };
   }
 
-  const body = isProblemDetails(response.error) ? response.error : undefined;
   const error: ApiError = {
     status: response.status,
     title: body?.title || response.statusText || `HTTP ${response.status}`,
@@ -42,5 +45,5 @@ export function isApiError(value: unknown): value is ApiError {
 }
 
 function isProblemDetails(value: unknown): value is ProblemDetails {
-  return typeof value === 'object' && value !== null;
+  return typeof value === 'object' && value !== null && ('title' in value || 'status' in value);
 }

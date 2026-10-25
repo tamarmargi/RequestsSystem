@@ -496,3 +496,6 @@ frontend/dist/
 frontend/.angular/
 frontend/coverage/
 frontend/out-tsc/
+
+# The macOS "Icon" rule above also matches the Angular icon component folder (case-insensitive git).
+!frontend/src/app/shared/icon/

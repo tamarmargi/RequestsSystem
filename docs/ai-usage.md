@@ -87,3 +87,27 @@ This document records, per development step, which parts were generated with Cla
 ### Reviewed / decided manually
 
 - TODO: fill in by the developer
+
+## Step G – Angular screens (T7.0, T7.2–T7.8)
+
+The UI design (6 screens: Main, StatusDialog, Conflict, History, BulkResult, States) and its design system were
+created with **Claude Design** (`docs/design/*.dc.html`); the colors come from the leaves of the Ministry of
+Environmental Protection logo.
+
+### Generated with Claude Code
+
+- Design tokens (`_tokens.scss`), the Angular Material theme mapping and the shared control and dialog styles.
+- `RequestsListState` (query reducer, debounce, switchMap, URL sync, list and stats view models, selection) and
+  `RequestStatusActions` (status update, 409 conflict flow, bulk update).
+- Components: requests-page, page-header, stats-cards, requests-filters, active-filters, bulk-action-bar,
+  requests-table, requests-paginator, list-state; dialogs: status-change, conflict, history-panel, bulk-result,
+  user-name; shared StatusBadge, PriorityLabel, Icon, labels and date helpers.
+- `CurrentUserService` and the `X-User-Name` interceptor, plus the backend change that decodes the
+  percent-encoded header (`CurrentUserAccessor`) and its integration test.
+- Tests: `requests-list.state.spec.ts`, `request-status-actions.spec.ts`, new cases in `error.interceptor.spec.ts`.
+- Browser verification against the seeded API (network log of debounce, cancellation, sort/filter/page requests,
+  status change, conflict from a second client, bulk, empty and error states) and the documentation updates.
+
+### Reviewed / decided manually
+
+- TODO: fill in by the developer

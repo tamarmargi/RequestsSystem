@@ -1,0 +1,39 @@
+@switch (kind()) {
+  @case ('loading') {
+    <div class="loading" aria-busy="true" aria-label="טוען פניות">
+      @for (row of skeletonRows(); track row) {
+        <div class="skeleton-row" aria-hidden="true">
+          <div class="skeleton skeleton--id"></div>
+          <div class="skeleton skeleton--text"></div>
+          <div class="skeleton skeleton--pill"></div>
+        </div>
+      }
+      <div class="loading__caption" role="status">טוען פניות…</div>
+    </div>
+  }
+  @case ('empty') {
+    <div class="message" role="status">
+      <div class="message__icon message__icon--empty"><app-icon name="search" [size]="26" /></div>
+      <div class="message__title">לא נמצאו פניות התואמות לסינון</div>
+      <div class="message__text">אפשר לשנות את מילות החיפוש או להסיר חלק מהמסננים.</div>
+      <button type="button" class="btn btn--outline-primary" (click)="clearFilters.emit()">ניקוי כל המסננים</button>
+    </div>
+  }
+  @case ('error') {
+    <div class="message" role="alert">
+      <div class="message__icon message__icon--error"><app-icon name="error" [size]="26" /></div>
+      <div class="message__title">לא ניתן לטעון את הפניות</div>
+      <div class="message__text">
+        @if (unreachable()) {
+          השרת אינו זמין כרגע. הנתונים לא נמחקו, אפשר לנסות שוב.
+        } @else {
+          אירעה שגיאה בשרת{{ errorSuffix() }}. הנתונים לא נמחקו, אפשר לנסות שוב.
+        }
+      </div>
+      <button type="button" class="btn btn--primary" (click)="retry.emit()">
+        <app-icon name="refresh" />
+        ניסיון חוזר
+      </button>
+    </div>
+  }
+}

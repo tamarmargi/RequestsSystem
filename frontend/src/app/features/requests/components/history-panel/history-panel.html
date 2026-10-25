@@ -1,0 +1,70 @@
+<div class="panel">
+  <div class="panel__header">
+    <div>
+      <h2 mat-dialog-title class="dialog__title">היסטוריית שינויים</h2>
+      <p class="dialog__subtitle">פנייה {{ request.id }} · {{ request.title }}</p>
+    </div>
+    <button type="button" class="icon-btn icon-btn--ghost" mat-dialog-close aria-label="סגירה">
+      <app-icon name="close" [size]="18" />
+    </button>
+  </div>
+
+  <dl class="summary">
+    <div>
+      <dt>ארגון</dt>
+      <dd class="summary__value">{{ request.organizationName }}</dd>
+    </div>
+    <div>
+      <dt>סטטוס נוכחי</dt>
+      <dd class="summary__badge"><app-status-badge [status]="request.status" /></dd>
+    </div>
+    <div>
+      <dt>נוצרה</dt>
+      <dd class="summary__value">{{ request.createdAt | date: dateFormat }}</dd>
+    </div>
+    <div>
+      <dt>מטפל</dt>
+      <dd class="summary__value">{{ request.assignedTo ?? 'לא שובץ' }}</dd>
+    </div>
+  </dl>
+
+  <div class="panel__body" aria-live="polite">
+    @if (history$ | async; as history) {
+      @if (history.state === 'loading') {
+        <div class="loading" aria-busy="true">
+          @for (row of [1, 2, 3]; track row) {
+            <div class="loading__row">
+              <div class="skeleton skeleton--pill"></div>
+              <div class="skeleton skeleton--line"></div>
+            </div>
+          }
+          <p class="muted">טוען היסטוריה…</p>
+        </div>
+      } @else if (history.state === 'error') {
+        <div class="message" role="alert">
+          <p>לא ניתן לטעון את ההיסטוריה. {{ history.message }}</p>
+          <button type="button" class="btn btn--primary" (click)="retry()">
+            <app-icon name="refresh" />
+            ניסיון חוזר
+          </button>
+        </div>
+      } @else if (history.items.length === 0) {
+        <p class="message muted">לא בוצעו שינויי סטטוס בפנייה זו.</p>
+      } @else {
+        <ol class="timeline">
+          @for (item of history.items; track $index; let first = $first) {
+            <li class="step">
+              <span class="step__knob" [class.step__knob--latest]="first" aria-hidden="true"></span>
+              <div class="step__change">
+                <app-status-badge [status]="item.previousStatus" />
+                <span class="step__arrow" role="img" aria-label="אל"><app-icon name="chevronLeft" [size]="14" /></span>
+                <app-status-badge [status]="item.newStatus" />
+              </div>
+              <div class="step__meta">{{ item.changedAt | date: dateTimeFormat }} · {{ item.changedBy }}</div>
+            </li>
+          }
+        </ol>
+      }
+    }
+  </div>
+</div>

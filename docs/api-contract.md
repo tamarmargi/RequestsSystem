@@ -189,7 +189,7 @@ Change the status of one request, with optimistic concurrency.
 
 | Header | Required | Notes |
 |---|---|---|
-| `X-User-Name` | No | Stored as `changedBy` in the history row. Trimmed and cut to 100 characters; missing or empty → `"anonymous"`. Use ASCII values: browsers refuse header values with characters such as Hebrew letters. There is no authentication yet. |
+| `X-User-Name` | No | Stored as `changedBy` in the history row. **Percent-encoded UTF-8** (`encodeURIComponent` in the browser, e.g. `%D7%93%D7%A0%D7%94` for `דנה`): browsers refuse raw header values with characters such as Hebrew letters. The server decodes it, then trims and cuts it to 100 characters; missing or empty → `"anonymous"`. Plain ASCII values without `%` arrive unchanged. There is no authentication yet. |
 
 ### Body
 

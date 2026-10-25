@@ -1,0 +1,59 @@
+// Shared dialog chrome (MatDialog), as in docs/design: title row with a close button, body, action row.
+
+.cdk-overlay-dark-backdrop {
+  background: var(--color-overlay);
+}
+
+.dialog__header {
+  padding: var(--space-20) var(--space-24) 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-12);
+}
+
+// mat-dialog-title adds its own padding and a 40px ::before spacer; the design's header layout replaces them.
+.mat-mdc-dialog-title.dialog__title {
+  padding: 0;
+
+  &::before {
+    display: none;
+  }
+}
+
+.dialog__title {
+  margin: 0;
+  font-size: var(--font-size-18);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+}
+
+.dialog__subtitle {
+  margin: var(--space-4) 0 0;
+  font-size: var(--font-size-14);
+  color: var(--color-text-muted);
+}
+
+.dialog__body {
+  padding: var(--space-20) var(--space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.dialog__actions {
+  padding: var(--space-16) var(--space-24);
+  border-top: var(--border-width) solid var(--color-divider);
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-10);
+}
+
+// History side panel: full height at the inline-start edge (right in RTL).
+.side-panel .mat-mdc-dialog-surface {
+  border-radius: 0;
+  box-shadow: var(--shadow-panel);
+  border-inline-start: var(--border-width) solid var(--color-border);
+}

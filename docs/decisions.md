@@ -148,3 +148,40 @@
 
 - **Decision:** Composite indexes for the list end with `CreatedAt DESC, Id DESC`, the exact `ORDER BY` of the list queries (decision 11: `Id` is the stable tie-breaker).
 - **Reason:** When the index order matches the whole `ORDER BY`, SQL Server reads the top rows of the page directly from the index and stops; there is no Sort operator (Q1-page: 2,134 → 70 reads). With `CreatedAt` alone, rows with equal `CreatedAt` would still need sorting by `Id`.
+
+## 27. No NgRx: a component-level state service with RxJS
+
+- **Decision:** The requests screen keeps its state in `RequestsListState`, an `@Injectable()` provided in the page component (not in root), built on RxJS streams; status changes and their side effects live in `RequestStatusActions`, provided next to it.
+- **Reason:** One screen with local state (query, list, stats, selection). NgRx would add actions, reducers, effects and selectors for no gain: there is no state shared between screens. Being provided in the page, the state is created and destroyed with the page.
+- **Alternatives:** NgRx Store / Component Store; a signals store (e.g. NgRx SignalStore).
+
+## 28. Search uses debounceTime + switchMap
+
+- **Decision:** Text inputs go through `trim → debounceTime(300) → distinctUntilChanged`, and the combined query goes through `switchMap` to `getRequests`.
+- **Reason:** Fewer requests while typing (one request for "בנק" instead of three), and a stale response can never overwrite a newer one: `switchMap` unsubscribes from the previous request, which aborts the HTTP call. The cancellation also reaches the server through the request's `CancellationToken`, so the database query is cancelled too.
+- **Alternatives:** `mergeMap` / `concatMap` (out-of-order or queued responses); a search button (no live search).
+
+## 29. Query state in the URL
+
+- **Decision:** The list query (search, filters, sort, page, page size) is written to the URL query parameters (only values that differ from the defaults, with `replaceUrl`) and read from them on load.
+- **Reason:** Refresh and shared links keep the same filters and page; `replaceUrl` keeps the browser history clean.
+- **Alternatives:** Keep the state in memory only; `localStorage`.
+
+## 30. Transition rules mirrored in the UI for display only
+
+- **Decision:** The status dialog shows only the transitions allowed from the current status (`ALLOWED_TRANSITIONS` in `shared/request-labels.ts`), and the conflict dialog disables "עדכון בכל זאת" when the transition is not allowed from the current status.
+- **Reason:** Better UX: the user is not offered a choice that will certainly fail. The server still enforces the rules and stays the source of truth (bulk updates show the server's per-item outcome).
+- **Alternatives:** Offer every status and rely on the server's `400` only; fetch the rules from an API endpoint.
+
+## 31. Design tokens from the logo colors
+
+- **Decision:** The design system (made in Claude Design, `docs/design/`) takes its brand colors from the leaves of the Ministry of Environmental Protection logo (green `#007A3D`, orange `#F29219`), without using the logo. All values are CSS custom properties in `frontend/src/styles/_tokens.scss`; component styles use only `var(--token)`, and the Angular Material theme is mapped to the same tokens.
+- **Reason:** A recognizable, consistent look that can be changed in one place.
+- **Accessibility constraint:** the orange does not have enough contrast as text on white, so it is never used as text: only as a surface with dark text (the bulk "החלה" button), the 4px header stripe, or a status dot. Status meaning never depends on color alone (every badge has a text label).
+- **Alternatives:** Material's default palettes; a third-party theme.
+
+## 32. X-User-Name is percent-encoded
+
+- **Decision:** The client sends `X-User-Name` as `encodeURIComponent(name)`, and the API decodes it (`Uri.UnescapeDataString` in `CurrentUserAccessor`).
+- **Reason:** User names are Hebrew, and browsers refuse header values outside ISO-8859-1 (`fetch`/XHR throw). Plain ASCII names without `%` are unchanged by decoding, so other clients keep working.
+- **Alternatives:** Send the name in the body (changes the contract of every update endpoint); RFC 8187 `name*=UTF-8''…` syntax (more complex, no benefit here).

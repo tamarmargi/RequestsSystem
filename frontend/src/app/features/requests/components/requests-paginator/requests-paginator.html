@@ -1,0 +1,36 @@
+<div class="paginator">
+  <div class="paginator__info">
+    <span class="muted">מציג {{ from() | number }}–{{ to() | number }} מתוך {{ totalCount() | number }}</span>
+    <label for="page-size" class="muted">בעמוד:</label>
+    <select id="page-size" class="paginator__size" [value]="pageSize()" (change)="onPageSize($any($event.target).value)">
+      @for (size of pageSizes; track size) {
+        <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
+      }
+    </select>
+  </div>
+
+  <nav class="paginator__pages" aria-label="דפדוף">
+    <button type="button" class="pg" aria-label="העמוד הקודם" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+      <app-icon name="chevronRight" [size]="14" [strokeWidth]="2.5" />
+    </button>
+    @for (item of items(); track item.kind === 'page' ? item.page : item.key) {
+      @if (item.kind === 'page') {
+        <button
+          type="button"
+          class="pg"
+          [class.pg--current]="item.page === page()"
+          [attr.aria-current]="item.page === page() ? 'page' : null"
+          [attr.aria-label]="'עמוד ' + item.page"
+          (click)="goTo(item.page)"
+        >
+          {{ item.page | number }}
+        </button>
+      } @else {
+        <span class="paginator__gap muted" aria-hidden="true">…</span>
+      }
+    }
+    <button type="button" class="pg" aria-label="העמוד הבא" [disabled]="page() >= lastPage()" (click)="goTo(page() + 1)">
+      <app-icon name="chevronLeft" [size]="14" [strokeWidth]="2.5" />
+    </button>
+  </nav>
+</div>

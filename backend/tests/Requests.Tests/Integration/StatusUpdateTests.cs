@@ -40,6 +40,18 @@ public class StatusUpdateTests
     }
 
     [Fact]
+    public async Task Patch_PercentEncodedUserHeader_ChangedByIsDecoded()
+    {
+        var request = await _fixture.CreateRequestAsync(RequestStatus.New);
+
+        var response = await PatchAsync(request.Id, RequestStatus.InProgress, Convert.ToBase64String(request.RowVersion),
+            userName: Uri.EscapeDataString("דנה לוי"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await HistoryRowsAsync(request.Id)).Should().ContainSingle().Which.ChangedBy.Should().Be("דנה לוי");
+    }
+
+    [Fact]
     public async Task Patch_WithoutUserHeader_ChangedByIsAnonymous()
     {
         var request = await _fixture.CreateRequestAsync(RequestStatus.New);

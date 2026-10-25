@@ -1,67 +1,152 @@
-// Design tokens.
-// PLACEHOLDER VALUES: these neutral values will be replaced by the design system in the dedicated
-// design step. Components must use only var(--token) for colors, font sizes and spacing; raw values
-// (hex, rgb, named colors, px sizes) live in this file only.
+// Design tokens – the design system from docs/design (Claude Design).
+// Brand colors come from the leaves of the Ministry of Environmental Protection logo (the logo itself is
+// not used). Components use only var(--token); raw values (hex, rgb, px sizes) live in this file only.
+//
+// Accessibility: --color-accent (orange) is never used as text on white. It is used only as a surface
+// with dark text, as the thin top stripe, or as a status dot.
 
 :root {
-  // Colors – base
-  --color-primary: #3b5bdb;
+  // Brand
+  --color-primary: #007a3d;
+  --color-primary-hover: #005f2f;
+  --color-primary-soft: #e3f2e9;
+  --color-primary-selected: #eef7f1;
   --color-on-primary: #ffffff;
+  --color-accent: #f29219;
+  --color-on-accent: #1b2420;
+
+  // Neutrals
+  --color-bg: #f4f6f3;
   --color-surface: #ffffff;
-  --color-background: #f5f6f8;
-  --color-text: #1f2328;
-  --color-text-muted: #5f6670;
-  --color-border: #d6d9de;
+  --color-surface-muted: #fafbfa;
+  --color-text: #1b2420;
+  --color-text-strong: #3d4943;
+  --color-text-muted: #5b6660;
+  --color-border: #dde3df;
+  --color-border-strong: #cdd5d0;
+  --color-divider: #edf0ee;
+  --color-overlay: rgba(27, 36, 32, 0.45);
+  --color-skeleton: #e6ebe8;
 
-  // Colors – feedback
-  --color-success: #2b8a3e;
-  --color-danger: #c92a2a;
+  // Inverse surface (bulk action bar, snackbar)
+  --color-inverse-surface: #1b2420;
+  --color-on-inverse-surface: #ffffff;
 
-  // Colors – request status
-  --color-status-new: #1c7ed6;
-  --color-status-in-progress: #f08c00;
-  --color-status-waiting: #7048e8;
-  --color-status-completed: #2b8a3e;
+  // Feedback
+  --color-danger: #b42318;
+  --color-danger-soft: #fdecea;
 
-  // Colors – request priority
-  --color-priority-low: #868e96;
-  --color-priority-medium: #f08c00;
-  --color-priority-high: #c92a2a;
+  // Request status: background, text, dot
+  --color-status-new-bg: #e8effd;
+  --color-status-new-text: #1d4ed8;
+  --color-status-new-dot: #1d4ed8;
+  --color-status-in-progress-bg: #fef1df;
+  --color-status-in-progress-text: #9a5200;
+  --color-status-in-progress-dot: #f29219;
+  --color-status-waiting-bg: #f0eafb;
+  --color-status-waiting-text: #6a3db5;
+  --color-status-waiting-dot: #6a3db5;
+  --color-status-waiting-surface: #fbf9fe;
+  --color-status-completed-bg: #e9eeeb;
+  --color-status-completed-text: #3d4943;
+  --color-status-completed-dot: #5b6660;
 
-  // Typography (Assistant supports Hebrew; loaded in index.html)
-  --font-family-base: 'Assistant', 'Segoe UI', Arial, sans-serif;
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-md: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.375rem;
-  --font-size-2xl: 1.75rem;
+  // Request priority (text)
+  --color-priority-high: #b42318;
+  --color-priority-medium: #9a5200;
+  --color-priority-low: #5b6660;
+
+  // Bulk outcomes: background, text
+  --color-outcome-updated-bg: var(--color-primary-soft);
+  --color-outcome-updated-text: var(--color-primary-hover);
+  --color-outcome-conflict-bg: var(--color-status-in-progress-bg);
+  --color-outcome-conflict-text: var(--color-status-in-progress-text);
+  --color-outcome-invalid-bg: var(--color-danger-soft);
+  --color-outcome-invalid-text: var(--color-danger);
+  --color-outcome-not-found-bg: var(--color-status-completed-bg);
+  --color-outcome-not-found-text: var(--color-status-completed-text);
+
+  // Typography (Heebo is loaded in index.html)
+  --font-family-base: 'Heebo', system-ui, sans-serif;
+  --font-size-12: 12px;
+  --font-size-13: 13px;
+  --font-size-14: 14px;
+  --font-size-15: 15px;
+  --font-size-16: 16px;
+  --font-size-17: 17px;
+  --font-size-18: 18px;
+  --font-size-26: 26px;
+  --font-size-28: 28px;
+  --font-size-30: 30px;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
+  --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  --line-height-base: 1.5;
+  --line-height-tight: 1.25;
+  --line-height-base: 1.55;
 
-  // Spacing scale (4px steps)
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.5rem;
-  --space-6: 2rem;
-  --space-8: 3rem;
+  // Spacing scale
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-14: 14px;
+  --space-16: 16px;
+  --space-18: 18px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-28: 28px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
 
-  // Shape
+  --badge-padding-block: 3px;
+
+  // Control sizes
+  --control-height: 40px;
+  --control-height-sm: 34px;
+  --icon-button-size: 36px;
+  --touch-target-min: 44px;
+  --icon-size-sm: 12px;
+  --icon-size-md: 16px;
+  --icon-size-lg: 20px;
+  --icon-size-xl: 26px;
+  --status-dot-size: 7px;
+  --state-icon-size: 56px;
+  --header-mark-size: 36px;
+  --conflict-icon-size: 40px;
+  --timeline-knob-size: 14px;
+  --skeleton-line-height: 12px;
+  --skeleton-pill-height: 20px;
+
+  // Borders
   --border-width: 1px;
-  --radius-sm: 4px;
+  --border-width-strong: 2px;
+  --border-width-knob: 3px;
+  --header-stripe-width: 4px;
+
+  // Radius
+  --radius-sm: 6px;
   --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-full: 9999px;
+  --radius-option: 10px;
+  --radius-panel: 12px;
+  --radius-dialog: 14px;
+  --radius-full: 999px;
 
   // Shadows
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.08);
-  --shadow-md: 0 2px 8px rgb(0 0 0 / 0.12);
-  --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.16);
+  --shadow-dialog: 0 12px 32px rgba(27, 36, 32, 0.18);
+  --shadow-panel: 0 12px 32px rgba(27, 36, 32, 0.14);
 
   // Layout
-  --layout-max-width: 1280px;
+  --layout-max-width: 1440px;
+  --sidebar-min-width: 260px;
+  --sidebar-max-width: 320px;
+  --content-min-width: 560px;
+  --stats-card-min-width: 200px;
+  --table-min-width: 980px;
+  --dialog-width: 480px;
+  --dialog-width-wide: 540px;
+  --side-panel-width: 480px;
+  --state-text-max-width: 300px;
 }

@@ -1,0 +1,50 @@
+<div class="dialog__header">
+  <div>
+    <h2 mat-dialog-title class="dialog__title">שינוי סטטוס</h2>
+    <p class="dialog__subtitle">פנייה {{ request.id }} · {{ request.title }}</p>
+  </div>
+  <button type="button" class="icon-btn icon-btn--ghost" mat-dialog-close aria-label="סגירה">
+    <app-icon name="close" [size]="18" />
+  </button>
+</div>
+
+<form class="dialog__body" id="status-change-form" (submit)="$event.preventDefault(); confirm()">
+  <div class="current">
+    <span class="muted">סטטוס נוכחי:</span>
+    <app-status-badge [status]="request.status" />
+  </div>
+
+  @if (options.length > 0) {
+    <fieldset class="options">
+      <legend class="options__legend">להעביר ל:</legend>
+      @for (status of options; track status) {
+        <label class="option" [class.option--selected]="selected() === status">
+          <input
+            type="radio"
+            name="target-status"
+            class="option__radio"
+            [value]="status"
+            [checked]="selected() === status"
+            (change)="selected.set(status)"
+          />
+          <app-status-badge [status]="status" />
+          <span class="option__description">{{ descriptions[status] }}</span>
+        </label>
+      }
+    </fieldset>
+  } @else {
+    <p class="final">הפנייה הושלמה, ולכן אין מעברים אפשריים.</p>
+  }
+
+  <p class="hint">
+    <app-icon name="info" class="hint__icon" />
+    מוצגים רק המעברים המותרים מהסטטוס הנוכחי. פנייה שהושלמה היא סופית.
+  </p>
+</form>
+
+<div class="dialog__actions">
+  @if (options.length > 0) {
+    <button type="submit" form="status-change-form" class="btn btn--primary" [disabled]="!selected()">עדכון סטטוס</button>
+  }
+  <button type="button" class="btn btn--secondary" mat-dialog-close>{{ options.length > 0 ? 'ביטול' : 'סגירה' }}</button>
+</div>

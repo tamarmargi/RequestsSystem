@@ -1,0 +1,119 @@
+.main {
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  padding: var(--space-28) var(--space-32) var(--space-48);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+
+  @media (max-width: 600px) {
+    padding-inline: var(--space-16);
+  }
+}
+
+.title-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-16);
+  flex-wrap: wrap;
+}
+
+.title-row__title {
+  margin: 0;
+  font-size: var(--font-size-28);
+  font-weight: var(--font-weight-bold);
+}
+
+.title-row__subtitle {
+  margin: var(--space-6) 0 0;
+  font-size: var(--font-size-15);
+  line-height: var(--line-height-base);
+  color: var(--color-text-muted);
+}
+
+// Sidebar + content; wraps (sidebar on top) on narrow screens.
+.layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-24);
+  align-items: flex-start;
+}
+
+.layout__sidebar {
+  flex: 1 1 var(--sidebar-min-width);
+  max-width: var(--sidebar-max-width);
+}
+
+.content {
+  flex: 999 1 var(--content-min-width);
+  min-width: 0;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-panel);
+  // Positioned, so overflow: hidden also clips absolutely positioned descendants.
+  position: relative;
+  overflow: hidden;
+}
+
+// When the layout stacks, the sidebar takes the full width.
+@media (max-width: 900px) {
+  .layout__sidebar {
+    max-width: none;
+  }
+}
+
+.toolbar {
+  padding: var(--space-16) var(--space-20);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  border-bottom: var(--border-width) solid var(--color-divider);
+}
+
+.toolbar__row {
+  display: flex;
+  gap: var(--space-12);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search {
+  flex: 1 1 var(--sidebar-max-width);
+  position: relative;
+}
+
+.search__icon {
+  position: absolute;
+  inset-inline-start: var(--space-12);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.search__input {
+  padding-inline-start: var(--space-40);
+}
+
+.count {
+  font-size: var(--font-size-14);
+}
+
+.count__value {
+  color: var(--color-text);
+}
+
+// The refresh progress bar overlays the top edge of the table, so nothing moves while refreshing.
+.progress {
+  position: relative;
+  height: 0;
+
+  mat-progress-bar {
+    position: absolute;
+    top: 0;
+    inset-inline: 0;
+    z-index: 1;
+  }
+}

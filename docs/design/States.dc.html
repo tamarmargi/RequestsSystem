@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>מצבי טעינה, ריק ושגיאה</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#007A3D}a:hover{color:#005F2F}
+.panel{background:#FFFFFF;border:1px solid #DDE3DF;border-radius:12px;display:flex;flex-direction:column;overflow:hidden}
+.cap{font-size:12px;font-weight:600;color:#5B6660;padding:12px 16px;border-bottom:1px solid #EDF0EE;background:#FAFBFA}
+.sk{height:12px;border-radius:6px;background:#E6EBE8}
+.skrow{display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid #EDF0EE}
+</style>
+</helmet>
+<div dir="rtl" style="width: 1440px; height: 460px; box-sizing: border-box; padding: 32px; background: #F4F6F3; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; font-family: 'Heebo', system-ui, sans-serif; color: #1B2420">
+<div class="panel" aria-busy="true" aria-label="טוען פניות">
+<div class="cap">טעינה</div>
+<div class="skrow"><div class="sk" style="width: 48px"></div><div class="sk" style="flex: 1"></div><div class="sk" style="width: 70px; height: 20px; border-radius: 999px"></div></div>
+<div class="skrow"><div class="sk" style="width: 48px"></div><div class="sk" style="flex: 1"></div><div class="sk" style="width: 70px; height: 20px; border-radius: 999px"></div></div>
+<div class="skrow"><div class="sk" style="width: 48px"></div><div class="sk" style="flex: 1"></div><div class="sk" style="width: 70px; height: 20px; border-radius: 999px"></div></div>
+<div class="skrow"><div class="sk" style="width: 48px"></div><div class="sk" style="flex: 1"></div><div class="sk" style="width: 70px; height: 20px; border-radius: 999px"></div></div>
+<div class="skrow" style="border-bottom: 0"><div class="sk" style="width: 48px"></div><div class="sk" style="flex: 1"></div><div class="sk" style="width: 70px; height: 20px; border-radius: 999px"></div></div>
+<div style="padding: 12px 16px; font-size: 13px; color: #5B6660">טוען פניות…</div>
+</div>
+<div class="panel">
+<div class="cap">אין תוצאות</div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center">
+<div style="width: 56px; height: 56px; border-radius: 50%; background: #E3F2E9; color: #007A3D; display: flex; align-items: center; justify-content: center">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+</div>
+<div style="font-size: 17px; font-weight: 600">לא נמצאו פניות התואמות לסינון</div>
+<div style="font-size: 14px; color: #5B6660; max-width: 300px; line-height: 1.55">אפשר לשנות את מילות החיפוש או להסיר חלק מהמסננים.</div>
+<button type="button" style="height: 40px; padding: 0 18px; border: 1px solid #007A3D; border-radius: 8px; background: #FFFFFF; color: #007A3D; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">ניקוי כל המסננים</button>
+</div>
+</div>
+<div class="panel" role="alert">
+<div class="cap">שגיאה</div>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center">
+<div style="width: 56px; height: 56px; border-radius: 50%; background: #FDECEA; color: #B42318; display: flex; align-items: center; justify-content: center">
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6M12 16.5h.01"></path></svg>
+</div>
+<div style="font-size: 17px; font-weight: 600">לא ניתן לטעון את הפניות</div>
+<div style="font-size: 14px; color: #5B6660; max-width: 300px; line-height: 1.55">השרת אינו זמין כרגע. הנתונים לא נמחקו, אפשר לנסות שוב.</div>
+<button type="button" style="height: 40px; padding: 0 18px; border: 0; border-radius: 8px; background: #007A3D; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 4v5h-5"></path></svg>ניסיון חוזר</button>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":460}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

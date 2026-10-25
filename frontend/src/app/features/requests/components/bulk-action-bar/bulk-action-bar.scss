@@ -1,0 +1,65 @@
+.bar {
+  background: var(--color-inverse-surface);
+  color: var(--color-on-inverse-surface);
+  padding: var(--space-10) var(--space-20);
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  flex-wrap: wrap;
+  font-size: var(--font-size-14);
+}
+
+.bar__label {
+  opacity: 0.85;
+}
+
+.bar__select {
+  height: var(--control-height-sm);
+  border-radius: var(--radius-md);
+  border: 0;
+  padding: 0 var(--space-10);
+  font: inherit;
+  font-size: var(--font-size-14);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+// Orange surface with dark text (never orange text on white).
+.bar__apply {
+  height: var(--control-height-sm);
+  padding: 0 var(--space-14);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font: inherit;
+  font-size: var(--font-size-14);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.bar__clear {
+  height: var(--control-height-sm);
+  padding: 0 var(--space-10);
+  border: 0;
+  background: transparent;
+  color: var(--color-on-inverse-surface);
+  font: inherit;
+  font-size: var(--font-size-14);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.bar__select,
+.bar__apply,
+.bar__clear {
+  &:focus-visible {
+    outline: var(--border-width-strong) solid var(--color-accent);
+    outline-offset: var(--border-width-strong);
+  }
+}

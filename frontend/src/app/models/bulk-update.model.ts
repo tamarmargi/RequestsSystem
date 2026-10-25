@@ -16,6 +16,9 @@ export type BulkUpdateOutcome = 'Updated' | 'NotFound' | 'Conflict' | 'InvalidTr
 export interface BulkUpdateItemResult {
   id: number;
   outcome: BulkUpdateOutcome;
+  /** Present on Updated: the new version of the request. */
+  version?: string;
+  /** Present on failures. */
   message?: string;
 }
 

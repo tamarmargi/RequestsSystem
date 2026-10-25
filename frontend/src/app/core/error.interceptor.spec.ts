@@ -52,4 +52,24 @@ describe('errorInterceptor', () => {
 
     expect(error).toEqual({ status: 0, title: 'server unreachable' });
   });
+
+  it('maps a 5xx without a ProblemDetails body (dev proxy, API down) to status 0', () => {
+    let error: ApiError | undefined;
+
+    client.get('/api/requests').subscribe({ error: (e: ApiError) => (error = e) });
+    http.expectOne('/api/requests').flush(null, { status: 500, statusText: 'Internal Server Error' });
+
+    expect(error).toEqual({ status: 0, title: 'server unreachable' });
+  });
+
+  it('keeps a 500 that comes from the API (ProblemDetails body)', () => {
+    let error: ApiError | undefined;
+
+    client.get('/api/requests').subscribe({ error: (e: ApiError) => (error = e) });
+    http
+      .expectOne('/api/requests')
+      .flush({ title: 'An unexpected error occurred.', status: 500 }, { status: 500, statusText: 'Internal Server Error' });
+
+    expect(error).toEqual({ status: 500, title: 'An unexpected error occurred.' });
+  });
 });

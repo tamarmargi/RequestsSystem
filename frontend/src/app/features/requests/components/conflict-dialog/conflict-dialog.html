@@ -1,0 +1,67 @@
+<div class="conflict__header">
+  <div class="conflict__icon">
+    <app-icon name="warning" [size]="20" />
+  </div>
+  <div>
+    <h2 mat-dialog-title class="dialog__title">הפנייה עודכנה בינתיים על ידי משתמש אחר</h2>
+    <p id="conflict-description" class="conflict__description">
+      השינוי שלך לא נשמר, כדי לא לדרוס את העדכון שנעשה לפניך. יש לבחור איך להמשיך.
+    </p>
+  </div>
+</div>
+
+<div class="compare">
+  <div class="card">
+    <div class="card__label">השינוי שלך</div>
+    <app-status-badge [status]="data.attempted" />
+    <div class="card__meta">
+      @if (data.loadedAt) {
+        מבוסס על הגרסה שנטענה ב-{{ data.loadedAt | date: timeFormat }}
+      } @else {
+        מבוסס על גרסה קודמת של הפנייה
+      }
+    </div>
+  </div>
+
+  <div class="card card--current" [class]="currentClass">
+    <div class="card__label card__label--current">המצב הנוכחי בשרת</div>
+    <app-status-badge [status]="data.current.status" />
+    <div class="card__meta card__meta--strong" aria-live="polite">
+      @if (lastChange$ | async; as change) {
+        @if (change.state === 'loading') {
+          טוען את פרטי העדכון…
+        } @else if (change.state === 'known') {
+          עודכן על ידי <strong>{{ change.changedBy }}</strong>, {{ change.ago }}
+        } @else {
+          עודכן ב-{{ data.current.updatedAt | date: dateTimeFormat }}
+        }
+      }
+    </div>
+  </div>
+</div>
+
+<p id="conflict-retry-note" class="note">
+  @if (retryAllowed) {
+    "עדכון בכל זאת" ישלח את השינוי מחדש מול הגרסה העדכנית. המעבר מ"{{ labels[data.current.status] }}" ל"{{
+      labels[data.attempted]
+    }}" מותר.
+  } @else if (alreadyInStatus) {
+    הפנייה כבר בסטטוס "{{ labels[data.attempted] }}", ולכן אין צורך לעדכן אותה שוב.
+  } @else {
+    המעבר מ"{{ labels[data.current.status] }}" ל"{{ labels[data.attempted] }}" אינו מותר, ולכן אי אפשר לעדכן בכל
+    זאת.
+  }
+</p>
+
+<div class="conflict__actions">
+  <button type="button" class="btn btn--primary" [mat-dialog-close]="keepTheirs">השארת השינוי של המשתמש האחר</button>
+  <button
+    type="button"
+    class="btn btn--secondary"
+    [mat-dialog-close]="retry"
+    [disabled]="!retryAllowed"
+    aria-describedby="conflict-retry-note"
+  >
+    עדכון בכל זאת
+  </button>
+</div>

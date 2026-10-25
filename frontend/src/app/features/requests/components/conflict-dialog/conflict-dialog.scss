@@ -1,0 +1,115 @@
+.conflict__header {
+  padding: var(--space-24) var(--space-24) 0;
+  display: flex;
+  gap: var(--space-14);
+  align-items: flex-start;
+}
+
+.conflict__icon {
+  flex: none;
+  width: var(--conflict-icon-size);
+  height: var(--conflict-icon-size);
+  border-radius: 50%;
+  background: var(--color-status-in-progress-bg);
+  color: var(--color-status-in-progress-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.conflict__description {
+  margin: var(--space-6) 0 0;
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-base);
+  color: var(--color-text-muted);
+}
+
+.compare {
+  padding: var(--space-20) var(--space-24);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--stats-card-min-width), 1fr));
+  gap: var(--space-12);
+}
+
+.card {
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-option);
+  padding: var(--space-14) var(--space-16);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-10);
+}
+
+.card__label {
+  font-size: var(--font-size-13);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
+}
+
+.card__meta {
+  font-size: var(--font-size-13);
+  line-height: var(--line-height-base);
+  color: var(--color-text-muted);
+}
+
+.card__meta--strong {
+  color: var(--color-text-strong);
+}
+
+// The current state is highlighted in the color of its status (2px border, compensated padding).
+.card--current {
+  border-width: var(--border-width-strong);
+  padding: calc(var(--space-14) - var(--border-width)) calc(var(--space-16) - var(--border-width));
+  background: var(--color-surface-muted);
+}
+
+.status--new {
+  border-color: var(--color-status-new-text);
+
+  .card__label--current {
+    color: var(--color-status-new-text);
+  }
+}
+
+.status--in-progress {
+  border-color: var(--color-status-in-progress-text);
+
+  .card__label--current {
+    color: var(--color-status-in-progress-text);
+  }
+}
+
+.status--waiting {
+  border-color: var(--color-status-waiting-text);
+  background: var(--color-status-waiting-surface);
+
+  .card__label--current {
+    color: var(--color-status-waiting-text);
+  }
+}
+
+.status--completed {
+  border-color: var(--color-status-completed-text);
+
+  .card__label--current {
+    color: var(--color-status-completed-text);
+  }
+}
+
+.note {
+  margin: 0 var(--space-24);
+  padding: var(--space-12) var(--space-14);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-13);
+  line-height: var(--line-height-base);
+  color: var(--color-text-strong);
+}
+
+.conflict__actions {
+  padding: var(--space-20) var(--space-24);
+  display: flex;
+  gap: var(--space-10);
+  flex-wrap: wrap;
+}

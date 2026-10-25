@@ -1,16 +1,19 @@
-// Global styles: design tokens first, then the Angular Material theme mapped onto them.
+// Global styles: design tokens first, then the Angular Material theme mapped onto them, then the shared
+// control classes (buttons, fields) used by all components.
 @use '@angular/material' as mat;
 @use 'styles/tokens';
+@use 'styles/controls';
+@use 'styles/dialogs';
 
 html {
   height: 100%;
-  // The palettes are a base for the shades Material derives (containers, states); the main
-  // system colors, fonts and corner radii are overridden below with our tokens.
+  // The palettes are only a base for the shades Material derives (containers, states); the colors,
+  // fonts and corner radii that Material components actually use are mapped to our tokens below.
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        primary: mat.$green-palette,
+        tertiary: mat.$orange-palette,
       ),
       typography: (
         plain-family: var(--font-family-base),
@@ -24,18 +27,99 @@ html {
     (
       primary: var(--color-primary),
       on-primary: var(--color-on-primary),
+      primary-container: var(--color-primary-soft),
+      on-primary-container: var(--color-primary-hover),
       surface: var(--color-surface),
-      background: var(--color-background),
+      surface-container: var(--color-surface),
+      surface-container-high: var(--color-surface),
+      surface-container-highest: var(--color-surface),
+      background: var(--color-bg),
       on-surface: var(--color-text),
       on-surface-variant: var(--color-text-muted),
-      outline: var(--color-border),
+      outline: var(--color-border-strong),
       outline-variant: var(--color-border),
       error: var(--color-danger),
-      corner-extra-small: var(--radius-sm),
-      corner-small: var(--radius-sm),
-      corner-medium: var(--radius-md),
-      corner-large: var(--radius-lg),
+      inverse-surface: var(--color-inverse-surface),
+      inverse-on-surface: var(--color-on-inverse-surface),
+      inverse-primary: var(--color-primary-soft),
+      corner-extra-small: var(--radius-md),
+      corner-small: var(--radius-md),
+      corner-medium: var(--radius-panel),
+      corner-large: var(--radius-panel),
+      corner-extra-large: var(--radius-dialog),
       corner-full: var(--radius-full),
+    )
+  );
+
+  @include mat.dialog-overrides(
+    (
+      container-color: var(--color-surface),
+      container-shape: var(--radius-dialog),
+      container-elevation-shadow: var(--shadow-dialog),
+      subhead-color: var(--color-text),
+      subhead-font: var(--font-family-base),
+      subhead-size: var(--font-size-18),
+      subhead-weight: var(--font-weight-bold),
+      supporting-text-color: var(--color-text),
+      supporting-text-font: var(--font-family-base),
+      supporting-text-size: var(--font-size-14),
+    )
+  );
+
+  @include mat.snack-bar-overrides(
+    (
+      container-color: var(--color-inverse-surface),
+      container-shape: var(--radius-md),
+      supporting-text-color: var(--color-on-inverse-surface),
+      supporting-text-font: var(--font-family-base),
+      supporting-text-size: var(--font-size-14),
+      button-color: var(--color-accent),
+    )
+  );
+
+  @include mat.checkbox-overrides(
+    (
+      selected-icon-color: var(--color-primary),
+      selected-hover-icon-color: var(--color-primary-hover),
+      selected-focus-icon-color: var(--color-primary-hover),
+      selected-pressed-icon-color: var(--color-primary-hover),
+      selected-checkmark-color: var(--color-on-primary),
+      unselected-icon-color: var(--color-border-strong),
+      unselected-hover-icon-color: var(--color-text-muted),
+      unselected-focus-icon-color: var(--color-text-muted),
+    )
+  );
+
+  @include mat.radio-overrides(
+    (
+      selected-icon-color: var(--color-primary),
+      selected-hover-icon-color: var(--color-primary-hover),
+      selected-focus-icon-color: var(--color-primary-hover),
+      selected-pressed-icon-color: var(--color-primary-hover),
+      unselected-icon-color: var(--color-border-strong),
+      unselected-hover-icon-color: var(--color-text-muted),
+      unselected-focus-icon-color: var(--color-text-muted),
+    )
+  );
+
+  @include mat.progress-bar-overrides(
+    (
+      active-indicator-color: var(--color-primary),
+      track-color: var(--color-primary-soft),
+    )
+  );
+
+  @include mat.table-overrides(
+    (
+      background-color: var(--color-surface),
+      header-headline-color: var(--color-text-muted),
+      header-headline-font: var(--font-family-base),
+      header-headline-size: var(--font-size-12),
+      header-headline-weight: var(--font-weight-semibold),
+      row-item-label-text-color: var(--color-text),
+      row-item-label-text-font: var(--font-family-base),
+      row-item-label-text-size: var(--font-size-14),
+      row-item-outline-color: var(--color-divider),
     )
   );
 }
@@ -43,10 +127,18 @@ html {
 body {
   color-scheme: light;
   margin: 0;
-  height: 100%;
-  background-color: var(--color-background);
+  min-height: 100%;
+  background-color: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-family-base);
-  font-size: var(--font-size-md);
-  line-height: var(--line-height-base);
+  font-size: var(--font-size-14);
+  line-height: var(--line-height-tight);
+}
+
+a {
+  color: var(--color-primary);
+
+  &:hover {
+    color: var(--color-primary-hover);
+  }
 }

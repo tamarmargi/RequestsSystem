@@ -1,0 +1,31 @@
+<section class="cards" aria-label="נתונים מסכמים" [attr.aria-busy]="state().status === 'loading'">
+  @if (stats(); as stats) {
+    <div class="card">
+      <div class="card__title">סך הכל</div>
+      <div class="card__total">{{ stats.total | number }}</div>
+      <div class="card__priorities">
+        @for (priority of priorities; track priority) {
+          <app-priority-label [priority]="priority">&nbsp;{{ stats.byPriority[priority] | number }}</app-priority-label>
+        }
+      </div>
+    </div>
+    @for (status of statuses; track status) {
+      <div class="card">
+        <app-status-badge [status]="status" />
+        <div class="card__count">{{ stats.byStatus[status] | number }}</div>
+        <div class="card__share">{{ share(status) }}% מהפניות</div>
+      </div>
+    }
+  } @else if (state().status === 'error') {
+    <div class="card card--error" role="alert">לא ניתן לטעון את הנתונים המסכמים.</div>
+  } @else {
+    @for (card of [1, 2, 3, 4, 5]; track card) {
+      <div class="card" aria-hidden="true">
+        <div class="skeleton skeleton--pill"></div>
+        <div class="skeleton skeleton--number"></div>
+        <div class="skeleton skeleton--line"></div>
+      </div>
+    }
+    <span class="visually-hidden">טוען נתונים מסכמים…</span>
+  }
+</section>
