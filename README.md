@@ -129,7 +129,7 @@ Endpoints implemented so far (full specification in [docs/api-contract.md](docs/
 
 | Endpoint | Description |
 |---|---|
-| `GET /api/requests` | Paged list with filters (`status`, `priority`, `organizationName`, `assignedTo`, `createdFrom`/`createdTo`), free-text `search` on title or organization, sorting (`sortBy`, `sortDirection`) and paging (`page`, `pageSize` ≤ 100). `400` on invalid parameters. |
+| `GET /api/requests` | Paged list with filters (`status`, `priority`, `organizationName`, `assignedTo`, `createdFrom`/`createdTo`), free-text `search` on title or organization (a numeric search also matches the request number), sorting (`sortBy`, `sortDirection`) and paging (`page`, `pageSize` ≤ 100). `400` on invalid parameters. |
 | `GET /api/requests/{id}` | A single request, or `404`. |
 | `GET /api/requests/stats` | Counts over all requests: total, per status and per priority. |
 | `PATCH /api/requests/{id}/status` | Changes the status, with optimistic concurrency on `version` (see [Concurrency](#concurrency)). `200` updated request, `400` invalid body or transition, `404`, `409` with the current state. Optional `X-User-Name` header for the audit row. |
@@ -470,6 +470,11 @@ Measured on the 100,000 seeded requests with the exact SQL EF Core sends, before
 - **Main bottleneck: text search.** `LIKE '%term%'` scans the whole table for the COUNT in both runs
   (2,030 reads, ~350 ms), which is >99% of a search request. Proposed: SQL Server Full-Text Search
   (`CONTAINS`), or "has more" instead of an exact total for searches.
+- **Search by request number** (`OR Id = @id` in the same `WHERE`) adds no measurable cost: the search
+  remains a scan, with identical reads before and after (COUNT 2,030; page 306,706) and times within
+  run-to-run noise. A number, like any search term with few matches, makes the page query walk the whole
+  `IX_Requests_CreatedAt` with a key lookup per row (~0.35–0.45 s); see the
+  [report](docs/performance/README.md#search-by-request-number).
 - **Deep paging:** page 4000 reads 245,185 pages (a plan reused from page 1 does 80,000 Key Lookups) vs 70
   for page 1. Proposed: keyset pagination, measured at 72 reads for the same page.
 - **Write cost:** 5 more indexes on `Requests` (~15 MB). A status update maintains only the two that contain

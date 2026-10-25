@@ -191,3 +191,9 @@
 - **Decision:** When a request moves from `New` to `InProgress` and has no handler, the user who made the change (the decoded `X-User-Name`, the same value as `ChangedBy`) becomes its handler. `"anonymous"` assigns nobody, and an existing handler is never overwritten. The rule (`AutoAssignment` in the BL) runs in the code shared by the single and the bulk update, and is saved in the same `SaveChanges` as the status change and the history row, under the same `RowVersion` check.
 - **Reason:** Keeps the data consistent (an in-progress request always has a handler, as in the seeded data) without adding an assignment feature that the assessment does not require.
 - **Alternatives:** A separate assignment endpoint and UI.
+
+## 34. Search also matches the request number
+
+- **Decision:** If the trimmed search text is only digits and fits in 1..int.MaxValue (leading zeros allowed), the search also matches the request with that `Id`, in addition to the text match on `Title` and `OrganizationName` (`OR [r].[Id] = @id` in the same `WHERE`). Other search texts are unchanged.
+- **Reason:** The number is shown in the table and users naturally search by it; the assessment requires search "at least" in `Title` and `OrganizationName`. No extra cost, because the query already scans (measured: identical logical reads, times within noise).
+- **Alternatives:** A separate "go to request number" field.

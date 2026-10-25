@@ -71,7 +71,7 @@ All parameters are optional.
 |---|---|---|---|
 | `page` | integer | `1` | ≥ 1 |
 | `pageSize` | integer | `20` | 1–100 |
-| `search` | string | – | Free text; matches `title` **or** `organizationName` (contains) |
+| `search` | string | – | Free text; matches `title` **or** `organizationName` (contains). If the trimmed text is only digits and fits in 1–2147483647 (leading zeros allowed: `0048213` = `48213`), it **also** matches the request whose `id` is that number |
 | `status` | `RequestStatus` | – | `New`, `InProgress`, `Waiting`, `Completed` |
 | `priority` | `RequestPriority` | – | `Low`, `Medium`, `High` |
 | `organizationName` | string | – | Exact match |

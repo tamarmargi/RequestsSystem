@@ -20,6 +20,9 @@ public sealed record RequestFilter
     /// <summary>Contained in Title or OrganizationName.</summary>
     public string? Search { get; init; }
 
+    /// <summary>When <see cref="Search"/> is a request number: the search also matches the request with this Id.</summary>
+    public int? SearchId { get; init; }
+
     public RequestStatus? Status { get; init; }
     public RequestPriority? Priority { get; init; }
 

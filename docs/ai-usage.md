@@ -111,4 +111,5 @@ Environmental Protection logo.
 ### Reviewed / decided manually
 
 - Noticed in the UI that an InProgress request had no handler, and decided on auto-assignment instead of a full assignment feature.
+- Decided to extend the search to the request number (the requirement says 'at least' Title and OrganizationName), and not to more text fields, because each extra LIKE field adds scan cost.
 - TODO: fill in by the developer

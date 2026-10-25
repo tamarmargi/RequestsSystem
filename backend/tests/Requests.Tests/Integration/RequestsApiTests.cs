@@ -62,6 +62,32 @@ public class RequestsApiTests
 
         result.Items.Should().NotBeEmpty()
             .And.OnlyContain(r => r.Title.Contains(term) || r.OrganizationName.Contains(term));
+        var expected = await _fixture.QueryDbAsync(db =>
+            db.Requests.CountAsync(r => r.Title.Contains(term) || r.OrganizationName.Contains(term)));
+        result.TotalCount.Should().Be(expected, "a text search matches only Title and OrganizationName, as before");
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("000")]
+    public async Task List_SearchByRequestNumber_ReturnsThatRequest(string leadingZeros)
+    {
+        // Created with English text, so the number can only match through the Id.
+        var request = await _fixture.CreateRequestAsync(RequestStatus.Waiting);
+
+        var result = await GetListAsync($"/api/requests?search={leadingZeros}{request.Id}");
+
+        result.Items.Should().ContainSingle().Which.Id.Should().Be(request.Id);
+        result.TotalCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task List_SearchByUnknownNumber_IsEmpty()
+    {
+        var result = await GetListAsync("/api/requests?search=987654321");
+
+        result.Items.Should().BeEmpty();
+        result.TotalCount.Should().Be(0);
     }
 
     [Fact]

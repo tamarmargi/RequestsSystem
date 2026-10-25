@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Requests.BL.Caching;
@@ -87,6 +88,7 @@ public class RequestQueryService : IRequestQueryService
         Page = p.Page,
         PageSize = p.PageSize,
         Search = NullIfBlank(p.Search),
+        SearchId = ParseRequestNumber(p.Search),
         Status = p.Status,
         Priority = p.Priority,
         OrganizationName = NullIfBlank(p.OrganizationName),
@@ -104,4 +106,11 @@ public class RequestQueryService : IRequestQueryService
         string.IsNullOrWhiteSpace(sortBy) ? SortField.CreatedAt : Enum.Parse<SortField>(sortBy.Trim(), ignoreCase: true);
 
     private static string? NullIfBlank(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    /// <summary>
+    /// The request number when the trimmed search text is only digits (leading zeros allowed) and fits in
+    /// 1..int.MaxValue; otherwise null. NumberStyles.None rejects signs, spaces and separators.
+    /// </summary>
+    private static int? ParseRequestNumber(string? search) =>
+        int.TryParse(search?.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out var id) && id > 0 ? id : null;
 }

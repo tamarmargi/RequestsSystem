@@ -122,6 +122,29 @@ Proposals:
 - **Prefix-only search** (`LIKE 'term%'`) with an index on `Title`: seekable and simple. Trade-off: users must
   type the beginning of the title, which is a different feature.
 
+#### Search by request number
+
+A numeric search also matches the request number: `… LIKE @search OR … LIKE @search OR [r].[Id] = @id` in the
+same `WHERE` (text searches send exactly the same SQL as before). Measured with
+[search-number-tests.sql](search-number-tests.sql) ([results](results-search-number.md),
+[plans](plans/search-number/)), `?search=48213`, before vs after the change, two runs of 5:
+
+| Query | Logical reads before → after | Elapsed ms before → after |
+|---|---:|---:|
+| COUNT | 2,030 → 2,030 | 264 → 270, 228 → 273 |
+| Page | 306,706 → 306,715 / 306,706 | 420 → 461, 349 → 409 |
+| (unchanged text search `תלונה`, COUNT, same SQL) | 2,030 | 244, 219 |
+
+The `OR Id` adds no measurable cost: reads are identical and the time differences are within the run-to-run
+noise (the unchanged text query itself varies by ~25 ms). It stays a scan.
+
+The page numbers show the rare-term case from above: a number never occurs in titles, so almost nothing
+matches the `LIKE`. The plan (compiled for a guess of ~150 index rows until 20 matches,
+`EstimateRows="151.61"`) walks the whole `IX_Requests_CreatedAt` with a Key Lookup per row: 306,706 reads,
+~0.35–0.45 s. This existed before the feature for every rare search term. Proposals (not implemented):
+Full-Text Search as above; or, for the page query of a search, avoid the ordered-index plan (e.g. find the
+matching `Id`s with one scan, then fetch and sort only those), which costs one scan (~2,030 reads) for any term.
+
 ### 2. Deep paging with `OFFSET`
 
 | Query | Logical reads | Elapsed ms | API median ms |

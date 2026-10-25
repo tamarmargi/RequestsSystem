@@ -23,14 +23,14 @@
       <section class="content" aria-label="רשימת פניות" [attr.aria-busy]="vm.status === 'loading'">
         <div class="toolbar">
           <div class="toolbar__row">
-            <label for="q" class="visually-hidden">חיפוש</label>
+            <label for="q" class="visually-hidden">חיפוש לפי מספר פנייה, כותרת או ארגון</label>
             <div class="search">
               <app-icon name="search" [size]="18" class="search__icon" />
               <input
                 id="q"
                 type="search"
                 class="input search__input"
-                placeholder="חיפוש בכותרת או בשם הארגון"
+                placeholder="חיפוש לפי מספר פנייה, כותרת או ארגון"
                 autocomplete="off"
                 [formControl]="state.searchControl"
               />

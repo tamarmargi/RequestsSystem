@@ -106,7 +106,9 @@ public class RequestRepository : IRequestRepository
     {
         if (filter.Search is not null)
         {
-            query = query.Where(r => r.Title.Contains(filter.Search) || r.OrganizationName.Contains(filter.Search));
+            query = filter.SearchId is null
+                ? query.Where(r => r.Title.Contains(filter.Search) || r.OrganizationName.Contains(filter.Search))
+                : WhereTextOrId(query, filter.Search, filter.SearchId.Value);
         }
 
         if (filter.Status is not null)
@@ -141,6 +143,12 @@ public class RequestRepository : IRequestRepository
 
         return query;
     }
+
+    // A numeric search also matches the request number: one more OR in the same WHERE, which costs nothing
+    // extra because the LIKE already scans. A separate method keeps the text-only query (and its parameter
+    // names) exactly as before.
+    private static IQueryable<Request> WhereTextOrId(IQueryable<Request> query, string search, int id) =>
+        query.Where(r => r.Title.Contains(search) || r.OrganizationName.Contains(search) || r.Id == id);
 
     // Id is always the secondary sort, in the same direction, so rows with equal values keep a stable order across pages.
     private static IOrderedQueryable<Request> ApplySort(IQueryable<Request> query, SortField sortBy, bool descending) =>

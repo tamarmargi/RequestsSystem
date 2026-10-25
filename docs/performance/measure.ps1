@@ -25,7 +25,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('before', 'after', 'filtered-index', 'bottlenecks')]
+    [ValidateSet('before', 'after', 'filtered-index', 'bottlenecks', 'search-number')]
     [string] $Label,
 
     [string] $ApiBaseUrl = 'http://localhost:5000',
