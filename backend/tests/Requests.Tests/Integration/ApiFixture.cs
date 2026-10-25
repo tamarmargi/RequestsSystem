@@ -62,16 +62,20 @@ public sealed class ApiFixture : IAsyncLifetime
     /// <summary>
     /// Inserts a fresh request, so a test that changes data works on its own row and does not affect other tests.
     /// </summary>
-    public async Task<Request> CreateRequestAsync(RequestStatus status)
+    /// <remarks>New requests get no handler, others get "test-handler" (as in the seeded data).</remarks>
+    public Task<Request> CreateRequestAsync(RequestStatus status) =>
+        CreateRequestAsync(status, status == RequestStatus.New ? null : "test-handler");
+
+    public async Task<Request> CreateRequestAsync(RequestStatus status, string? assignedTo)
     {
-        var request = await InsertRequestAsync(status);
+        var request = await InsertRequestAsync(status, assignedTo);
 
         // A direct database write bypasses the API, so the cached stats are dropped here, as the API does after its writes.
         Factory.Services.GetRequiredService<IStatsCache>().Invalidate();
         return request;
     }
 
-    private Task<Request> InsertRequestAsync(RequestStatus status) => QueryDbAsync(async db =>
+    private Task<Request> InsertRequestAsync(RequestStatus status, string? assignedTo) => QueryDbAsync(async db =>
     {
         var created = DateTime.UtcNow.AddDays(-1);
         var request = new Request
@@ -80,7 +84,7 @@ public sealed class ApiFixture : IAsyncLifetime
             OrganizationName = "Integration Tests Ltd",
             Status = status,
             Priority = RequestPriority.Medium,
-            AssignedTo = status == RequestStatus.New ? null : "test-handler",
+            AssignedTo = assignedTo,
             CreatedAt = created,
             UpdatedAt = created
         };

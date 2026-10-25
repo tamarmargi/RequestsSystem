@@ -110,4 +110,5 @@ Environmental Protection logo.
 
 ### Reviewed / decided manually
 
+- Noticed in the UI that an InProgress request had no handler, and decided on auto-assignment instead of a full assignment feature.
 - TODO: fill in by the developer

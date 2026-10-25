@@ -1,3 +1,5 @@
+using Requests.BL.Domain;
+
 namespace Requests.Api.Http;
 
 /// <summary>
@@ -7,7 +9,8 @@ namespace Requests.Api.Http;
 public sealed class CurrentUserAccessor
 {
     public const string HeaderName = "X-User-Name";
-    public const string Anonymous = "anonymous";
+    /// <summary>Same value the BL checks for auto-assignment.</summary>
+    public const string Anonymous = AutoAssignment.AnonymousUser;
 
     /// <summary>Matches the ChangedBy column length.</summary>
     public const int MaxLength = 100;

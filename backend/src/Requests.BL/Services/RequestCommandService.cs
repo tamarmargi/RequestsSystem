@@ -145,6 +145,10 @@ public class RequestCommandService : IRequestCommandService
             return new UpdateStatusResult.InvalidTransition(DescribeInvalidTransition(entity.Status, newStatus));
         }
 
+        // Taken into work without a handler -> the user becomes the handler. Set on the tracked entity, so it is
+        // written in the same SaveChanges (and under the same RowVersion check) as the status and history row.
+        entity.AssignedTo = AutoAssignment.HandlerAfterChange(entity.Status, newStatus, entity.AssignedTo, changedBy);
+
         // 5. Save (its own SaveChanges = its own transaction); false means someone else saved in between.
         if (!await _repository.SaveStatusChangeAsync(entity, expectedVersion, newStatus, changedBy, ct))
         {

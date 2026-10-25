@@ -185,3 +185,9 @@
 - **Decision:** The client sends `X-User-Name` as `encodeURIComponent(name)`, and the API decodes it (`Uri.UnescapeDataString` in `CurrentUserAccessor`).
 - **Reason:** User names are Hebrew, and browsers refuse header values outside ISO-8859-1 (`fetch`/XHR throw). Plain ASCII names without `%` are unchanged by decoding, so other clients keep working.
 - **Alternatives:** Send the name in the body (changes the contract of every update endpoint); RFC 8187 `name*=UTF-8''…` syntax (more complex, no benefit here).
+
+## 33. Auto-assign on New -> InProgress
+
+- **Decision:** When a request moves from `New` to `InProgress` and has no handler, the user who made the change (the decoded `X-User-Name`, the same value as `ChangedBy`) becomes its handler. `"anonymous"` assigns nobody, and an existing handler is never overwritten. The rule (`AutoAssignment` in the BL) runs in the code shared by the single and the bulk update, and is saved in the same `SaveChanges` as the status change and the history row, under the same `RowVersion` check.
+- **Reason:** Keeps the data consistent (an in-progress request always has a handler, as in the seeded data) without adding an assignment feature that the assessment does not require.
+- **Alternatives:** A separate assignment endpoint and UI.

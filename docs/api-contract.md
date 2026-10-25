@@ -230,7 +230,19 @@ error would be misleading; the current state is the actionable answer.
 
 ### Response `200 OK`
 
-The updated `RequestDto` (with the new `status`, `updatedAt` and `version`).
+The updated `RequestDto` (with the new `status`, `updatedAt` and `version`, and `assignedTo` if it was auto-assigned).
+
+### Auto-assignment
+
+When the change moves a request from `New` to `InProgress` and the request has no handler
+(`assignedTo` is `null`), the user who made the change (the decoded `X-User-Name`, the same value stored as
+`changedBy`) becomes its handler. Rules:
+
+- `"anonymous"` (no or empty `X-User-Name`) assigns nobody: `assignedTo` stays `null`.
+- An existing `assignedTo` is never overwritten.
+- No other transition changes `assignedTo`.
+- The handler is written in the same transaction as the status change and the history row, under the same
+  `version` check: a `409` or any other failure assigns nobody.
 
 ### Status codes
 
@@ -314,6 +326,11 @@ All requests are loaded with one query. Then each item, **in input order**, goes
 the same order, as `PATCH …/status`, and a successful item is saved **in its own transaction** together with
 its history row. A failed item never rolls back the items saved before it, and does not prevent the items
 after it.
+
+The [auto-assignment rule](#auto-assignment) of `PATCH …/status` applies to every item: with
+`newStatus: "InProgress"`, each `New` item without a handler gets the user from `X-User-Name` as its handler
+(not for `"anonymous"`, never overwriting an existing handler), in the same transaction as that item's
+status change. The results do not include `assignedTo`; the client reloads the list to see it.
 
 | Outcome | When | Extra fields |
 |---|---|---|

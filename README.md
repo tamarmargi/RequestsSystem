@@ -352,6 +352,13 @@ set by SQL Server. The seeder writes with `SqlBulkCopy`, bypasses `SaveChanges`,
 Changing a status to itself is not allowed. The rules (`StatusTransitions` in the BL) match the history
 paths of the seeded data.
 
+**Auto-assignment.** When a request is taken into work (`New` → `InProgress`) and has no handler, the user
+who made the change (from `X-User-Name`, the same value stored as `ChangedBy`) becomes its handler, so an
+in-progress request always has one, as in the seeded data. `"anonymous"` assigns nobody, and an existing
+handler is never overwritten. The rule (`AutoAssignment` in the BL) runs in the shared code of the single and
+the bulk update, and the handler is saved in the same `SaveChanges` as the status and the history row, so it
+is protected by the same `RowVersion` check: a conflict assigns nobody.
+
 ### Order of checks in `PATCH …/status`
 
 1. Body is valid (`newStatus` known, `version` is Base64 of 8 bytes), otherwise `400` with `errors`.
@@ -483,6 +490,9 @@ TODO
   client can send any name. In a real system it would come from the authenticated user (e.g. a claim of a
   validated JWT), not from a header the client controls. Because browsers refuse non-ASCII header values,
   the client percent-encodes the name and the API decodes it ([decision 32](docs/decisions.md)).
+- **No screen for (re)assigning a handler.** A handler is set only automatically, when a request is taken
+  into work ([Auto-assignment](#status-transitions)); changing or removing it is out of the scope of the
+  assessment and would need its own endpoint and UI.
 - **Date filters use UTC days**, while the table shows local dates: a request created on 05.09 at 01:00
   Israel time (04.09 22:00 UTC) is shown as 05.09 but matches the filter day 04.09.
 - **Bulk update saves each item separately**: up to 100 `SaveChanges` round trips (plus one reload per
