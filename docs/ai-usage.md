@@ -30,7 +30,9 @@ This document records, per development step, which parts were generated with Cla
 
 ### Reviewed / decided manually
 
-- TODO: fill in by the developer
+- בחרתי ב-Angular 21 LTS ולא ב-22: תמיכה ארוכת טווח, ודרישת Node נמוכה יותר, כך שקל יותר להריץ את הפרויקט.
+- החלטתי להגדיר את חוזה ה-API לפני המימוש, כדי לבנות את ה-Frontend במקביל ל-Backend.
+- החלטתי להשקיע בעיצוב, ולכן ביקשתי כבר בשלב הזה בסיס של משתני עיצוב (Design Tokens), כדי שהעיצוב יוחלף במקום אחד.
 
 ## Step C – Read API (T2.1–T2.6, T8.1, T8.3)
 
@@ -44,7 +46,10 @@ This document records, per development step, which parts were generated with Cla
 
 ### Reviewed / decided manually
 
-- TODO: fill in by the developer
+- הגדרתי את המבנה של שלוש שכבות (API, BL, DAL), ובחנתי את ההחלטה ליצור ממשקים רק לשירותים ול-Repository, ולא ל-DTOs ולמחלקות נתונים.
+- בחרתי ב-SQL Server בגלל rowversion המובנה ותוכניות הביצוע, אחרי השוואה ל-MongoDB ול-PostgreSQL.
+- בדקתי את ה-Endpoints ב-Swagger מול 100,000 הרשומות.
+- בדקתי את ניסוח דרישת החיפוש במבדק ("לפחות" בכותרת ובארגון), ווידאתי שהמימוש עומד בה.
 
 ## Step D – Status update, concurrency and audit (T3.1–T4.2, T8.2, T8.4)
 
@@ -58,7 +63,9 @@ This document records, per development step, which parts were generated with Cla
 
 ### Reviewed / decided manually
 
-- TODO: fill in by the developer
+- גיליתי בבדיקה ב-UI שעדכון סטטוס מחזיר "הפנייה לא נמצאה". בדקתי ב-Swagger ומצאתי שה-Endpoints של שלב זה לא נוצרו, כי השלב לא הורץ. הרצתי אותו, וה-UI עבד בלי שינוי, כי נבנה לפי החוזה.
+- קבעתי את כללי המעבר, כולל מעבר ישיר מ-Waiting ל-Completed, ווידאתי שהם תואמים לנתוני ה-Seed.
+- בדקתי התנגשות ידנית: עדכנתי את אותה פנייה משתי לשוניות, וקיבלתי את חלון ה-409.
 
 ## Step E – Bulk update and cache (T5.1–T6.2, T8.5)
 
@@ -72,7 +79,9 @@ This document records, per development step, which parts were generated with Cla
 
 ### Reviewed / decided manually
 
-- TODO: fill in by the developer
+- בחרתי ב-Partial Success ולא ב-All-or-Nothing, כי הפניות אינן תלויות זו בזו.
+- החלטתי על IMemoryCache ולא על Redis, כי השרת רץ כמופע יחיד, ו-Redis מתועד כהתאמה לריבוי שרתים.
+- החלטתי שהנתונים המסכמים מחושבים על כל הפניות ולא לפי הסינון, כדי שיתאימו ל-Cache.
 
 ## Step F – Performance and indexes (T1.3, T9.1–T9.3)
 
@@ -86,7 +95,8 @@ This document records, per development step, which parts were generated with Cla
 
 ### Reviewed / decided manually
 
-- TODO: fill in by the developer
+- עברתי על תרשימי תוכניות הביצוע לפני ואחרי האינדקסים, והשוויתי אותם לטבלת המדידות. התרשימים נוצרו בעזרת סקריפט מקבצי ה-.sqlplan שב-docs/performance/plans, ולא צולמו מ-SSMS.
+- למדתי מהדוח שבעמוד עמוק האינדקס דווקא הגדיל את מספר הקריאות, ושלכן Keyset Pagination מוצע כשיפור.
 
 ## Step G – Angular screens (T7.0, T7.2–T7.8)
 
@@ -112,7 +122,9 @@ Environmental Protection logo.
 
 - Noticed in the UI that an InProgress request had no handler, and decided on auto-assignment instead of a full assignment feature.
 - Decided to extend the search to the request number (the requirement says 'at least' Title and OrganizationName), and not to more text fields, because each extra LIKE field adds scan cost.
-- TODO: fill in by the developer
+- עיצבתי את המסכים ב-Claude Design, ובחרתי את הצבעים מעלי הלוגו של המשרד להגנת הסביבה
+- השוויתי את המימוש לעיצוב ואישרתי את הסטיות: בורר תאריכים של הדפדפן, ועדכון מרובה בלי סטטוס מסומן מראש, כדי למנוע שינוי של פניות רבות בטעות.
+- החלטתי לא להוסיף יצירה, עריכה ומחיקה של פניות, כי הן מחוץ לדרישות המבדק.
 
 ## Step H – Submission (T10.x)
 
@@ -126,4 +138,7 @@ Environmental Protection logo.
 
 ### Reviewed / decided manually
 
-- TODO: fill in by the developer
+- כשהכונן התמלא ו-Docker נתקע, עצרתי את העבודה לפני ה-Commit, פיניתי מקום והפעלתי מחדש.
+- אישרתי את שינוי טעינת הגופן: בגלל סינון התעבורה (NetFree), הבנייה ב-Docker לא יכלה להוריד אותו.
+- הרצתי בעצמי את המערכת ב-Docker, ובדקתי שהיא עובדת.
+- צילמתי את המסכים, ובדקתי שהבדיקות עוברות (102 בשרת ו-14 ב-Angular).
