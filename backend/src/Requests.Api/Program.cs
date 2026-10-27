@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Requests.Api.ErrorHandling;
 using Requests.Api.Http;
+using Requests.Api.Startup;
 using Requests.BL;
 using Requests.BL.Caching;
 using Requests.DAL;
@@ -66,10 +67,9 @@ var app = builder.Build();
 // "--seed [--count N]": fill the database with test data and exit without starting the web server.
 if (args.Contains("--seed"))
 {
-    const int defaultSeedCount = 100_000;
     const int maxSeedCount = 1_000_000;
 
-    var seedCount = defaultSeedCount;
+    var seedCount = DatabaseSeeder.DefaultCount;
     var countIndex = Array.IndexOf(args, "--count");
     if (countIndex >= 0)
     {
@@ -87,6 +87,9 @@ if (args.Contains("--seed"))
     await scope.ServiceProvider.GetRequiredService<DatabaseSeeder>().SeedAsync(seedCount, CancellationToken.None);
     return;
 }
+
+// Database:MigrateOnStartup / Seed:OnStartupIfEmpty (both off by default; on in docker-compose.yml).
+await app.PrepareDatabaseAsync();
 
 // GlobalExceptionHandler decides how each exception is logged; the middleware's own Error log for every
 // exception (including validation and cancellation) is turned off in appsettings.json.

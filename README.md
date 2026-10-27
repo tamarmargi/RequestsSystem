@@ -1,55 +1,93 @@
 # RequestsSystem
 
-A system for managing requests from organizations.
+[![CI](https://github.com/tamarmargi/RequestsSystem/actions/workflows/ci.yml/badge.svg)](https://github.com/tamarmargi/RequestsSystem/actions/workflows/ci.yml)
+![.NET 8](https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet)
+![Angular 21](https://img.shields.io/badge/Angular-21-DD0031?logo=angular)
+![SQL Server 2022](https://img.shields.io/badge/SQL%20Server-2022-CC2927?logo=microsoftsqlserver)
 
-- Work plan: [docs/work-plan.md](docs/work-plan.md)
-- API contract: [docs/api-contract.md](docs/api-contract.md)
+A system for managing requests from organizations: a server-side searchable, filterable and paged list of
+100,000 requests, status updates with optimistic concurrency and audit history, bulk updates with partial
+success, and cached statistics — ASP.NET Core 8, EF Core, SQL Server 2022 and Angular 21.
 
-## Prerequisites
+<div dir="rtl">
+
+**תקציר.** מערכת לניהול פניות של ארגונים. המסך מציג 100,000 פניות עם חיפוש, סינון, מיון ודפדוף בצד השרת,
+מאפשר לשנות סטטוס של פנייה אחת או של כמה פניות יחד, מזהה התנגשות כששני משתמשים מעדכנים את אותה פנייה
+ומאפשר להחליט מה לעשות, ושומר היסטוריית שינויים מלאה. הנתונים המסכמים נשמרים ב-Cache, והאינדקסים נבחרו
+לפי מדידה של השאילתות האמיתיות.
+
+</div>
+
+![מסך הפניות](docs/images/requests-page.png)
+
+## Contents
+
+- [Quick start (Docker)](#quick-start-docker) · [Local development](#local-development)
+- [For reviewers](#for-reviewers) · [Screenshots](#screenshots) · [Design](#design)
+- [Architecture](#architecture) · [API](#api) · [Frontend](#frontend) · [Running tests](#running-tests)
+- [Database & Indexes](#database--indexes) · [Concurrency](#concurrency) · [Bulk Update](#bulk-update) ·
+  [Cache](#cache) · [Performance](#performance)
+- [Technical Decisions](#technical-decisions) · [Known Limitations](#known-limitations) · [AI Usage](#ai-usage)
+- Docs: [work plan](docs/work-plan.md) · [API contract](docs/api-contract.md) ·
+  [decisions](docs/decisions.md) · [performance report](docs/performance/README.md)
+
+## Quick start (Docker)
+
+Only [Docker](https://www.docker.com/) is needed. From the repository root:
+
+```bash
+docker compose up --build
+```
+
+- UI: http://localhost:4200
+- API (Swagger): http://localhost:5000/swagger
+
+The first start takes a few minutes: the images are built, and the API applies the migrations and seeds
+100,000 requests when the database is empty. Later starts keep the data (and your changes) and are much
+faster. `docker compose down` stops everything; `docker compose down -v` also deletes the database volume.
+
+What runs:
+
+| Service | Image | Port | Notes |
+|---|---|---|---|
+| `sqlserver` | SQL Server 2022 | 1435 → 1433 | Data in the `sqlserver-data` volume |
+| `api` | [backend/Dockerfile](backend/Dockerfile) (.NET 8 SDK build → ASP.NET Core 8 runtime) | 5000 → 8080 | `Database__MigrateOnStartup=true`, `Seed__OnStartupIfEmpty=true`, Swagger on (`Development`), healthcheck on `/api/health` |
+| `web` | [frontend/Dockerfile](frontend/Dockerfile) (Node build → nginx) | 4200 → 80 | [nginx.conf](frontend/nginx.conf) serves the app and proxies `/api` to `api:8080` |
+
+> The SQL Server password is taken from `.env` if it exists, otherwise from the default in
+> [docker-compose.yml](docker-compose.yml), which is the same as in [.env.example](.env.example). It is a
+> **local development password only**.
+
+### Startup options
+
+Both are **off by default** (`appsettings.json`) and switched on only by `docker-compose.yml`:
+
+| Setting | Effect |
+|---|---|
+| `Database:MigrateOnStartup` | Applies pending EF Core migrations when the API starts, and logs how long it took. |
+| `Seed:OnStartupIfEmpty` | Runs the seeder (100,000 requests) only if the `Requests` table is empty, so restarts keep the data; logs whether it ran or was skipped, and how long it took. |
+
+Outside Docker, migrations stay explicit (`dotnet ef database update`), see [decision 35](docs/decisions.md).
+
+## Local development
+
+### Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (or newer SDK with the .NET 8 runtime)
 - [Docker](https://www.docker.com/) (Docker Desktop on Windows/macOS)
 - [Node.js](https://nodejs.org/) LTS – developed with Node 24.12.0 and npm 11.6.2 (Angular 21 requires Node `^20.19`, `^22.12` or `>=24`)
 
-## Project structure
+### How to run
 
-```
-RequestsSystem/
-├── backend/
-│   ├── RequestsSystem.sln
-│   ├── src/
-│   │   ├── Requests.Api/      # HTTP entry point: controllers, Program.cs, configuration
-│   │   ├── Requests.BL/       # Business logic: services, DTOs, validation
-│   │   └── Requests.DAL/      # Data access with EF Core: DbContext, entities, migrations
-│   └── tests/
-│       └── Requests.Tests/    # xUnit unit and integration tests
-├── frontend/                  # Angular 21 client (see frontend/README.md)
-│   ├── proxy.conf.json        # dev proxy: /api → http://localhost:5000
-│   └── src/
-│       ├── styles/            # design tokens (_tokens.scss), shared control and dialog styles
-│       └── app/
-│           ├── models/        # TypeScript types matching docs/api-contract.md
-│           ├── services/      # HTTP client (RequestsApiService)
-│           ├── core/          # cross-cutting: ApiError, error and X-User-Name interceptors, current user
-│           ├── shared/        # labels, transitions, StatusBadge, PriorityLabel, icons, date helpers
-│           └── features/
-│               └── requests/  # RequestsListState, RequestStatusActions, components/ (page, table, dialogs…)
-├── docs/                      # Technical decisions, work plan, API contract, performance report
-│   └── design/                # UI design from Claude Design (*.dc.html, reference only)
-├── .config/                   # Local .NET tools manifest (dotnet-ef)
-└── docker-compose.yml         # Local SQL Server 2022
-```
-
-## How to run
-
-All commands are run from the `RequestsSystem` folder (the repository root).
+All commands are run from the `RequestsSystem` folder (the repository root). Only the database runs in
+Docker; the API and the UI run on the host.
 
 ```bash
-# 1. Local secrets (first time only)
+# 1. Local secrets (first time only; optional, docker-compose.yml has the same default)
 cp .env.example .env
 
-# 2. Start SQL Server 2022 and wait until it is healthy
-docker compose up -d
+# 2. Start SQL Server 2022 only, and wait until it is healthy
+docker compose up -d sqlserver
 
 # 3. Restore local tools (dotnet-ef) and apply migrations
 dotnet tool restore
@@ -68,6 +106,9 @@ dotnet run --project backend/src/Requests.Api
 
 > SQL Server from Docker is exposed on host port **1435** (not 1433) so it does not collide with a
 > locally installed SQL Server instance, which typically uses TCP 1433 and its DAC on 1434.
+>
+> Use `docker compose up -d sqlserver`, not `docker compose up`, for local development: the full stack
+> would also start the `api` and `web` containers on ports 5000 and 4200.
 
 Run the frontend (in a second terminal, while the API is running):
 
@@ -82,7 +123,7 @@ port 5000. See [Frontend](#frontend).
 
 To run the tests, see [Running tests](#running-tests).
 
-## Test Data
+### Test Data
 
 Generate test data (SQL Server must be running and migrations applied):
 
@@ -115,17 +156,150 @@ What is generated (code in `backend/src/Requests.DAL/Seeding/`):
 **Why skewed distributions?** Real data is never uniform. Index selectivity depends on the actual value
 distribution: filtering by `Status = Waiting` (10%) behaves differently from `Status = Completed` (50%),
 and a "big" organization returns many more rows than a small one. Realistic skew makes the index and
-performance measurements in later steps meaningful instead of optimistic.
+performance measurements meaningful instead of optimistic.
 
 **Why SqlBulkCopy?** Inserting ~280,000 rows through EF Core (`AddRange` + `SaveChanges`) means change
 tracking and batched `INSERT` statements and takes minutes. `SqlBulkCopy` streams the rows with the
-bulk-load protocol inside one transaction. Measured on the local Docker SQL Server: generation ~0.4 s,
-insert ~2.8 s on an empty database (~7.4 s when existing data is deleted first); the whole command
-finishes in under 10 seconds.
+bulk-load protocol inside one transaction. Measured on the local Docker SQL Server before the indexes were
+added: generation ~0.4 s, insert ~2.8 s on an empty database (~7.4 s when existing data is deleted first);
+the whole command finished in under 10 seconds. With the five indexes the insert takes ~13–16 s
+([performance report](docs/performance/README.md#write-cost-of-the-indexes)).
+
+## For reviewers
+
+Where each section of the assessment is implemented, tested and documented.
+
+| # | Requirement | Implementation | Tests | Documentation |
+|---|---|---|---|---|
+| 1 | Data retrieval: server-side search, filters, sorting, paging, stats | [RequestsController](backend/src/Requests.Api/Controllers/RequestsController.cs), [RequestQueryService](backend/src/Requests.BL/Services/RequestQueryService.cs), [RequestRepository](backend/src/Requests.DAL/Repositories/RequestRepository.cs), [RequestQueryParametersValidator](backend/src/Requests.BL/Validation/RequestQueryParametersValidator.cs) | [RequestsApiTests](backend/tests/Requests.Tests/Integration/RequestsApiTests.cs), [RequestQueryParametersValidatorTests](backend/tests/Requests.Tests/Validation/RequestQueryParametersValidatorTests.cs) | [API](#api), [Avoiding loading all data into memory](#avoiding-loading-all-data-into-memory), [API contract](docs/api-contract.md) |
+| 2 | Status update with optimistic concurrency | [RequestCommandService](backend/src/Requests.BL/Services/RequestCommandService.cs), [StatusTransitions](backend/src/Requests.BL/Domain/StatusTransitions.cs), [AutoAssignment](backend/src/Requests.BL/Domain/AutoAssignment.cs), [RequestRepository](backend/src/Requests.DAL/Repositories/RequestRepository.cs) (`SaveStatusChangeAsync`), [AppDbContext](backend/src/Requests.DAL/AppDbContext.cs) | [StatusUpdateTests](backend/tests/Requests.Tests/Integration/StatusUpdateTests.cs) (incl. parallel `Task.WhenAll`), [StatusTransitionsTests](backend/tests/Requests.Tests/Domain/StatusTransitionsTests.cs), [UpdateStatusRequestValidatorTests](backend/tests/Requests.Tests/Validation/UpdateStatusRequestValidatorTests.cs), [AutoAssignmentTests](backend/tests/Requests.Tests/Integration/AutoAssignmentTests.cs) | [Concurrency](#concurrency) |
+| 3 | Audit history | [RequestRepository](backend/src/Requests.DAL/Repositories/RequestRepository.cs), [RequestStatusHistory](backend/src/Requests.DAL/Entities/RequestStatusHistory.cs), [RequestStatusHistoryConfiguration](backend/src/Requests.DAL/Configurations/RequestStatusHistoryConfiguration.cs) | [StatusUpdateTests](backend/tests/Requests.Tests/Integration/StatusUpdateTests.cs) (history rows, order, `ChangedBy`) | [Audit history](#audit-history) |
+| 4 | Bulk update | [RequestCommandService](backend/src/Requests.BL/Services/RequestCommandService.cs) (`BulkUpdateStatusAsync`), [BulkUpdateStatusRequestValidator](backend/src/Requests.BL/Validation/BulkUpdateStatusRequestValidator.cs) | [BulkUpdateTests](backend/tests/Requests.Tests/Integration/BulkUpdateTests.cs), [BulkUpdateStatusRequestValidatorTests](backend/tests/Requests.Tests/Validation/BulkUpdateStatusRequestValidatorTests.cs), [RequestRepositoryTests](backend/tests/Requests.Tests/Integration/RequestRepositoryTests.cs) | [Bulk Update](#bulk-update) |
+| 5 | Angular client | [requests-list.state.ts](frontend/src/app/features/requests/requests-list.state.ts), [request-status-actions.ts](frontend/src/app/features/requests/request-status-actions.ts), [components](frontend/src/app/features/requests/components/), [requests-api.service.ts](frontend/src/app/services/requests-api.service.ts) | [requests-list.state.spec.ts](frontend/src/app/features/requests/requests-list.state.spec.ts), [request-status-actions.spec.ts](frontend/src/app/features/requests/request-status-actions.spec.ts), [error.interceptor.spec.ts](frontend/src/app/core/error.interceptor.spec.ts), [requests-api.service.spec.ts](frontend/src/app/services/requests-api.service.spec.ts) | [Frontend](#frontend), [Conflict handling in the UI](#conflict-handling-in-the-ui), [Design](#design) |
+| 6 | Performance | [RequestConfiguration](backend/src/Requests.DAL/Configurations/RequestConfiguration.cs) (indexes), [AddRequestIndexes](backend/src/Requests.DAL/Migrations/20261025004902_AddRequestIndexes.cs) | Measurement: [measure.ps1](docs/performance/measure.ps1), [queries.sql](docs/performance/queries.sql), [plans](docs/performance/plans/) | [Performance](#performance), [performance report](docs/performance/README.md) |
+| 7 | Cache | [MemoryStatsCache](backend/src/Requests.BL/Caching/MemoryStatsCache.cs), [IStatsCache](backend/src/Requests.BL/Caching/IStatsCache.cs) | [MemoryStatsCacheTests](backend/tests/Requests.Tests/Caching/MemoryStatsCacheTests.cs), [BulkUpdateTests](backend/tests/Requests.Tests/Integration/BulkUpdateTests.cs) (invalidation end to end) | [Cache](#cache) |
+| 8 | Automated tests | [backend/tests/Requests.Tests](backend/tests/Requests.Tests/), frontend `*.spec.ts`, [CI workflow](.github/workflows/ci.yml) | Integration tests on a real SQL Server ([ApiFixture](backend/tests/Requests.Tests/Integration/ApiFixture.cs), Testcontainers) | [Running tests](#running-tests) |
+| 9 | Work plan | [docs/work-plan.md](docs/work-plan.md) | – | [work plan](docs/work-plan.md) |
+| 10 | Code quality | Three layers ([Api](backend/src/Requests.Api/), [BL](backend/src/Requests.BL/), [DAL](backend/src/Requests.DAL/)), [GlobalExceptionHandler](backend/src/Requests.Api/ErrorHandling/GlobalExceptionHandler.cs), validation in the BL | [GlobalExceptionHandlerTests](backend/tests/Requests.Tests/Api/GlobalExceptionHandlerTests.cs) | [Architecture](#architecture), [decisions](docs/decisions.md) |
+| 11 | Documentation | This README, [docs/](docs/) | – | [API contract](docs/api-contract.md), [decisions](docs/decisions.md), [AI usage](docs/ai-usage.md) |
+| – | Submission | [docker-compose.yml](docker-compose.yml), [backend/Dockerfile](backend/Dockerfile), [frontend/Dockerfile](frontend/Dockerfile), [CI](.github/workflows/ci.yml) | CI runs all backend and frontend tests on every push | [Quick start (Docker)](#quick-start-docker) |
+
+## Screenshots
+
+| | |
+|---|---|
+| ![מסך הפניות](docs/images/requests-page.png) | ![שינוי סטטוס](docs/images/status-dialog.png) |
+| Requests page: stats, search, filters, server-side paging | Status change: only the allowed targets |
+| ![התנגשות](docs/images/conflict.png) | ![היסטוריה](docs/images/history.png) |
+| Conflict (409): your change vs the current state on the server | History panel, newest first |
+| ![תוצאת עדכון מרובה](docs/images/bulk-result.png) | ![מצב ריק](docs/images/empty-state.png) |
+| Bulk update: result per request | Empty state |
+| ![מצב שגיאה](docs/images/error-state.png) | ![Swagger](docs/images/swagger.png) |
+| Error state with retry | API in Swagger |
+| ![בדיקות](docs/images/tests.png) | |
+| Backend and frontend tests passing | |
+
+![שתי לשוניות מעדכנות את אותה פנייה: השנייה מקבלת התנגשות](docs/images/conflict-demo.gif)
+
+*שתי לשוניות מעדכנות את אותה פנייה: השנייה מקבלת התנגשות*
+
+Execution plans before and after the indexes (from the [performance report](docs/performance/README.md)):
+
+| | Before | After |
+|---|---|---|
+| Q1 – default list | ![Q1 before](docs/performance/images/q1-before.png) | ![Q1 after](docs/performance/images/q1-after.png) |
+| Q2 – status + priority | ![Q2 before](docs/performance/images/q2-before.png) | ![Q2 after](docs/performance/images/q2-after.png) |
+| Q5 – stats | ![Q5 before](docs/performance/images/q5-before.png) | ![Q5 after](docs/performance/images/q5-after.png) |
+
+The list of required screenshot files is in [docs/images/README.md](docs/images/README.md).
+
+## Design
+
+The screens were designed first in **Claude Design** ([docs/design](docs/design), 6 screens: Main,
+StatusDialog, Conflict, History, BulkResult, States) and then implemented with Angular components and
+Angular Material.
+
+| Screen | Design | Implemented |
+|---|---|---|
+| Main | ![Main design](docs/design/Main.png) | ![Main implemented](docs/images/requests-page.png) |
+| Status change | ![StatusDialog design](docs/design/StatusDialog.png) | ![Status change implemented](docs/images/status-dialog.png) |
+| Conflict | ![Conflict design](docs/design/Conflict.png) | ![Conflict implemented](docs/images/conflict.png) |
+| History | ![History design](docs/design/History.png) | ![History implemented](docs/images/history.png) |
+| Bulk result | ![BulkResult design](docs/design/BulkResult.png) | ![Bulk result implemented](docs/images/bulk-result.png) |
+| States | ![States design](docs/design/States.png) | ![Empty state implemented](docs/images/empty-state.png) ![Error state implemented](docs/images/error-state.png) |
+
+- **Colors** are taken from the leaves of the Ministry of Environmental Protection logo — green `#007A3D`
+  and orange `#F29219` — without using the logo itself. All values are design tokens (CSS custom properties)
+  in [`_tokens.scss`](frontend/src/styles/_tokens.scss); components use only `var(--token)`, and the Material
+  theme (buttons, checkboxes, dialogs, snackbar, table, progress bar) is mapped to the same tokens
+  ([decision 31](docs/decisions.md)).
+- **Typography:** Heebo (Hebrew), sizes 12–30 px.
+- **Accessibility:**
+  - Status meaning never depends on color alone: every badge has a dot **and** a text label, priorities are words.
+  - Text colors meet contrast on their backgrounds; the orange is **never used as text on white** — only as
+    a surface with dark text (the bulk "החלה" button), the 4px header stripe, or a status dot.
+  - Real buttons and labels for every input, `aria-label` on icon buttons, dialogs with titles (the conflict
+    dialog is an `alertdialog`), focus moves to the dialog title and returns to the triggering button on close,
+    `aria-live` for the result count and loading states.
+  - The layout stacks on narrow screens; the wide table scrolls inside its own box, never the page.
+
+## Project structure
+
+```
+RequestsSystem/
+├── backend/
+│   ├── RequestsSystem.sln
+│   ├── Dockerfile             # API image (.NET 8 SDK build → ASP.NET Core 8 runtime)
+│   ├── src/
+│   │   ├── Requests.Api/      # HTTP entry point: controllers, Program.cs, configuration, startup options
+│   │   ├── Requests.BL/       # Business logic: services, DTOs, validation, domain rules, cache
+│   │   └── Requests.DAL/      # Data access with EF Core: DbContext, entities, migrations, repository, seeder
+│   └── tests/
+│       └── Requests.Tests/    # xUnit unit and integration tests
+├── frontend/                  # Angular 21 client (see frontend/README.md)
+│   ├── Dockerfile, nginx.conf # web image: Node build → nginx (serves the app, proxies /api)
+│   ├── proxy.conf.json        # dev proxy: /api → http://localhost:5000
+│   └── src/
+│       ├── styles/            # design tokens (_tokens.scss), shared control and dialog styles
+│       └── app/
+│           ├── models/        # TypeScript types matching docs/api-contract.md
+│           ├── services/      # HTTP client (RequestsApiService)
+│           ├── core/          # cross-cutting: ApiError, error and X-User-Name interceptors, current user
+│           ├── shared/        # labels, transitions, StatusBadge, PriorityLabel, icons, date helpers
+│           └── features/
+│               └── requests/  # RequestsListState, RequestStatusActions, components/ (page, table, dialogs…)
+├── docs/                      # Technical decisions, work plan, API contract, AI usage
+│   ├── design/                # UI design from Claude Design (*.dc.html and images, reference only)
+│   ├── images/                # README screenshots
+│   └── performance/           # performance report, queries, measurement script, execution plans
+├── .github/workflows/ci.yml   # CI: backend build + tests, frontend tests + build
+├── .config/                   # Local .NET tools manifest (dotnet-ef)
+└── docker-compose.yml         # SQL Server 2022, API and web
+```
+
+## Architecture
+
+The backend solution (`backend/RequestsSystem.sln`) has three layers plus a test project:
+
+| Project | Responsibility |
+|---|---|
+| `backend/src/Requests.Api` | Entry point only: ASP.NET Core Web API controllers, `Program.cs`, configuration, Swagger. No business logic. |
+| `backend/src/Requests.BL` | Business logic: services, DTOs, validation (FluentValidation). Exposes `AddBl()` for DI registration. |
+| `backend/src/Requests.DAL` | Data access: EF Core `AppDbContext`, entities, entity configurations, migrations. Exposes `AddDal()` for DI registration. |
+| `backend/tests/Requests.Tests` | xUnit tests (unit and integration via `WebApplicationFactory` + Testcontainers). |
+
+Dependency direction: `Api → BL → DAL`, and `Api → DAL` for DI wiring. DAL references neither BL nor Api; BL does not reference Api.
+
+### Data model
+
+- **Requests**: `Id`, `Title`, `OrganizationName`, `Status` (tinyint), `Priority` (tinyint), `AssignedTo`, `CreatedAt`/`UpdatedAt` (UTC), `RowVersion` (rowversion concurrency token).
+- **RequestStatusHistory**: `Id`, `RequestId` (FK, cascade delete), `PreviousStatus`, `NewStatus`, `ChangedAt` (UTC), `ChangedBy`. Indexed on `(RequestId, ChangedAt)`.
+
+See [docs/decisions.md](docs/decisions.md) for technical decisions.
 
 ## API
 
-Endpoints implemented so far (full specification in [docs/api-contract.md](docs/api-contract.md)):
+Endpoints (full specification in [docs/api-contract.md](docs/api-contract.md)):
 
 | Endpoint | Description |
 |---|---|
@@ -135,7 +309,7 @@ Endpoints implemented so far (full specification in [docs/api-contract.md](docs/
 | `PATCH /api/requests/{id}/status` | Changes the status, with optimistic concurrency on `version` (see [Concurrency](#concurrency)). `200` updated request, `400` invalid body or transition, `404`, `409` with the current state. Optional `X-User-Name` header for the audit row. |
 | `GET /api/requests/{id}/history` | Status change history, newest first, or `404`. |
 | `POST /api/requests/bulk-status` | Changes the status of 1–100 requests with partial success (see [Bulk Update](#bulk-update)). `200` with a result per item whenever the request is valid; `400` for an invalid request (nothing changed). |
-| `GET /api/health` | Liveness check. |
+| `GET /api/health` | Liveness check (also the Docker healthcheck). |
 
 Enums are strings, dates are UTC ISO 8601, `version` is the Base64 `rowversion`, and every error is an
 RFC 7807 ProblemDetails (`400` responses include an `errors` object keyed by the camelCase parameter name).
@@ -147,8 +321,6 @@ or in Visual Studio / Rider).
 ## Frontend
 
 Angular 21 (standalone, zoneless) + Angular Material, Hebrew RTL UI, in [frontend/](frontend/README.md).
-
-![מסך הפניות](docs/images/requests-page.png)
 
 | Requirement | How the screen does it |
 |---|---|
@@ -197,6 +369,9 @@ Tests: `cd frontend && npm test` (Vitest, single headless run).
 - **Current user:** the user chip in the header edits the name (kept in `localStorage`). An interceptor sends
   it on every `/api` request as `X-User-Name`, percent-encoded because browsers refuse Hebrew header values;
   the API decodes it and stores it as `changedBy` ([decision 32](docs/decisions.md)).
+- **Serving:** in development the Angular dev server proxies `/api` to the API; in Docker, nginx serves the
+  built app and proxies `/api` to the API container. In both cases the app calls relative `/api` URLs on the
+  same origin, so no CORS is needed ([decisions 9 and 36](docs/decisions.md)).
 
 ### Conflict handling in the UI
 
@@ -217,25 +392,6 @@ Tests: `cd frontend && npm test` (Vitest, single headless run).
 6. After a successful update the list and the stats are refreshed (the user stays on the same page) and a
    short snackbar confirms it.
 
-### Design
-
-The screens were designed in **Claude Design** ([docs/design](docs/design), 6 screens: Main, StatusDialog,
-Conflict, History, BulkResult, States) and implemented with Angular components and Angular Material.
-
-- **Colors** are taken from the leaves of the Ministry of Environmental Protection logo — green `#007A3D`
-  and orange `#F29219` — without using the logo itself. All values are design tokens (CSS custom properties)
-  in [`_tokens.scss`](frontend/src/styles/_tokens.scss); components use only `var(--token)`, and the Material
-  theme (buttons, checkboxes, dialogs, snackbar, table, progress bar) is mapped to the same tokens.
-- **Typography:** Heebo (Hebrew), sizes 12–30 px.
-- **Accessibility:**
-  - Status meaning never depends on color alone: every badge has a dot **and** a text label, priorities are words.
-  - Text colors meet contrast on their backgrounds; the orange is **never used as text on white** — only as
-    a surface with dark text (the bulk "החלה" button), the 4px header stripe, or a status dot.
-  - Real buttons and labels for every input, `aria-label` on icon buttons, dialogs with titles (the conflict
-    dialog is an `alertdialog`), focus moves to the dialog title and returns to the triggering button on close,
-    `aria-live` for the result count and loading states.
-  - The layout stacks on narrow screens; the wide table scrolls inside its own box, never the page.
-
 ## Running tests
 
 ```bash
@@ -249,25 +405,9 @@ they start a throwaway SQL Server 2022 container with Testcontainers (once for a
 apply the migrations, seed 500 deterministic requests and call the API over HTTP through
 `WebApplicationFactory`. The first run also pulls the SQL Server image if it is not present.
 
-## Architecture
-
-The backend solution (`backend/RequestsSystem.sln`) has three layers plus a test project:
-
-| Project | Responsibility |
-|---|---|
-| `backend/src/Requests.Api` | Entry point only: ASP.NET Core Web API controllers, `Program.cs`, configuration, Swagger. No business logic. |
-| `backend/src/Requests.BL` | Business logic: services, DTOs, validation (FluentValidation). Exposes `AddBl()` for DI registration. |
-| `backend/src/Requests.DAL` | Data access: EF Core `AppDbContext`, entities, entity configurations, migrations. Exposes `AddDal()` for DI registration. |
-| `backend/tests/Requests.Tests` | xUnit tests (unit and integration via `WebApplicationFactory` + Testcontainers). |
-
-Dependency direction: `Api → BL → DAL`, and `Api → DAL` for DI wiring. DAL references neither BL nor Api; BL does not reference Api.
-
-### Data model
-
-- **Requests**: `Id`, `Title`, `OrganizationName`, `Status` (tinyint), `Priority` (tinyint), `AssignedTo`, `CreatedAt`/`UpdatedAt` (UTC), `RowVersion` (rowversion concurrency token).
-- **RequestStatusHistory**: `Id`, `RequestId` (FK, cascade delete), `PreviousStatus`, `NewStatus`, `ChangedAt` (UTC), `ChangedBy`. Indexed on `(RequestId, ChangedAt)`.
-
-See [docs/decisions.md](docs/decisions.md) for technical decisions.
+The same tests run in [CI](.github/workflows/ci.yml) on every push and pull request to `main`: the backend
+job builds and runs all backend tests (Docker is available on the GitHub runner for Testcontainers), and
+the frontend job runs `npm test` and the production build.
 
 ## Database & Indexes
 
@@ -487,7 +627,16 @@ Details in the [report](docs/performance/README.md#how-to-reproduce).
 
 ## Technical Decisions
 
-TODO
+The most important decisions; the full list (37 decisions, each with its reason and alternatives) is in
+[docs/decisions.md](docs/decisions.md).
+
+| Decision | Why | Alternative |
+|---|---|---|
+| **SQL Server + `rowversion`** for optimistic concurrency | The database itself rejects a stale update in the `WHERE` of the `UPDATE`, not only the code or the UI; execution plans make the performance work measurable | PostgreSQL / MongoDB; a manual version number column |
+| **Three layers (Api / BL / DAL)** with a specific repository | Clear responsibilities without over-engineering; all request queries in one place for the performance work | Clean Architecture with 4+ projects, CQRS / MediatR; a generic repository |
+| **Bulk update with partial success, one transaction per item** | Items are independent: one conflict must not block 99 valid updates, and the client sees exactly what failed | All-or-nothing in one transaction; `207 Multi-Status` |
+| **`IMemoryCache` behind `IStatsCache`**, absolute expiration + invalidation after every successful update | Stats are an expensive aggregate, identical for all users; changes show immediately, staleness is bounded by 60 s; Redis can replace it without other code changes | Redis from the start; caching the list (near-zero hit rate) |
+| **Indexes chosen by measured queries** | Every index speeds specific reads and slows every write; only indexes used by a measured query (verified in the actual plan) are kept | One index per filterable column; a filtered index for open requests (measured: unusable with parameterized queries) |
 
 ## Known Limitations
 
@@ -495,6 +644,9 @@ TODO
   client can send any name. In a real system it would come from the authenticated user (e.g. a claim of a
   validated JWT), not from a header the client controls. Because browsers refuse non-ASCII header values,
   the client percent-encodes the name and the API decodes it ([decision 32](docs/decisions.md)).
+- **No creating, editing or deleting requests.** They are not part of the assessment; all requests come from
+  the seeder. A possible extension is `POST /api/requests` with validation (FluentValidation, as for the other
+  inputs) that also writes a first history row (`New`), in the same transaction.
 - **No screen for (re)assigning a handler.** A handler is set only automatically, when a request is taken
   into work ([Auto-assignment](#status-transitions)); changing or removing it is out of the scope of the
   assessment and would need its own endpoint and UI.
@@ -514,4 +666,18 @@ TODO
 
 ## AI Usage
 
-TODO
+- **Claude Code** generated the implementation step by step from written instructions (backend, frontend,
+  tests, measurement scripts, Docker and CI) and the documentation drafts, and ran the builds, the tests and
+  the measurements of each step.
+- **Claude Design** produced the UI design and its design system ([docs/design](docs/design)); the colors come
+  from the leaves of the Ministry of Environmental Protection logo.
+- **Reviewed and decided by me**, as recorded so far in [docs/ai-usage.md](docs/ai-usage.md): the
+  requirements of the seed data (skewed distributions, fixed seed and reference date, consistent history
+  paths), approving a deviation from the original instruction (fixed history Ids so repeated seeding gives
+  identical data), checking the seeded data directly in the database (counts, distributions, a repeated run,
+  the history of a sample request) and that the seed time is reasonable, and two product decisions: automatic
+  assignment of the handler instead of a full assignment feature, and extending the search to the request
+  number but not to more text fields.
+
+The per-step details — what was generated and what was reviewed or decided manually — are in
+[docs/ai-usage.md](docs/ai-usage.md).

@@ -499,3 +499,9 @@ frontend/out-tsc/
 
 # The macOS "Icon" rule above also matches the Angular icon component folder (case-insensitive git).
 !frontend/src/app/shared/icon/
+
+## CI and Docker
+# Test result files (dotnet test --logger trx, uploaded as CI artifacts).
+*.trx
+TestResults/
+# Docker builds produce images only; nothing is written to the working tree.

@@ -113,3 +113,17 @@ Environmental Protection logo.
 - Noticed in the UI that an InProgress request had no handler, and decided on auto-assignment instead of a full assignment feature.
 - Decided to extend the search to the request number (the requirement says 'at least' Title and OrganizationName), and not to more text fields, because each extra LIKE field adds scan cost.
 - TODO: fill in by the developer
+
+## Step H – Submission (T10.x)
+
+### Generated with Claude Code
+
+- One-command run: `backend/Dockerfile`, `frontend/Dockerfile` and `frontend/nginx.conf`, the `api` and `web` services in `docker-compose.yml`, and the startup options `Database:MigrateOnStartup` / `Seed:OnStartupIfEmpty` (`DatabaseStartup`).
+- CI: `.github/workflows/ci.yml` (backend build and tests with Testcontainers, frontend tests and production build).
+- Cleanup: removed the placeholder test, explicit `api/health` route, outdated wording in the docs, `.gitignore` for CI test results; the design images renamed to English file names.
+- The README restructure (landing page, quick start, table for reviewers, screenshots, design, technical decisions, AI usage), `docs/images/README.md`, decisions 35–37 and the work plan updates.
+- Verification of the Docker run, which found a restart bug: the SQL Server healthcheck passed while `RequestsDb` was still recovering, so the startup migration tried to create the database again. The healthcheck now waits until every database is `ONLINE`.
+
+### Reviewed / decided manually
+
+- TODO: fill in by the developer

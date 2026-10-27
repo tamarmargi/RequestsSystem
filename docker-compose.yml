@@ -1,22 +1,62 @@
 name: requestssystem
 
+# Whole system:      docker compose up --build        -> UI http://localhost:4200, API http://localhost:5000/swagger
+# Local development: docker compose up -d sqlserver   -> then dotnet run (API) and npm start (UI), see README.md
+#
+# SA_PASSWORD comes from .env when it exists; otherwise the default below is used.
+# It is a LOCAL DEVELOPMENT password only (the same as in .env.example), never use it anywhere else.
+
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: requests-sqlserver
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: ${SA_PASSWORD}
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD:-Your_Strong_Pass123}
     ports:
       - "1435:1433"
     volumes:
       - sqlserver-data:/var/opt/mssql
+    # Healthy only when every database is ONLINE: after a restart RequestsDb is recovered for a few seconds,
+    # and EF Core migrations started in that window try to CREATE the database again and fail.
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q \"SELECT 1\" -b -o /dev/null"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q \"IF EXISTS (SELECT 1 FROM sys.databases WHERE state_desc <> 'ONLINE') RAISERROR('databases are recovering', 16, 1)\" -b -o /dev/null"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 20s
+
+  api:
+    build: ./backend
+    container_name: requests-api
+    environment:
+      # Development: Swagger UI is enabled.
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: "Server=sqlserver,1433;Database=RequestsDb;User Id=sa;Password=${SA_PASSWORD:-Your_Strong_Pass123};TrustServerCertificate=True"
+      # One-command run: apply migrations, and seed 100,000 requests only if the table is empty.
+      Database__MigrateOnStartup: "true"
+      Seed__OnStartupIfEmpty: "true"
+    ports:
+      - "5000:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      # Migrations and the first seed run before the API starts listening.
+      start_period: 60s
+
+  web:
+    build: ./frontend
+    container_name: requests-web
+    ports:
+      - "4200:80"
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   sqlserver-data:

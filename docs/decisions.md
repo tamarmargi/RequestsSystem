@@ -39,7 +39,7 @@
 ## 7. Angular Material for behavior, custom design tokens for appearance
 
 - **Decision:** Use Angular Material components for behavior, and our own CSS custom properties (`frontend/src/styles/_tokens.scss`) for appearance. The Material theme is mapped onto these variables (primary color, typography, shape).
-- **Reason:** Ready-made, accessible table, paginator, sort and dialogs that work with server-side paging and sorting, while the visual design stays under our control through our own CSS variables (to be defined in a dedicated design step).
+- **Reason:** Ready-made, accessible table, paginator, sort and dialogs that work with server-side paging and sorting, while the visual design stays under our control through our own CSS variables (defined in the design step, see decision 31).
 - **Alternatives:** PrimeNG, Angular CDK with fully custom components.
 
 ## 8. API contract defined before implementation
@@ -197,3 +197,21 @@
 - **Decision:** If the trimmed search text is only digits and fits in 1..int.MaxValue (leading zeros allowed), the search also matches the request with that `Id`, in addition to the text match on `Title` and `OrganizationName` (`OR [r].[Id] = @id` in the same `WHERE`). Other search texts are unchanged.
 - **Reason:** The number is shown in the table and users naturally search by it; the assessment requires search "at least" in `Title` and `OrganizationName`. No extra cost, because the query already scans (measured: identical logical reads, times within noise).
 - **Alternatives:** A separate "go to request number" field.
+
+## 35. Migrations and seeding on startup only by configuration
+
+- **Decision:** The API can apply EF Core migrations (`Database:MigrateOnStartup`) and seed 100,000 requests when the `Requests` table is empty (`Seed:OnStartupIfEmpty`) when it starts. Both are off by default in `appsettings.json` and switched on only in `docker-compose.yml`. Each one logs when it runs and how long it took.
+- **Reason:** A one-command run for reviewers (`docker compose up --build`) with a ready database and data, while every other environment keeps explicit migrations (`dotnet ef database update`), so schema changes are never applied by accident when an instance starts. Seeding only an empty table means restarts keep the data and the user's changes.
+- **Alternatives:** A separate migration/seed container or init script; always migrating on startup.
+
+## 36. nginx serves the built Angular app and proxies /api
+
+- **Decision:** In Docker, the `web` container is nginx: it serves the production build of the Angular app (with SPA fallback to `index.html`) and proxies `/api` to the `api` container. The app keeps calling relative `/api` URLs.
+- **Reason:** The browser talks to one origin, so no CORS configuration is needed, exactly like the dev server's proxy in local development (decision 9). The same build works in both setups without environment-specific URLs.
+- **Alternatives:** Serving the Angular files from ASP.NET Core; a separate origin for the API with CORS.
+
+## 37. The production build does not inline Google Fonts
+
+- **Decision:** In the production configuration of `angular.json`, `optimization.fonts` is `false`. The `<link>` to the Heebo font in `index.html` stays, so the browser loads the font at runtime, exactly as the development build already does.
+- **Reason:** With font inlining on, `ng build` downloads the Google Fonts CSS during the build. Inside the Docker build container this failed on a network that inspects TLS ("unable to get local issuer certificate"), so `docker compose up --build` broke. Without inlining, the build needs no internet access beyond npm.
+- **Alternatives:** Passing a custom CA certificate into the Docker build; self-hosting the font files in `src/assets`.
