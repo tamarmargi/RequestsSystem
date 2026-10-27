@@ -1,5 +1,89 @@
 # Technical Decisions
 
+## Key decisions
+
+The five decisions summarized in the README section *Technical Decisions*:
+
+- SQL Server + `rowversion` for optimistic concurrency — [1](#1-sql-server), [16](#16-version-in-the-request-body-rather-than-if-match)
+- Three layers (Api / BL / DAL) with a specific repository — [3](#3-three-layers-api--bl--dal), [10](#10-specific-repository-in-the-dal-no-generic-repository)
+- Bulk update with partial success, one transaction per item — [20](#20-bulk-update-partial-success), [21](#21-bulk-update-one-transaction-per-item)
+- `IMemoryCache` behind `IStatsCache`, absolute expiration + invalidation — [23](#23-cache-imemorycache-behind-istatscache-absolute-expiration--explicit-invalidation)
+- Indexes chosen by measured queries — [24](#24-indexes-chosen-by-measured-queries-not-per-column)
+
+## Index
+
+### Database
+
+| # | Decision |
+|---|---|
+| [1](#1-sql-server) | SQL Server |
+| [4](#4-enums-stored-as-tinyint) | Enums stored as tinyint |
+| [5](#5-all-dates-in-utc) | All dates in UTC |
+| [6](#6-seeding-with-sqlbulkcopy-and-a-fixed-random-seed) | Seeding with SqlBulkCopy and a fixed random seed |
+
+### Data access & API
+
+| # | Decision |
+|---|---|
+| [2](#2-ef-core) | EF Core |
+| [3](#3-three-layers-api--bl--dal) | Three layers (Api / BL / DAL) |
+| [8](#8-api-contract-defined-before-implementation) | API contract defined before implementation |
+| [10](#10-specific-repository-in-the-dal-no-generic-repository) | Specific repository in the DAL (no generic repository) |
+| [11](#11-stable-sorting-with-id-as-a-tie-breaker) | Stable sorting with Id as a tie-breaker |
+| [12](#12-date-range-semantics) | Date range semantics |
+| [13](#13-stats-computed-over-all-requests-in-one-query) | Stats computed over all requests, in one query |
+| [14](#14-validation-in-the-bl-mapped-to-400-by-a-global-handler) | Validation in the BL, mapped to 400 by a global handler |
+| [18](#18-result-objects-instead-of-exceptions-for-expected-outcomes) | Result objects instead of exceptions for expected outcomes |
+| [34](#34-search-also-matches-the-request-number) | Search also matches the request number |
+
+### Concurrency & audit
+
+| # | Decision |
+|---|---|
+| [15](#15-status-transition-rules) | Status transition rules |
+| [16](#16-version-in-the-request-body-rather-than-if-match) | Version in the request body rather than If-Match |
+| [17](#17-conflict-is-checked-before-the-transition-rule) | Conflict is checked before the transition rule |
+| [19](#19-updatedat-set-centrally-in-savechanges) | UpdatedAt set centrally in SaveChanges |
+| [33](#33-auto-assign-on-new---inprogress) | Auto-assign on New -> InProgress |
+
+### Bulk & cache
+
+| # | Decision |
+|---|---|
+| [20](#20-bulk-update-partial-success) | Bulk update: partial success |
+| [21](#21-bulk-update-one-transaction-per-item) | Bulk update: one transaction per item |
+| [22](#22-bulk-response-200-with-per-item-results-not-207) | Bulk response: 200 with per-item results, not 207 |
+| [23](#23-cache-imemorycache-behind-istatscache-absolute-expiration--explicit-invalidation) | Cache: IMemoryCache behind IStatsCache, absolute expiration + explicit invalidation |
+
+### Performance
+
+| # | Decision |
+|---|---|
+| [24](#24-indexes-chosen-by-measured-queries-not-per-column) | Indexes chosen by measured queries, not per column |
+| [25](#25-no-filtered-index-for-open-requests) | No filtered index for open requests |
+| [26](#26-composite-indexes-include-id-as-the-last-key) | Composite indexes include Id as the last key |
+
+### Frontend
+
+| # | Decision |
+|---|---|
+| [7](#7-angular-material-for-behavior-custom-design-tokens-for-appearance) | Angular Material for behavior, custom design tokens for appearance |
+| [27](#27-no-ngrx-a-component-level-state-service-with-rxjs) | No NgRx: a component-level state service with RxJS |
+| [28](#28-search-uses-debouncetime--switchmap) | Search uses debounceTime + switchMap |
+| [29](#29-query-state-in-the-url) | Query state in the URL |
+| [30](#30-transition-rules-mirrored-in-the-ui-for-display-only) | Transition rules mirrored in the UI for display only |
+| [31](#31-design-tokens-from-the-logo-colors) | Design tokens from the logo colors |
+| [32](#32-x-user-name-is-percent-encoded) | X-User-Name is percent-encoded |
+
+### Run & deployment
+
+| # | Decision |
+|---|---|
+| [9](#9-dev-proxy-instead-of-cors) | Dev proxy instead of CORS |
+| [35](#35-migrations-and-seeding-on-startup-only-by-configuration) | Migrations and seeding on startup only by configuration |
+| [36](#36-nginx-serves-the-built-angular-app-and-proxies-api) | nginx serves the built Angular app and proxies /api |
+| [37](#37-the-production-build-does-not-inline-google-fonts) | The production build does not inline Google Fonts |
+
 ## 1. SQL Server
 
 - **Decision:** Use SQL Server 2022 as the database.
@@ -9,7 +93,19 @@
 ## 2. EF Core
 
 - **Decision:** Use EF Core as the data access technology.
-- **Reason:** LINQ is translated to SQL, and EF Core has built-in concurrency support (concurrency tokens / rowversion).
+- **Reason:** LINQ is translated to* The old E7 heading said 10, but its tasks added up to 9.5. The new heading matches its tasks.
+
+Totals: each epic heading equals the sum of its tasks, and the 11 epics add up to the total of 19.75.
+Task estimates: 0.5 h → 0.25, 1 h → 0.5, 1.5 h → 0.5 and 2 h → 0.75. The 1 h and 1.5 h tasks are now the same size.
+Optional tasks: T7.8 is 0.5 and T8.6 is 0.25. They are still left out of the total.
+Overview: now says "15–20 שעות (19.75 שעות לפי סכום המשימות)". The old 45/54 hours and the 20% safety margin wording are gone.
+New "הערכה מול ביצוע" section, after the overview: planned 15–20 and actual 10–12, why it was faster, and the three environment problems. It contains only the facts you gave.
+Critical path: 28 → 13.25 hours, the sum of E0, E1, E2, E3, E5, E8 and E10.
+Risks section: "קצר מ-42 שעות" → 18.5 hours. I kept 42's ratio to the old total (42/44.5 × 19.75 ≈ 18.6, rounded down to 18.5). Change it if you meant something else by that number.
+README.md and the rest of docs/: no mention of the old totals.
+
+
+ SQL, and EF Core has built-in concurrency support (concurrency tokens / rowversion).
 - **Alternatives:** Dapper.
 
 ## 3. Three layers (Api / BL / DAL)
