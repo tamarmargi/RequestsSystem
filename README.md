@@ -770,7 +770,8 @@ The most important decisions; the full list (37 decisions, each with its reason 
   - The execution plan diagrams against the measurements.
   - The Docker run, the screenshots and the passing tests (102 backend, 14 Angular).
 - **Problems I traced:**
-  - A "הפנייה לא נמצאה" error in the UI, traced to a step that had not been run.
+  - A "הפנייה לא נמצאה" error in the UI, traced to an old API process from before the status update step
+    still running on port 5000.
   - A full disk that stopped Docker.
   - A font that the Docker build could not download behind NetFree.
 
