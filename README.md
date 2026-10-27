@@ -106,18 +106,7 @@ Where each section of the assessment is implemented, tested and documented.
 | ![בדיקות](docs/images/tests.png) | |
 | Backend and frontend tests passing | |
 
-<details>
-<summary>Execution plans before and after the indexes</summary>
-
-From the [performance report](docs/performance/README.md):
-
-| | Before | After |
-|---|---|---|
-| Q1 – default list | ![Q1 before](docs/performance/images/q1-before.png) | ![Q1 after](docs/performance/images/q1-after.png) |
-| Q2 – status + priority | ![Q2 before](docs/performance/images/q2-before.png) | ![Q2 after](docs/performance/images/q2-after.png) |
-| Q5 – stats | ![Q5 before](docs/performance/images/q5-before.png) | ![Q5 after](docs/performance/images/q5-after.png) |
-
-</details>
+Execution plans before and after the indexes are in [Performance](#performance).
 
 The list of screenshot files is in [docs/images/README.md](docs/images/README.md).
 
@@ -552,6 +541,22 @@ Measured on the 100,000 seeded requests with the exact SQL EF Core sends, before
 | Status + priority filter | 2,030 → 418 (page) + 2,030 → 8 (COUNT) | 43.4 → 10.3 ms |
 | Stats, uncached | 2,030 → 152 | 50 → 38.7 ms |
 | Filter by handler / organization (page) | 2,030 → 71 / 72 | – |
+
+| Q1 – default list, before | Q1 – default list, after |
+|---|---|
+| ![Q1 before](docs/performance/images/q1-before.png) | ![Q1 after](docs/performance/images/q1-after.png) |
+
+Before: a full scan of the table and a sort; after: the first 20 rows read in order from IX_Requests_CreatedAt, no sort.
+
+<details>
+<summary>More execution plans (Q2, Q5)</summary>
+
+| | Before | After |
+|---|---|---|
+| Q2 – status + priority | ![Q2 before](docs/performance/images/q2-before.png) | ![Q2 after](docs/performance/images/q2-after.png) |
+| Q5 – stats | ![Q5 before](docs/performance/images/q5-before.png) | ![Q5 after](docs/performance/images/q5-after.png) |
+
+</details>
 
 <details>
 <summary>Findings, bottlenecks and how to reproduce</summary>

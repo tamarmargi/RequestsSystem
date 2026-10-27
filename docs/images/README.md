@@ -26,12 +26,12 @@ actual plans. They were not captured from SSMS.
 
 | Done | File | Plan file | Used in |
 |---|---|---|---|
-| [x] | `q1-before.png` | `plans/before/Q1-page.sqlplan` (Clustered Index Scan + parallel Sort) | README Screenshots, performance report |
-| [x] | `q1-after.png` | `plans/after/Q1-page.sqlplan` (Index Scan of `IX_Requests_CreatedAt` + Key Lookups) | README Screenshots, performance report |
-| [x] | `q2-before.png` | `plans/before/Q2-page.sqlplan` (Clustered Index Scan + Sort) | README Screenshots, performance report |
-| [x] | `q2-after.png` | `plans/after/Q2-page.sqlplan` (Index Seek of `IX_Requests_Status_CreatedAt`) | README Screenshots, performance report |
-| [x] | `q5-before.png` | `plans/before/Q5-stats.sqlplan` (Clustered Index Scan) | README Screenshots, performance report |
-| [x] | `q5-after.png` | `plans/after/Q5-stats.sqlplan` (Index Scan of `IX_Requests_Status_Priority`) | README Screenshots, performance report |
+| [x] | `q1-before.png` | `plans/before/Q1-page.sqlplan` (Clustered Index Scan + parallel Sort) | README Performance, performance report |
+| [x] | `q1-after.png` | `plans/after/Q1-page.sqlplan` (Index Scan of `IX_Requests_CreatedAt` + Key Lookups) | README Performance, performance report |
+| [x] | `q2-before.png` | `plans/before/Q2-page.sqlplan` (Clustered Index Scan + Sort) | README Performance, performance report |
+| [x] | `q2-after.png` | `plans/after/Q2-page.sqlplan` (Index Seek of `IX_Requests_Status_CreatedAt`) | README Performance, performance report |
+| [x] | `q5-before.png` | `plans/before/Q5-stats.sqlplan` (Clustered Index Scan) | README Performance, performance report |
+| [x] | `q5-after.png` | `plans/after/Q5-stats.sqlplan` (Index Scan of `IX_Requests_Status_Priority`) | README Performance, performance report |
 
 ## docs/design/ (already present)
 
